@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recipe Details - FoodExpress</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Page transition animations */
+        body {
+            opacity: 0;
+            animation: fadeIn 0.5s ease-in forwards;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        /* Link transitions */
+        a, button {
+            transition: all 0.3s ease;
+        }
+    </style>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#ef4444',
+                        secondary: '#f97316',
+                        dark: '#1f2937',
+                        light: '#f3f4f6'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .recipe-step {
+            counter-increment: step-counter;
+            margin-bottom: 1rem;
+        }
+        .recipe-step::before {
+            content: counter(step-counter);
+            background-color: #ef4444;
+            color: white;
+            font-weight: bold;
+            padding: 0.2rem 0.6rem;
+            border-radius: 50%;
+            margin-right: 0.5rem;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
+    <!-- Header/Navigation -->
+    <header class="sticky top-0 z-50 bg-white dark:bg-gray-800 shadow-md">
+        <div class="container mx-auto flex flex-wrap p-5 flex-col md:flex-row items-center">
+            <a href="index.html" class="flex title-font font-medium items-center text-gray-900 dark:text-white mb-4 md:mb-0">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 text-white p-2 bg-primary rounded-full" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
+                </svg>
+                <span class="ml-3 text-xl font-bold">Food<span class="text-primary">Express</span></span>
+            </a>
+            <nav class="md:ml-auto flex flex-wrap items-center text-base justify-center">
+                <a href="homepage.html" class="mr-5 hover:text-primary transition dark:text-gray-300 dark:hover:text-primary">Home</a>
+                <a href="recommended.html" class="mr-5 hover:text-primary transition dark:text-gray-300 dark:hover:text-primary">Recommended</a>
+                <a href="restaurants.html" class="mr-5 hover:text-primary transition dark:text-gray-300 dark:hover:text-primary">Restaurants</a>
+                <a href="index.html#contact" class="mr-5 hover:text-primary transition dark:text-gray-300 dark:hover:text-primary">Contact</a>
+            </nav>
+            <button id="theme-toggle" class="p-2 rounded-lg focus:outline-none text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 mr-4">
+                <i class="fas fa-moon dark:hidden"></i>
+                <i class="fas fa-sun hidden dark:block"></i>
+            </button>
+            <button onclick="window.history.back()" class="inline-flex items-center bg-primary text-white border-0 py-2 px-4 focus:outline-none hover:bg-red-600 rounded-lg transition mt-4 md:mt-0">
+                <i class="fas fa-arrow-left mr-2"></i> Back
+            </button>
+        </div>
+    </header>
+
+    <!-- Recipe Details Section -->
+    <section class="text-gray-600 dark:text-gray-300 body-font py-12">
+        <div class="container px-5 mx-auto">
+            <div class="flex flex-col lg:flex-row gap-8">
+                <!-- Recipe Image and Basic Info -->
+                <div class="lg:w-1/2">
+                    <img id="recipe-main-image" class="w-full h-96 object-cover rounded-lg shadow-lg" src="" alt="">
+                    <div class="mt-6 bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
+                        <h1 id="recipe-title" class="text-3xl font-bold title-font mb-2 text-dark dark:text-white"></h1>
+                        <div class="flex items-center mb-4">
+                            <div class="flex text-yellow-400 mr-4">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star-half-alt"></i>
+                            </div>
+                            <span class="text-gray-600 dark:text-gray-300">4.7 (120 reviews)</span>
+                        </div>
+                        <p id="recipe-description" class="text-gray-700 dark:text-gray-300 mb-6"></p>
+                        
+                        <div class="grid grid-cols-3 gap-4 mb-6">
+                            <div class="bg-gray-100 dark:bg-gray-700 p-3 rounded-lg text-center">
+                                <div class="text-lg font-bold text-dark dark:text-white" id="recipe-prep-time">15 min</div>
+                                <div class="text-sm text-gray-600 dark:text-gray-400">Prep Time</div>
+                            </div>
+                            <div class="bg-gray-100 dark:bg-gray-700 p-3 rounded-lg text-center">
+                                <div class="text-lg font-bold text-dark dark:text-white" id="recipe-cook-time">30 min</div>
+                                <div class="text-sm text-gray-600 dark:text-gray-400">Cook Time</div>
+                            </div>
+                            <div class="bg-gray-100 dark:bg-gray-700 p-3 rounded-lg text-center">
+                                <div class="text-lg font-bold text-dark dark:text-white" id="recipe-servings">4</div>
+                                <div class="text-sm text-gray-600 dark:text-gray-400">Servings</div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex space-x-4">
+                            <button onclick="addToCartFromRecipe()" class="flex-1 bg-primary text-white py-3 rounded-lg hover:bg-red-600 transition flex items-center justify-center">
+                                <i class="fas fa-shopping-cart mr-2"></i> Add to Cart
+                            </button>
+                            <button class="w-12 h-12 bg-gray-100 dark:bg-gray-700 text-primary rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition flex items-center justify-center">
+                                <i class="fas fa-heart"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Recipe Content -->
+                <div class="lg:w-1/2">
+                    <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow mb-8">
+                        <h2 class="text-xl font-bold title-font mb-4 text-dark dark:text-white flex items-center">
+                            <i class="fas fa-list-ul text-primary mr-2"></i> Ingredients
+                        </h2>
+                        <ul id="recipe-ingredients" class="space-y-2">
+                            <!-- Ingredients will be added here dynamically -->
+                        </ul>
+                    </div>
+                    
+                    <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
+                        <h2 class="text-xl font-bold title-font mb-4 text-dark dark:text-white flex items-center">
+                            <i class="fas fa-list-ol text-primary mr-2"></i> Instructions
+                        </h2>
+                        <div id="recipe-instructions" class="space-y-4">
+                            <!-- Instructions will be added here dynamically -->
+                        </div>
+                    </div>
+                    
+                    <div class="mt-8 bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
+                        <h2 class="text-xl font-bold title-font mb-4 text-dark dark:text-white flex items-center">
+                            <i class="fas fa-utensils text-primary mr-2"></i> Nutrition Information
+                        </h2>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <div class="bg-gray-100 dark:bg-gray-700 p-3 rounded-lg text-center">
+                                <div class="text-lg font-bold text-dark dark:text-white" id="recipe-calories">350</div>
+                                <div class="text-sm text-gray-600 dark:text-gray-400">Calories</div>
+                            </div>
+                            <div class="bg-gray-100 dark:bg-gray-700 p-3 rounded-lg text-center">
+                                <div class="text-lg font-bold text-dark dark:text-white" id="recipe-protein">22g</div>
+                                <div class="text-sm text-gray-600 dark:text-gray-400">Protein</div>
+                            </div>
+                            <div class="bg-gray-100 dark:bg-gray-700 p-3 rounded-lg text-center">
+                                <div class="text-lg font-bold text-dark dark:text-white" id="recipe-carbs">45g</div>
+                                <div class="text-sm text-gray-600 dark:text-gray-400">Carbs</div>
+                            </div>
+                            <div class="bg-gray-100 dark:bg-gray-700 p-3 rounded-lg text-center">
+                                <div class="text-lg font-bold text-dark dark:text-white" id="recipe-fat">15g</div>
+                                <div class="text-sm text-gray-600 dark:text-gray-400">Fat</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="text-gray-600 dark:text-gray-300 body-font bg-white dark:bg-gray-800">
+        <div class="container px-5 py-8 mx-auto flex items-center sm:flex-row flex-col">
+            <a href="index.html" class="flex title-font font-medium items-center md:justify-start justify-center text-gray-900 dark:text-white">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 text-white p-2 bg-primary rounded-full" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
+                </svg>
+                <span class="ml-3 text-xl font-bold">Food<span class="text-primary">Express</span></span>
+            </a>
+            <p class="text-sm text-gray-500 dark:text-gray-400 sm:ml-4 sm:pl-4 sm:border-l-2 sm:border-gray-200 dark:sm:border-gray-700 sm:py-2 sm:mt-0 mt-4">© 2023 FoodExpress —
+                <a href="#" class="text-gray-600 dark:text-gray-300 ml-1" rel="noopener noreferrer" target="_blank">All Rights Reserved</a>
+            </p>
+            <span class="inline-flex sm:ml-auto sm:mt-0 mt-4 justify-center sm:justify-start">
+                <a href="#" class="text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-primary">
+                    <i class="fab fa-facebook-f"></i>
+                </a>
+                <a href="#" class="ml-3 text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-primary">
+                    <i class="fab fa-twitter"></i>
+                </a>
+                <a href="#" class="ml-3 text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-primary">
+                    <i class="fab fa-instagram"></i>
+                </a>
+            </span>
+        </div>
+    </footer>
+
+    <script>
+        // Theme toggle functionality
+        const themeToggle = document.getElementById('theme-toggle');
+        const html = document.documentElement;
+
+        // Check for saved user preference or use system preference
+        if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            html.classList.add('dark');
+        } else {
+            html.classList.remove('dark');
+        }
+
+        // Toggle theme
+        themeToggle.addEventListener('click', () => {
+            html.classList.toggle('dark');
+            localStorage.setItem('theme', html.classList.contains('dark') ? 'dark' : 'light');
+        });
+
+        // Recipe database (combined from homepage and recommended)
+        const recipes = {
+            // Existing recipes from homepage (1-10)
+            1: {
+                title: "Dal Makhani",
+                description: "Creamy black lentils cooked with minimal oil. A protein-rich dish that's perfect with roti or rice.",
+                image: "https://images.unsplash.com/photo-1601050690597-df0568f70950?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+                prepTime: "10 min",
+                cookTime: "60 min",
+                servings: 4,
+                calories: 320,
+                protein: "18g",
+                carbs: "40g",
+                fat: "10g",
+                ingredients: [
+                    "1 cup whole black lentils (urad dal)",
+                    "1/4 cup kidney beans (rajma)",
+                    "1 onion, finely chopped",
+                    "2 tomatoes, pureed",
+                    "1 tbsp ginger-garlic paste",
+                    "1 tsp cumin seeds",
+                    "1 tsp coriander powder",
+                    "1/2 tsp garam masala",
+                    "1/2 tsp turmeric powder",
+                    "1 tsp red chili powder",
+                    "1 tbsp oil",
+                    "1 tbsp butter",
+                    "1/2 cup cream",
+                    "Salt to taste",
+                    "Fresh coriander for garnish"
+                ],
+                instructions: [
+                    "Soak lentils and kidney beans overnight. Pressure cook until soft.",
+                    "Heat oil and butter in a pan, add cumin seeds and let them splutter.",
+                    "Add onions and sauté until golden. Add ginger-garlic paste and sauté for a minute.",
+                    "Add tomato puree and cook until oil separates. Add all dry spices and salt.",
+                    "Add cooked lentils and beans along with some water. Simmer for 30 minutes, stirring occasionally.",
+                    "Add cream and simmer for another 10 minutes. Garnish with fresh coriander.",
+                    "Serve hot with roti or rice."
+                ]
+            },
+            2: {
+                title: "Quinoa Upma",
+                description: "Quinoa cooked with Indian spices and vegetables. A healthy twist on traditional upma that's high in protein.",
+                image: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+                prepTime: "10 min",
+                cookTime: "20 min",
+                servings: 4,
+                calories: 280,
+                protein: "10g",
+                carbs: "45g",
+                fat: "8g",
+                ingredients: [
+                    "1 cup quinoa, rinsed",
+                    "2 cups water",
+                    "1 onion, finely chopped",
+                    "1 carrot, diced",
+                    "1/2 cup green peas",
+                    "1 green chili, chopped",
+                    "1 tsp mustard seeds",
+                    "1 tsp cumin seeds",
+                    "1/2 tsp turmeric powder",
+                    "1 tbsp oil",
+                    "Salt to taste",
+                    "Fresh coriander for garnish",
+                    "Lemon wedges for serving"
+                ],
+                instructions: [
+                    "Dry roast quinoa in a pan for 2-3 minutes until fragrant. Set aside.",
+                    "Heat oil in a pan, add mustard and cumin seeds. Let them splutter.",
+                    "Add onions and green chili, sauté until onions are translucent.",
+                    "Add carrots and peas, sauté for 2 minutes. Add turmeric and salt.",
+                    "Add quinoa and water, bring to a boil. Reduce heat, cover and simmer for 15 minutes.",
+                    "Fluff with fork, garnish with coriander. Serve hot with lemon wedges."
+                ]
+            },
+            3: {
+                title: "Oats Poha",
+                description: "Steel-cut oats prepared like traditional poha with peanuts and spices. A high-fiber breakfast option that helps lower cholesterol.",
+                image: "https://images.unsplash.com/photo-1608500218954-bafec1ae555c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+                prepTime: "10 min",
+                cookTime: "10 min",
+                servings: 4,
+                calories: 250,
+                protein: "8g",
+                carbs: "40g",
+                fat: "6g",
+                ingredients: [
+                    "2 cups steel-cut oats",
+                    "1 onion, finely chopped",
+                    "1 green chili, chopped",
+                    "1/2 tsp mustard seeds",
+                    "1/2 tsp cumin seeds",
+                    "10-12 curry leaves",
+                    "2 tbsp peanuts",
+                    "1/2 tsp turmeric powder",
+                    "1 tbsp lemon juice",
+                    "1 tbsp oil",
+                    "Salt to taste",
+                    "Fresh coriander for garnish"
+                ],
+                instructions: [
+                    "Rinse oats and soak in water for 5 minutes. Drain and set aside.",
+                    "Heat oil in a pan, add mustard and cumin seeds. Let them splutter.",
+                    "Add peanuts and roast until golden. Add curry leaves, green chili and onions. Sauté until onions are soft.",
+                    "Add turmeric powder and salt. Mix well.",
+                    "Add soaked oats and stir gently to combine all ingredients.",
+                    "Cover and cook on low heat for 3-4 minutes. Sprinkle lemon juice and garnish with coriander.",
+                    "Serve hot with yogurt or chutney."
+                ]
+            },
+            4: {
+                title: "Vegan Buddha Bowl",
+                description: "Nutritious bowl with quinoa, roasted vegetables, and tahini dressing. A complete meal packed with plant-based protein.",
+                image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=880&q=80",
+                prepTime: "15 min",
+                cookTime: "25 min",
+                servings: 1,
+                calories: 300,
+                protein: "10g",
+                carbs: "45g",
+                fat: "10g",
+                ingredients: [
+                    "1/2 cup cooked quinoa",
+                    "1/2 cup roasted sweet potatoes",
+                    "1/2 cup steamed broccoli",
+                    "1/4 avocado, sliced",
+                    "1/4 cup shredded purple cabbage",
+                    "2 tbsp hummus",
+                    "1 tbsp tahini",
+                    "1 tsp lemon juice",
+                    "1 tsp maple syrup",
+                    "Salt and pepper to taste",
+                    "Pumpkin seeds for garnish"
+                ],
+                instructions: [
+                    "Arrange all vegetables and quinoa in a bowl.",
+                    "In a small bowl, mix tahini, lemon juice, maple syrup, salt and pepper to make dressing.",
+                    "Drizzle dressing over the bowl. Add hummus on the side.",
+                    "Garnish with pumpkin seeds and serve."
+                ]
+            },
+            5: {
+                title: "Grilled Salmon with Steamed Vegetables",
+                description: "Fresh salmon with seasonal steamed vegetables. Rich in omega-3 fatty acids and perfect for a healthy dinner.",
+                image: "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+                prepTime: "15 min",
+                cookTime: "15 min",
+                servings: 1,
+                calories: 350,
+                protein: "35g",
+                carbs: "10g",
+                fat: "20g",
+                ingredients: [
+                    "1 salmon fillet (about 150g)",
+                    "1 tsp olive oil",
+                    "1/2 tsp lemon zest",
+                    "1/2 tsp dried dill",
+                    "Salt and pepper to taste",
+                    "1 cup mixed vegetables (broccoli, carrots, zucchini)",
+                    "Lemon wedges for serving"
+                ],
+                instructions: [
+                    "Preheat grill to medium-high heat.",
+                    "Rub salmon with olive oil, lemon zest, dill, salt and pepper.",
+                    "Grill salmon for 4-5 minutes per side until cooked through.",
+                    "Meanwhile, steam vegetables until tender-crisp (about 5 minutes).",
+                    "Serve salmon with steamed vegetables and lemon wedges."
+                ]
+            },
+            6: {
+                title: "Keto Butter Chicken",
+                description: "Tender chicken in rich tomato and butter gravy (low-carb version). Perfect for those following a keto diet.",
+                image: "https://images.unsplash.com/photo-1601050690597-df0568f70950?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+                prepTime: "15 min",
+                cookTime: "25 min",
+                servings: 2,
+                calories: 380,
+                protein: "28g",
+                carbs: "6g",
+                fat: "28g",
+                ingredients: [
+                    "500g chicken thighs, boneless",
+                    "1/2 cup plain yogurt",
+                    "2 tbsp lemon juice",
+                    "1 tbsp ginger-garlic paste",
+                    "1 tsp garam masala",
+                    "1 tsp turmeric powder",
+                    "1 tsp chili powder",
+                    "2 tbsp butter",
+                    "1 onion, finely chopped",
+                    "1 cup tomato puree",
+                    "1/2 cup heavy cream",
+                    "1 tsp fenugreek leaves",
+                    "Salt to taste"
+                ],
+                instructions: [
+                    "Marinate chicken with yogurt, lemon juice, ginger-garlic paste and spices for at least 1 hour.",
+                    "Grill or bake the chicken until cooked through. Set aside.",
+                    "In a pan, melt butter and sauté onions until golden. Add tomato puree and cook for 5 minutes.",
+                    "Add cream and simmer for 5 minutes. Add fenugreek leaves and salt.",
+                    "Add grilled chicken pieces and simmer for 5-10 minutes.",
+                    "Serve hot with cauliflower rice or low-carb naan."
+                ]
+            },
+            7: {
+                title: "Tandoori Chicken",
+                description: "Lean chicken marinated in yogurt and spices, grilled in tandoor. Excellent source of high-quality protein.",
+                image: "https://images.unsplash.com/photo-1603360946369-dc9bb6258143?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+                prepTime: "10 min (plus marination)",
+                cookTime: "30 min",
+                servings: 4,
+                calories: 280,
+                protein: "35g",
+                carbs: "4g",
+                fat: "14g",
+                ingredients: [
+                    "1 kg chicken (legs or breast)",
+                    "1 cup yogurt",
+                    "2 tbsp lemon juice",
+                    "2 tbsp ginger-garlic paste",
+                    "1 tsp turmeric powder",
+                    "1 tbsp red chili powder",
+                    "1 tbsp garam masala",
+                    "1 tsp cumin powder",
+                    "1 tsp coriander powder",
+                    "1 tbsp kasuri methi (dried fenugreek leaves)",
+                    "Salt to taste",
+                    "2 tbsp oil",
+                    "Lemon wedges and onion rings for serving"
+                ],
+                instructions: [
+                    "Make deep cuts in the chicken pieces for marinade to penetrate.",
+                    "Mix all marinade ingredients (yogurt, spices, lemon juice) in a bowl.",
+                    "Coat chicken pieces thoroughly with marinade. Refrigerate for at least 4 hours, preferably overnight.",
+                    "Preheat oven to 200°C (400°F). Place chicken on a wire rack over baking tray.",
+                    "Bake for 25-30 minutes, turning once halfway through. Brush with oil during last 5 minutes.",
+                    "Broil for 2-3 minutes for charred effect.",
+                    "Serve hot with lemon wedges and onion rings."
+                ]
+            },
+            8: {
+                title: "Paneer Protein Shake",
+                description: "Blend of paneer, banana, almond butter and milk. Perfect post-workout recovery drink packed with protein.",
+                image: "https://images.unsplash.com/photo-1519996521439-0408c916b631?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+                prepTime: "5 min",
+                cookTime: "0 min",
+                servings: 1,
+                calories: 350,
+                protein: "25g",
+                carbs: "30g",
+                fat: "15g",
+                ingredients: [
+                    "100g paneer (cottage cheese)",
+                    "1 banana",
+                    "1 tbsp almond butter",
+                    "1 cup milk (or almond milk)",
+                    "1 tsp honey (optional)",
+                    "1/2 tsp cinnamon powder",
+                    "Ice cubes (optional)"
+                ],
+                instructions: [
+                    "Cut paneer into small cubes for easier blending.",
+                    "Add all ingredients to a blender.",
+                    "Blend until smooth and creamy. Add more milk if needed for desired consistency.",
+                    "Pour into glass and serve immediately.",
+                    "For chilled version, add ice cubes before blending."
+                ]
+            },
+            9: {
+                title: "Whole Wheat Pasta Primavera",
+                description: "Whole wheat pasta with fresh seasonal vegetables. A healthier take on classic pasta with more fiber.",
+                image: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+                prepTime: "15 min",
+                cookTime: "25 min",
+                servings: 2,
+                calories: 350,
+                protein: "15g",
+                carbs: "55g",
+                fat: "8g",
+                ingredients: [
+                    "2 cups whole wheat pasta",
+                    "2 cups mixed vegetables (zucchini, bell peppers, cherry tomatoes, broccoli)",
+                    "2 cloves garlic, minced",
+                    "2 tbsp olive oil",
+                    "1/4 cup grated parmesan cheese",
+                    "Salt and pepper to taste",
+                    "Fresh basil leaves for garnish"
+                ],
+                instructions: [
+                    "Cook pasta according to package instructions. Reserve 1/2 cup pasta water.",
+                    "Heat olive oil in a pan, add garlic and sauté for 30 seconds.",
+                    "Add vegetables and sauté for 5-7 minutes until tender-crisp.",
+                    "Add cooked pasta, reserved pasta water, salt and pepper. Toss to combine.",
+                    "Sprinkle with parmesan cheese and garnish with fresh basil.",
+                    "Serve immediately."
+                ]
+            },
+            10: {
+                title: "Steamed Fish with Ginger and Spring Onions",
+                description: "Fresh fish steamed with ginger and spring onions. Light, healthy and packed with protein.",
+                image: "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+                prepTime: "10 min",
+                cookTime: "15 min",
+                servings: 1,
+                calories: 250,
+                protein: "30g",
+                carbs: "5g",
+                fat: "12g",
+                ingredients: [
+                    "1 white fish fillet (like basa or cod)",
+                    "1 inch ginger, julienned",
+                    "2 spring onions, sliced",
+                    "1 tbsp light soy sauce",
+                    "1 tsp sesame oil",
+                    "1/2 tsp sugar",
+                    "1/4 cup water",
+                    "Fresh coriander for garnish"
+                ],
+                instructions: [
+                    "Place fish on a heatproof plate that fits in your steamer.",
+                    "Top fish with ginger and half the spring onions.",
+                    "Mix soy sauce, sesame oil, sugar and water. Pour over fish.",
+                    "Steam for 8-10 minutes until fish flakes easily with a fork.",
+                    "Garnish with remaining spring onions and fresh coriander.",
+                    "Serve hot with steamed rice or vegetables."
+                ]
+            },
+            
+            // Recipes for recommended foods (101-110)
+            101: {
+                title: "Quinoa Khichdi",
+                description: "Protein-rich quinoa cooked with moong dal and vegetables. Low glycemic index makes it perfect for blood sugar control.",
+                image: "https://images.unsplash.com/photo-1601050690597-df0568f70950?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+                prepTime: "10 min",
+                cookTime: "20 min",
+                servings: 2,
+                calories: 280,
+                protein: "12g",
+                carbs: "45g",
+                fat: "6g",
+                ingredients: [
+                    "1/2 cup quinoa, rinsed",
+                    "1/4 cup moong dal (split yellow lentils)",
+                    "1 small onion, finely chopped",
+                    "1 small tomato, chopped",
+                    "1/2 cup mixed vegetables (carrots, beans, peas)",
+                    "1 tsp cumin seeds",
+                    "1/2 tsp turmeric powder",
+                    "1/2 tsp garam masala",
+                    "1 tsp ginger-garlic paste",
+                    "1 tbsp ghee or oil",
+                    "Salt to taste",
+                    "Fresh coriander for garnish",
+                    "Lemon wedges for serving"
+                ],
+                instructions: [
+                    "Wash quinoa and moong dal together and soak for 15 minutes.",
+                    "Heat ghee/oil in a pressure cooker, add cumin seeds and let them splutter.",
+                    "Add onions and sauté until translucent. Add ginger-garlic paste and sauté for 30 seconds.",
+                    "Add tomatoes and cook until soft. Add all vegetables and spices, mix well.",
+                    "Drain quinoa and moong dal, add to the cooker with 2 cups water and salt.",
+                    "Pressure cook for 2 whistles on medium heat. Let pressure release naturally.",
+                    "Garnish with coriander and serve hot with lemon wedges."
+                ]
+            },
+            102: {
+                title: "Grilled Salmon with Steamed Vegetables",
+                description: "Fresh salmon grilled with herbs served with nutrient-rich steamed vegetables. Rich in omega-3 fatty acids.",
+                image: "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+                prepTime: "10 min",
+                cookTime: "15 min",
+                servings: 1,
+                calories: 350,
+                protein: "35g",
+                carbs: "10g",
+                fat: "20g",
+                ingredients: [
+                    "1 salmon fillet (150g)",
+                    "1 tbsp olive oil",
+                    "1 tsp lemon juice",
+                    "1/2 tsp dried oregano",
+                    "1/2 tsp garlic powder",
+                    "Salt and pepper to taste",
+                    "1 cup mixed vegetables (broccoli, carrots, zucchini)",
+                    "Lemon wedges for serving"
+                ],
+                instructions: [
+                    "Preheat grill to medium-high heat.",
+                    "Pat salmon dry and rub with olive oil, lemon juice, oregano, garlic powder, salt and pepper.",
+                    "Grill salmon skin-side down for 4-5 minutes, then flip and cook for another 3-4 minutes.",
+                    "Meanwhile, steam vegetables until tender-crisp (about 5 minutes).",
+                    "Serve salmon with steamed vegetables and lemon wedges."
+                ]
+            },
+            103: {
+                title: "Sprouts Salad",
+                description: "Fresh sprouts mixed with cucumber, tomatoes, and lemon dressing. Packed with fiber and plant-based protein.",
+                image: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+                prepTime: "15 min",
+                cookTime: "0 min",
+                servings: 1,
+                calories: 150,
+                protein: "8g",
+                carbs: "25g",
+                fat: "3g",
+                ingredients: [
+                    "1 cup mixed sprouts (moong, chana, etc.)",
+                    "1/2 cucumber, diced",
+                    "1 small tomato, diced",
+                    "1/4 onion, finely chopped",
+                    "1 green chili, finely chopped (optional)",
+                    "1 tbsp lemon juice",
+                    "1/2 tsp roasted cumin powder",
+                    "Salt to taste",
+                    "Fresh coriander for garnish"
+                ],
+                instructions: [
+                    "Rinse sprouts thoroughly and drain well.",
+                    "In a large bowl, combine sprouts, cucumber, tomato, onion and green chili.",
+                    "Add lemon juice, cumin powder and salt. Toss gently to combine.",
+                    "Garnish with fresh coriander and serve immediately."
+                ]
+            },
+            104: {
+                title: "Oats Idli with Sambar",
+                description: "Steamed oats idli served with protein-rich sambar. High fiber helps maintain heart health.",
+                image: "https://images.unsplash.com/photo-1608500218954-bafec1ae555c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+                prepTime: "10 min (plus fermentation)",
+                cookTime: "15 min",
+                servings: 2,
+                calories: 200,
+                protein: "10g",
+                carbs: "35g",
+                fat: "3g",
+                ingredients: [
+                    "1 cup oats, ground to flour",
+                    "1/2 cup urad dal (black gram dal)",
+                    "1/4 cup poha (flattened rice)",
+                    "1/2 tsp fenugreek seeds",
+                    "Salt to taste",
+                    "Water as needed",
+                    "1 tsp oil for greasing",
+                    "1 cup sambar (prepared separately)",
+                    "Coconut chutney for serving"
+                ],
+                instructions: [
+                    "Soak urad dal and fenugreek seeds together for 4-5 hours.",
+                    "Grind to a smooth batter, adding water as needed.",
+                    "Soak poha for 10 minutes, then grind and mix with oats flour and dal batter.",
+                    "Add salt and let ferment for 8-10 hours.",
+                    "Grease idli plates, pour batter and steam for 10-12 minutes.",
+                    "Serve hot with sambar and coconut chutney."
+                ]
+            },
+            105: {
+                title: "Grilled Chicken with Quinoa",
+                description: "Lean chicken breast grilled with herbs served with protein-packed quinoa.",
+                image: "https://images.unsplash.com/photo-1603360946369-dc9bb6258143?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+                prepTime: "15 min",
+                cookTime: "20 min",
+                servings: 1,
+                calories: 400,
+                protein: "40g",
+                carbs: "35g",
+                fat: "12g",
+                ingredients: [
+                    "1 chicken breast (150g)",
+                    "1/2 cup cooked quinoa",
+                    "1 tsp olive oil",
+                    "1/2 tsp garlic powder",
+                    "1/2 tsp paprika",
+                    "Salt and pepper to taste",
+                    "1/2 cup steamed vegetables (broccoli, carrots)",
+                    "Lemon wedges for serving"
+                ],
+                instructions: [
+                    "Preheat grill or grill pan to medium-high heat.",
+                    "Rub chicken with olive oil, garlic powder, paprika, salt and pepper.",
+                    "Grill chicken for 6-7 minutes per side until cooked through.",
+                    "Serve with cooked quinoa and steamed vegetables.",
+                    "Garnish with lemon wedges."
+                ]
+            },
+            106: {
+                title: "Paneer Bhurji with Multigrain Roti",
+                description: "Scrambled cottage cheese cooked with minimal oil served with fiber-rich multigrain roti.",
+                image: "https://images.unsplash.com/photo-1519996521439-0408c916b631?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+                prepTime: "10 min",
+                cookTime: "15 min",
+                servings: 2,
+                calories: 300,
+                protein: "18g",
+                carbs: "25g",
+                fat: "15g",
+                ingredients: [
+                    "200g paneer (cottage cheese), crumbled",
+                    "1 onion, finely chopped",
+                    "1 tomato, finely chopped",
+                    "1 green chili, chopped",
+                    "1/2 tsp turmeric powder",
+                    "1 tsp coriander powder",
+                    "1/2 tsp garam masala",
+                    "1 tbsp oil",
+                    "Salt to taste",
+                    "Fresh coriander for garnish",
+                    "2 multigrain rotis"
+                ],
+                instructions: [
+                    "Heat oil in a pan, add onions and sauté until translucent.",
+                    "Add green chili and tomatoes, cook until tomatoes are soft.",
+                    "Add all spices and salt, mix well.",
+                    "Add crumbled paneer and cook for 3-4 minutes, stirring gently.",
+                    "Garnish with fresh coriander.",
+                    "Serve hot with multigrain roti."
+                ]
+            },
+            107: {
+                title: "Moong Dal Chilla",
+                description: "Protein-packed moong dal pancakes with mint chutney. Low calorie and nutrient dense.",
+                image: "https://images.unsplash.com/photo-1626700051175-6818013e1d4f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1064&q=80",
+                prepTime: "8 hours (soaking)",
+                cookTime: "15 min",
+                servings: 2,
+                calories: 180,
+                protein: "12g",
+                carbs: "25g",
+                fat: "4g",
+                ingredients: [
+                    "1 cup moong dal (split yellow lentils)",
+                    "1/2 inch ginger",
+                    "1 green chili",
+                    "1/4 tsp asafoetida",
+                    "Salt to taste",
+                    "1/4 tsp turmeric powder",
+                    "1 tbsp oil for cooking",
+                    "Mint chutney for serving"
+                ],
+                instructions: [
+                    "Soak moong dal for 6-8 hours or overnight.",
+                    "Drain and blend with ginger, green chili and little water to make a smooth batter.",
+                    "Add asafoetida, turmeric and salt. Mix well.",
+                    "Heat a non-stick pan, pour a ladle of batter and spread into thin circle.",
+                    "Drizzle oil around edges, cook until golden on both sides.",
+                    "Serve hot with mint chutney."
+                ]
+            },
+            108: {
+                title: "Greek Yogurt with Berries",
+                description: "Protein-rich Greek yogurt with antioxidant-packed fresh berries.",
+                image: "https://images.unsplash.com/photo-1505576399279-565b52d4ac71?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+                prepTime: "5 min",
+                cookTime: "0 min",
+                servings: 1,
+                calories: 150,
+                protein: "15g",
+                carbs: "20g",
+                fat: "2g",
+                ingredients: [
+                    "1 cup Greek yogurt",
+                    "1/2 cup mixed berries (strawberries, blueberries, raspberries)",
+                    "1 tbsp honey (optional)",
+                    "1 tbsp chopped nuts (almonds, walnuts)",
+                    "1/2 tsp cinnamon powder"
+                ],
+                instructions: [
+                    "In a bowl, layer Greek yogurt and berries.",
+                    "Drizzle with honey if using.",
+                    "Sprinkle chopped nuts and cinnamon powder on top.",
+                    "Serve immediately or chill for 30 minutes before serving."
+                ]
+            },
+            109: {
+                title: "Bottle Gourd Soup",
+                description: "Light and nutritious bottle gourd soup with minimal spices. Kidney-friendly preparation.",
+                image: "https://images.unsplash.com/photo-1606787366850-de6330128bfc?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+                prepTime: "10 min",
+                cookTime: "20 min",
+                servings: 1,
+                calories: 120,
+                protein: "3g",
+                carbs: "15g",
+                fat: "5g",
+                ingredients: [
+                    "1 cup bottle gourd (lauki/doodhi), peeled and chopped",
+                    "1/2 inch ginger, grated",
+                    "1 clove garlic, minced",
+                    "1 tsp olive oil",
+                    "1/2 tsp cumin seeds",
+                    "Salt to taste",
+                    "1 cup water or vegetable stock",
+                    "Fresh coriander for garnish"
+                ],
+                instructions: [
+                    "Heat oil in a pan, add cumin seeds and let them splutter.",
+                    "Add ginger and garlic, sauté for 30 seconds.",
+                    "Add chopped bottle gourd and sauté for 2 minutes.",
+                    "Add water/stock and salt, bring to boil. Simmer for 15 minutes until gourd is soft.",
+                    "Cool slightly and blend to smooth consistency.",
+                    "Reheat if needed, garnish with coriander and serve warm."
+                ]
+            },
+            110: {
+                title: "Methi Paratha with Low-fat Curd",
+                description: "Fenugreek whole wheat flatbreads with probiotic-rich curd. Helps with insulin resistance.",
+                image: "https://images.unsplash.com/photo-1601050690775-d8523a9a72c3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+                prepTime: "15 min",
+                cookTime: "20 min",
+                servings: 2,
+                calories: 250,
+                protein: "10g",
+                carbs: "40g",
+                fat: "6g",
+                ingredients: [
+                    "1 cup whole wheat flour",
+                    "1/2 cup fresh fenugreek leaves (methi), finely chopped",
+                    "1/2 tsp carom seeds (ajwain)",
+                    "1/2 tsp red chili powder",
+                    "Salt to taste",
+                    "Water as needed",
+                    "1 tsp oil for cooking",
+                    "1/2 cup low-fat curd for serving"
+                ],
+                instructions: [
+                    "Mix flour, fenugreek leaves, carom seeds, chili powder and salt in a bowl.",
+                    "Add water gradually to make a soft dough. Knead for 5 minutes.",
+                    "Divide dough into 4 equal portions. Roll each into thin circles.",
+                    "Cook on hot tawa, applying little oil on both sides until golden spots appear.",
+                    "Serve hot with low-fat curd."
+                ]
+            }
+        };
+
+        // Load recipe data based on URL parameter
+        function loadRecipe() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const recipeId = urlParams.get('id');
+            
+            if (!recipeId || !recipes[recipeId]) {
+                // Redirect to homepage if recipe not found
+                window.location.href = 'homepage.html';
+                return;
+            }
+            
+            const recipe = recipes[recipeId];
+            
+            // Set recipe data in the page
+            document.getElementById('recipe-title').textContent = recipe.title;
+            document.getElementById('recipe-description').textContent = recipe.description;
+            document.getElementById('recipe-main-image').src = recipe.image;
+            document.getElementById('recipe-main-image').alt = recipe.title;
+            document.getElementById('recipe-prep-time').textContent = recipe.prepTime;
+            document.getElementById('recipe-cook-time').textContent = recipe.cookTime;
+            document.getElementById('recipe-servings').textContent = recipe.servings;
+            document.getElementById('recipe-calories').textContent = recipe.calories;
+            document.getElementById('recipe-protein').textContent = recipe.protein;
+            document.getElementById('recipe-carbs').textContent = recipe.carbs;
+            document.getElementById('recipe-fat').textContent = recipe.fat;
+            
+            // Add ingredients
+            const ingredientsList = document.getElementById('recipe-ingredients');
+            ingredientsList.innerHTML = '';
+            recipe.ingredients.forEach(ingredient => {
+                const li = document.createElement('li');
+                li.className = 'flex items-start';
+                li.innerHTML = `
+                    <span class="inline-block w-5 h-5 bg-primary text-white text-center rounded-full mr-2 mt-0.5">✓</span>
+                    <span class="text-gray-700 dark:text-gray-300">${ingredient}</span>
+                `;
+                ingredientsList.appendChild(li);
+            });
+            
+            // Add instructions
+            const instructionsContainer = document.getElementById('recipe-instructions');
+            instructionsContainer.innerHTML = '';
+            recipe.instructions.forEach((instruction, index) => {
+                const div = document.createElement('div');
+                div.className = 'recipe-step flex items-start';
+                div.innerHTML = `
+                    <span class="text-gray-700 dark:text-gray-300">${instruction}</span>
+                `;
+                instructionsContainer.appendChild(div);
+            });
+            
+            // Set up add to cart button
+            window.addToCartFromRecipe = function() {
+                // In a real app, this would add the recipe's main dish to cart
+                alert(`Added ${recipe.title} to your cart!`);
+                // You would typically redirect to cart or show a notification
+            };
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', loadRecipe);
+
+           // Add smooth transition to all links
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', function(e) {
+                // Don't apply to:
+                // 1. External links
+                // 2. Anchor links (#)
+                // 3. Links to the current page
+                if (!this.href || 
+                    this.href.startsWith('http') || 
+                    this.href.includes('#') || 
+                    this.href === window.location.href) {
+                    return;
+                }
+                
+                e.preventDefault();
+                document.body.style.opacity = '0';
+                document.body.style.transition = 'opacity 0.3s ease';
+                
+                setTimeout(() => {
+                    window.location.href = this.href;
+                }, 300);
+            });
+        });
+    });
+    </script>
+</body>
+</html>

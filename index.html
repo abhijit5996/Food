@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FoodExpress - Healthy Meals Delivered Fast</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Page transition animations */
+        body {
+            opacity: 0;
+            animation: fadeIn 0.5s ease-in forwards;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        /* Link transitions */
+        a, button {
+            transition: all 0.3s ease;
+        }
+    </style>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
+  
+        const firebaseConfig = {
+          apiKey: "AIzaSyBx0Kt9o04ye0XrtA8ecp84wD8Q9OCDjlA",
+          authDomain: "foodorder-4380c.firebaseapp.com",
+          projectId: "foodorder-4380c",
+          storageBucket: "foodorder-4380c.firebasestorage.app",
+          messagingSenderId: "735023580381",
+          appId: "1:735023580381:web:c6740bef2fc9bdee1b4734"
+        };
+  
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const provider = new GoogleAuthProvider();
+  
+        // Check auth state
+        onAuthStateChanged(auth, (user) => {
+          if (user) {
+            // Update UI for logged in user
+            document.getElementById('login-btn').classList.add('hidden');
+            document.getElementById('profile-section').classList.remove('hidden');
+            document.getElementById('profile-name').textContent = user.displayName || user.email.split('@')[0];
+            
+            const redirectAfterLogin = localStorage.getItem('redirectAfterLogin');
+            if (redirectAfterLogin) {
+              localStorage.removeItem('redirectAfterLogin');
+              window.location.href = redirectAfterLogin;
+            }
+          } else {
+            // Update UI for logged out user
+            document.getElementById('login-btn').classList.remove('hidden');
+            document.getElementById('profile-section').classList.add('hidden');
+          }
+        });
+  
+        // Google sign-in function
+        window.signInWithGoogle = async function() {
+          try {
+            const result = await signInWithPopup(auth, provider);
+            const user = result.user;
+            window.location.href = 'homepage.html';
+          } catch (error) {
+            console.error('Google sign-in error:', error);
+            alert('Google sign-in failed: ' + error.message);
+          }
+        };
+
+        // Logout function
+        window.logout = async function() {
+          try {
+            await signOut(auth);
+            window.location.href = 'index.html';
+          } catch (error) {
+            console.error('Logout error:', error);
+          }
+        };
+    </script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#ef4444',
+                        secondary: '#f97316',
+                        dark: '#1f2937',
+                        light: '#f3f4f6'
+                    },
+                    animation: {
+                        'click': 'click 300ms ease-out',
+                    },
+                    keyframes: {
+                        click: {
+                            '0%, 100%': { transform: 'scale(1)' },
+                            '50%': { transform: 'scale(0.95)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900">
+    <!-- Header/Navigation -->
+    <header class="sticky top-0 z-50 bg-white dark:bg-gray-800 shadow-md">
+        <div class="container mx-auto flex flex-wrap p-5 flex-col md:flex-row items-center">
+            <a href="index.html" class="flex title-font font-medium items-center text-gray-900 dark:text-white mb-4 md:mb-0">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 text-white p-2 bg-primary rounded-full" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
+                </svg>
+                <span class="ml-3 text-xl font-bold">Food<span class="text-primary">Express</span></span>
+            </a>
+            <nav class="md:ml-auto flex flex-wrap items-center text-base justify-center">
+                <a href="homepage.html" class="mr-5 hover:text-primary transition dark:text-gray-300 dark:hover:text-primary">Home</a>
+                <a href="#menu" class="mr-5 hover:text-primary transition dark:text-gray-300 dark:hover:text-primary">Menu</a>
+                <a href="#about" class="mr-5 hover:text-primary transition dark:text-gray-300 dark:hover:text-primary">About</a>
+                <a href="#contact" class="mr-5 hover:text-primary transition dark:text-gray-300 dark:hover:text-primary">Contact</a>
+            </nav>
+            <button id="theme-toggle" class="p-2 rounded-lg focus:outline-none text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 mr-2">
+                <i class="fas fa-moon dark:hidden"></i>
+                <i class="fas fa-sun hidden dark:block"></i>
+            </button>
+            <a href="login.html" id="login-btn" class="inline-flex items-center bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-white border-0 py-2 px-4 focus:outline-none hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition mr-2">
+                <i class="fas fa-user mr-2"></i> Login
+            </a>
+            <div id="profile-section" class="hidden relative">
+                <button id="profile-button" class="inline-flex items-center bg-gray-100 dark:bg-gray-700 text-dark dark:text-white border-0 py-2 px-4 focus:outline-none hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition">
+                    <i class="fas fa-user-circle mr-2"></i> <span id="profile-name"></span>
+                </button>
+                <div id="profile-dropdown" class="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg py-1 z-50 hidden">
+                    <a href="homepage.html" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">Dashboard</a>
+                    <a href="preferences.html" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">Preferences</a>
+                    <a href="orders.html" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">My Orders</a>
+                    <a href="#" onclick="logout()" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">Sign out</a>
+                </div>
+            </div>
+            <button onclick="toggleCart()" class="inline-flex items-center bg-primary text-white border-0 py-2 px-4 focus:outline-none hover:bg-red-600 rounded-lg transition mt-4 md:mt-0">
+                <i class="fas fa-shopping-cart mr-2"></i> Cart
+                <span id="cart-count" class="ml-2 bg-white text-primary rounded-full w-6 h-6 flex items-center justify-center">0</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Shopping Cart Sidebar -->
+    <div id="cart-sidebar" class="fixed top-0 right-0 h-full w-80 bg-white dark:bg-gray-800 shadow-lg transform translate-x-full transition-transform duration-300 ease-in-out z-50 overflow-y-auto">
+        <div class="p-4 border-b dark:border-gray-700 flex justify-between items-center">
+            <h3 class="text-lg font-semibold dark:text-white">Your Order</h3>
+            <button onclick="toggleCart()" class="text-gray-500 hover:text-primary dark:text-gray-400 dark:hover:text-primary">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div id="cart-items" class="p-4">
+            <!-- Cart items will be added here dynamically -->
+            <p class="text-gray-500 dark:text-gray-400 text-center py-8">Your cart is empty</p>
+        </div>
+        <div class="p-4 border-t dark:border-gray-700">
+            <div class="flex justify-between mb-2 dark:text-white">
+                <span>Subtotal:</span>
+                <span id="cart-subtotal">₹0.00</span>
+            </div>
+            <div class="flex justify-between mb-4 dark:text-white">
+                <span>Delivery:</span>
+                <span>₹30.00</span>
+            </div>
+            <div class="flex justify-between font-bold text-lg dark:text-white">
+                <span>Total:</span>
+                <span id="cart-total">₹30.00</span>
+            </div>
+            <a href="orders.html" class="w-full bg-primary text-white py-2 rounded-lg mt-4 hover:bg-red-600 transition flex items-center justify-center">
+                Checkout
+            </a>
+        </div>
+    </div>
+    <div id="cart-overlay" class="hidden fixed inset-0 bg-black bg-opacity-50 z-40" onclick="toggleCart()"></div>
+
+    <!-- Hero Section -->
+    <section id="home" class="text-gray-600 body-font bg-gradient-to-r from-primary to-secondary">
+        <div class="container mx-auto flex px-5 py-24 md:flex-row flex-col items-center">
+            <div class="lg:flex-grow md:w-1/2 lg:pr-24 md:pr-16 flex flex-col md:items-start md:text-left mb-16 md:mb-0 items-center text-center">
+                <h1 class="title-font sm:text-4xl text-3xl mb-4 font-bold text-white">
+                    Healthy Food <br class="hidden lg:inline-block">Delivered to Your Door
+                </h1>
+                <p class="mb-8 leading-relaxed text-white opacity-90">
+                    Experience nutritious meals prepared by our chefs with fresh, organic ingredients. Eat well without compromising on taste.
+                </p>
+                <div class="flex justify-center">
+                    <a href="#menu" class="inline-flex text-white bg-dark border-0 py-3 px-6 focus:outline-none hover:bg-gray-800 rounded-lg text-lg transition">
+                        Order Now
+                    </a>
+                    <a href="#about" class="ml-4 inline-flex text-dark bg-white border-0 py-3 px-6 focus:outline-none hover:bg-gray-100 rounded-lg text-lg transition">
+                        Learn More
+                    </a>
+                </div>
+            </div>
+            <div class="lg:max-w-lg lg:w-full md:w-1/2 w-5/6">
+                <img class="object-cover object-center rounded-lg shadow-xl" alt="hero" src="https://images.unsplash.com/photo-1490645935967-10de6ba17061?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1453&q=80">
+            </div>
+        </div>
+    </section>
+
+    <!-- Featured Categories -->
+    <section class="text-gray-600 body-font py-12 bg-white dark:bg-gray-800">
+        <div class="container px-5 mx-auto">
+            <div class="flex flex-col text-center w-full mb-12">
+                <h2 class="text-2xl font-bold title-font mb-4 text-dark dark:text-white">Our Healthy Categories</h2>
+                <p class="lg:w-2/3 mx-auto leading-relaxed text-gray-500 dark:text-gray-400">Explore our nutritious selection of food categories</p>
+            </div>
+            <div class="flex flex-wrap -m-4 text-center">
+                <div class="p-4 md:w-1/4 sm:w-1/2 w-full">
+                    <div onclick="filterMenu('Salads')" class="border-2 border-gray-200 dark:border-gray-700 px-4 py-6 rounded-lg transform hover:scale-105 transition duration-300 cursor-pointer">
+                        <div class="w-12 h-12 inline-flex items-center justify-center rounded-full bg-red-100 text-primary mb-5 mx-auto">
+                            <i class="fas fa-leaf text-xl"></i>
+                        </div>
+                        <h2 class="title-font font-medium text-lg text-gray-900 dark:text-white">Salads</h2>
+                        <p class="leading-relaxed mt-2 dark:text-gray-300">Fresh, nutrient-packed salads</p>
+                    </div>
+                </div>
+                <div class="p-4 md:w-1/4 sm:w-1/2 w-full">
+                    <div onclick="filterMenu('Bowls')" class="border-2 border-gray-200 dark:border-gray-700 px-4 py-6 rounded-lg transform hover:scale-105 transition duration-300 cursor-pointer">
+                        <div class="w-12 h-12 inline-flex items-center justify-center rounded-full bg-red-100 text-primary mb-5 mx-auto">
+                            <i class="fas fa-utensils text-xl"></i>
+                        </div>
+                        <h2 class="title-font font-medium text-lg text-gray-900 dark:text-white">Bowls</h2>
+                        <p class="leading-relaxed mt-2 dark:text-gray-300">Balanced, wholesome bowls</p>
+                    </div>
+                </div>
+                <div class="p-4 md:w-1/4 sm:w-1/2 w-full">
+                    <div onclick="filterMenu('Soups')" class="border-2 border-gray-200 dark:border-gray-700 px-4 py-6 rounded-lg transform hover:scale-105 transition duration-300 cursor-pointer">
+                        <div class="w-12 h-12 inline-flex items-center justify-center rounded-full bg-red-100 text-primary mb-5 mx-auto">
+                            <i class="fas fa-utensil-spoon text-xl"></i>
+                        </div>
+                        <h2 class="title-font font-medium text-lg text-gray-900 dark:text-white">Soups</h2>
+                        <p class="leading-relaxed mt-2 dark:text-gray-300">Hearty and healthy soups</p>
+                    </div>
+                </div>
+                <div class="p-4 md:w-1/4 sm:w-1/2 w-full">
+                    <div onclick="filterMenu('Smoothies')" class="border-2 border-gray-200 dark:border-gray-700 px-4 py-6 rounded-lg transform hover:scale-105 transition duration-300 cursor-pointer">
+                        <div class="w-12 h-12 inline-flex items-center justify-center rounded-full bg-red-100 text-primary mb-5 mx-auto">
+                            <i class="fas fa-glass-whiskey text-xl"></i>
+                        </div>
+                        <h2 class="title-font font-medium text-lg text-gray-900 dark:text-white">Smoothies</h2>
+                        <p class="leading-relaxed mt-2 dark:text-gray-300">Nutrient-rich blends</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Menu Section -->
+    <section id="menu" class="text-gray-600 body-font bg-gray-50 dark:bg-gray-900 py-12">
+        <div class="container px-5 mx-auto">
+            <div class="flex flex-col text-center w-full mb-12">
+                <h2 class="text-2xl font-bold title-font mb-4 text-dark dark:text-white">Our Healthy Menu</h2>
+                <p class="lg:w-2/3 mx-auto leading-relaxed text-gray-500 dark:text-gray-400">Discover our nutritionist-approved meals</p>
+                <button onclick="filterMenu('All')" class="mt-4 mx-auto text-primary hover:underline focus:outline-none">
+                    Show All Dishes
+                </button>
+            </div>
+            
+            <div class="flex flex-wrap -m-4">
+                <!-- Menu items will be added here dynamically -->
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="text-gray-600 body-font py-12 bg-white dark:bg-gray-800">
+        <div class="container px-5 mx-auto">
+            <div class="flex flex-col text-center w-full mb-12">
+                <h2 class="text-2xl font-bold title-font mb-4 text-dark dark:text-white">About FoodExpress</h2>
+                <p class="lg:w-2/3 mx-auto leading-relaxed text-gray-500 dark:text-gray-400">Our story and what makes us special</p>
+            </div>
+            <div class="flex flex-wrap sm:-m-4 -mx-4 -mb-10 -mt-4 md:space-y-0 space-y-6">
+                <div class="p-4 md:w-1/3 flex">
+                    <div class="w-12 h-12 inline-flex items-center justify-center rounded-full bg-red-100 text-primary mb-4 flex-shrink-0">
+                        <i class="fas fa-history text-xl"></i>
+                    </div>
+                    <div class="flex-grow pl-6">
+                        <h2 class="text-gray-900 dark:text-white text-lg title-font font-medium mb-2">Our Mission</h2>
+                        <p class="leading-relaxed text-base dark:text-gray-300">Founded in 2010, FoodExpress is committed to making healthy eating convenient. We believe nutritious food should be delicious and accessible to everyone.</p>
+                    </div>
+                </div>
+                <div class="p-4 md:w-1/3 flex">
+                    <div class="w-12 h-12 inline-flex items-center justify-center rounded-full bg-red-100 text-primary mb-4 flex-shrink-0">
+                        <i class="fas fa-leaf text-xl"></i>
+                    </div>
+                    <div class="flex-grow pl-6">
+                        <h2 class="text-gray-900 dark:text-white text-lg title-font font-medium mb-2">Organic Ingredients</h2>
+                        <p class="leading-relaxed text-base dark:text-gray-300">We source only organic, fresh ingredients from local farmers. Our meals are free from artificial additives and preservatives.</p>
+                    </div>
+                </div>
+                <div class="p-4 md:w-1/3 flex">
+                    <div class="w-12 h-12 inline-flex items-center justify-center rounded-full bg-red-100 text-primary mb-4 flex-shrink-0">
+                        <i class="fas fa-bolt text-xl"></i>
+                    </div>
+                    <div class="flex-grow pl-6">
+                        <h2 class="text-gray-900 dark:text-white text-lg title-font font-medium mb-2">Nutritionist Approved</h2>
+                        <p class="leading-relaxed text-base dark:text-gray-300">Every meal is designed by nutritionists to provide balanced nutrition without compromising on taste.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials -->
+    <section class="text-gray-600 body-font py-12 bg-gray-50 dark:bg-gray-900">
+        <div class="container px-5 mx-auto">
+            <div class="flex flex-col text-center w-full mb-12">
+                <h2 class="text-2xl font-bold title-font mb-4 text-dark dark:text-white">What Our Customers Say</h2>
+                <p class="lg:w-2/3 mx-auto leading-relaxed text-gray-500 dark:text-gray-400">Don't just take our word for it</p>
+            </div>
+            <div class="flex flex-wrap -m-4">
+                <div class="p-4 md:w-1/3">
+                    <div class="h-full bg-white dark:bg-gray-800 p-8 rounded-lg shadow-sm">
+                        <div class="flex items-center mb-4">
+                            <div class="w-12 h-12 rounded-full bg-primary inline-flex items-center justify-center text-white">
+                                <span class="font-bold">JD</span>
+                            </div>
+                            <div class="ml-4">
+                                <h3 class="text-gray-900 dark:text-white title-font font-medium">John D.</h3>
+                                <div class="flex text-yellow-400">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="leading-relaxed mb-6 dark:text-gray-300">The quinoa bowls from FoodExpress are my go-to lunch! Always fresh and packed with nutrients. I've never felt better!</p>
+                    </div>
+                </div>
+                <div class="p-4 md:w-1/3">
+                    <div class="h-full bg-white dark:bg-gray-800 p-8 rounded-lg shadow-sm">
+                        <div class="flex items-center mb-4">
+                            <div class="w-12 h-12 rounded-full bg-primary inline-flex items-center justify-center text-white">
+                                <span class="font-bold">SM</span>
+                            </div>
+                            <div class="ml-4">
+                                <h3 class="text-gray-900 dark:text-white title-font font-medium">Sarah M.</h3>
+                                <div class="flex text-yellow-400">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="leading-relaxed mb-6 dark:text-gray-300">I order from FoodExpress at least twice a week. Their green smoothies give me the energy boost I need for my morning workouts.</p>
+                    </div>
+                </div>
+                <div class="p-4 md:w-1/3">
+                    <div class="h-full bg-white dark:bg-gray-800 p-8 rounded-lg shadow-sm">
+                        <div class="flex items-center mb-4">
+                            <div class="w-12 h-12 rounded-full bg-primary inline-flex items-center justify-center text-white">
+                                <span class="font-bold">RT</span>
+                            </div>
+                            <div class="ml-4">
+                                <h3 class="text-gray-900 dark:text-white title-font font-medium">Robert T.</h3>
+                                <div class="flex text-yellow-400">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star-half-alt"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="leading-relaxed mb-6 dark:text-gray-300">Since switching to FoodExpress, I've lost 10 pounds without feeling deprived. The lentil soup is my favorite!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="text-gray-600 body-font relative py-12 bg-white dark:bg-gray-800">
+        <div class="container px-5 mx-auto">
+            <div class="flex flex-col text-center w-full mb-12">
+                <h2 class="text-2xl font-bold title-font mb-4 text-dark dark:text-white">Contact Us</h2>
+                <p class="lg:w-2/3 mx-auto leading-relaxed text-gray-500 dark:text-gray-400">Have questions? Get in touch with us</p>
+            </div>
+            <div class="lg:w-1/2 md:w-2/3 mx-auto">
+                <div class="flex flex-wrap -m-2">
+                    <div class="p-2 w-1/2">
+                        <div class="relative">
+                            <label for="name" class="leading-7 text-sm text-gray-600 dark:text-gray-400">Name</label>
+                            <input type="text" id="name" name="name" class="w-full bg-gray-100 dark:bg-gray-700 bg-opacity-50 rounded border border-gray-300 dark:border-gray-600 focus:border-primary focus:bg-white dark:focus:bg-gray-800 focus:ring-2 focus:ring-red-200 text-base outline-none text-gray-700 dark:text-white py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
+                        </div>
+                    </div>
+                    <div class="p-2 w-1/2">
+                        <div class="relative">
+                            <label for="email" class="leading-7 text-sm text-gray-600 dark:text-gray-400">Email</label>
+                            <input type="email" id="email" name="email" class="w-full bg-gray-100 dark:bg-gray-700 bg-opacity-50 rounded border border-gray-300 dark:border-gray-600 focus:border-primary focus:bg-white dark:focus:bg-gray-800 focus:ring-2 focus:ring-red-200 text-base outline-none text-gray-700 dark:text-white py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
+                        </div>
+                    </div>
+                    <div class="p-2 w-full">
+                        <div class="relative">
+                            <label for="message" class="leading-7 text-sm text-gray-600 dark:text-gray-400">Message</label>
+                            <textarea id="message" name="message" class="w-full bg-gray-100 dark:bg-gray-700 bg-opacity-50 rounded border border-gray-300 dark:border-gray-600 focus:border-primary focus:bg-white dark:focus:bg-gray-800 focus:ring-2 focus:ring-red-200 h-32 text-base outline-none text-gray-700 dark:text-white py-1 px-3 resize-none leading-6 transition-colors duration-200 ease-in-out"></textarea>
+                        </div>
+                    </div>
+                    <div class="p-2 w-full">
+                        <button class="flex mx-auto text-white bg-primary border-0 py-2 px-8 focus:outline-none hover:bg-red-600 rounded-lg text-lg transition">
+                            Send Message
+                        </button>
+                    </div>
+                    <div class="p-2 w-full pt-8 mt-8 border-t border-gray-200 dark:border-gray-700 text-center">
+                        <a class="text-primary">hello@foodexpress.com</a>
+                        <p class="leading-normal my-5 dark:text-gray-400">123 Food Street
+                            <br>New York, NY 10001
+                        </p>
+                        <span class="inline-flex">
+                            <a class="text-gray-500 hover:text-primary mx-2 dark:text-gray-400 dark:hover:text-primary">
+                                <i class="fab fa-facebook-f"></i>
+                            </a>
+                            <a class="text-gray-500 hover:text-primary mx-2 dark:text-gray-400 dark:hover:text-primary">
+                                <i class="fab fa-twitter"></i>
+                            </a>
+                            <a class="text-gray-500 hover:text-primary mx-2 dark:text-gray-400 dark:hover:text-primary">
+                                <i class="fab fa-instagram"></i>
+                            </a>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="text-gray-600 body-font bg-dark dark:bg-gray-900">
+        <div class="container px-5 py-8 mx-auto flex items-center sm:flex-row flex-col">
+            <a href="#" class="flex title-font font-medium items-center md:justify-start justify-center text-white">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 text-white p-2 bg-primary rounded-full" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
+                </svg>
+                <span class="ml-3 text-xl font-bold">Food<span class="text-primary">Express</span></span>
+            </a>
+            <p class="text-sm text-gray-400 sm:ml-4 sm:pl-4 sm:border-l-2 sm:border-gray-800 sm:py-2 sm:mt-0 mt-4">© 2023 FoodExpress —
+                <a href="#" class="text-gray-500 ml-1" rel="noopener noreferrer" target="_blank">All Rights Reserved</a>
+            </p>
+            <span class="inline-flex sm:ml-auto sm:mt-0 mt-4 justify-center sm:justify-start">
+                <a href="#" class="text-gray-400 hover:text-white">
+                    <i class="fab fa-facebook-f"></i>
+                </a>
+                <a href="#" class="ml-3 text-gray-400 hover:text-white">
+                    <i class="fab fa-twitter"></i>
+                </a>
+                <a href="#" class="ml-3 text-gray-400 hover:text-white">
+                    <i class="fab fa-instagram"></i>
+                </a>
+            </span>
+        </div>
+    </footer>
+
+    <!-- Recipe Modal -->
+    <div id="recipe-modal" class="hidden fixed inset-0 z-50 overflow-y-auto">
+        <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 transition-opacity" aria-hidden="true">
+                <div class="absolute inset-0 bg-gray-500 dark:bg-gray-900 opacity-75" onclick="hideRecipe()"></div>
+            </div>
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+            <div class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
+                <div class="px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                    <div class="sm:flex sm:items-start">
+                        <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
+                            <div class="flex justify-between items-center">
+                                <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white" id="recipe-title"></h3>
+                                <button onclick="hideRecipe()" class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                            <div class="mt-4">
+                                <img id="recipe-image" class="w-full h-48 object-cover rounded-lg mb-4" src="" alt="">
+                                <div class="bg-gray-100 dark:bg-gray-700 p-4 rounded-lg">
+                                    <h4 class="font-medium text-gray-900 dark:text-white mb-2">Ingredients:</h4>
+                                    <ul id="recipe-ingredients" class="list-disc list-inside text-gray-700 dark:text-gray-300"></ul>
+                                </div>
+                                <div class="mt-4">
+                                    <h4 class="font-medium text-gray-900 dark:text-white mb-2">Instructions:</h4>
+                                    <p id="recipe-instructions" class="text-gray-700 dark:text-gray-300"></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gray-50 dark:bg-gray-700 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                    <button type="button" onclick="hideRecipe()" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-primary text-base font-medium text-white hover:bg-red-600 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm transition">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Updated menu data with proper food images
+        const menuItems = [
+            {
+                id: 1,
+                name: "Quinoa Buddha Bowl",
+                category: "Bowls",
+                price: 220,
+                description: "Nutrient-packed bowl with quinoa, avocado, chickpeas and tahini dressing",
+                image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=880&q=80"
+            },
+            {
+                id: 2,
+                name: "Kale Caesar Salad",
+                category: "Salads",
+                price: 180,
+                description: "Fresh kale with homemade caesar dressing and whole grain croutons",
+                image: "https://images.unsplash.com/photo-1546793665-c74683f339c1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=687&q=80"
+            },
+            {
+                id: 3,
+                name: "Lentil Soup",
+                category: "Soups",
+                price: 150,
+                description: "Hearty lentil soup with vegetables and herbs",
+                image: "https://images.unsplash.com/photo-1608375587735-9e6f1e0a0d53?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=687&q=80"
+            },
+            {
+                id: 4,
+                name: "Green Smoothie",
+                category: "Smoothies",
+                price: 120,
+                description: "Spinach, banana, almond milk and chia seeds",
+                image: "https://images.unsplash.com/photo-1519996529931-28324d5a630e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=687&q=80"
+            },
+            {
+                id: 5,
+                name: "Avocado Toast",
+                category: "Breakfast",
+                price: 140,
+                description: "Whole grain toast with smashed avocado and cherry tomatoes",
+                image: "https://images.unsplash.com/photo-1551504734-5ee1c4a1479b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80"
+            },
+            {
+                id: 6,
+                name: "Grilled Salmon",
+                category: "Main Course",
+                price: 280,
+                description: "Wild-caught salmon with roasted vegetables",
+                image: "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80"
+            },
+            {
+                id: 7,
+                name: "Chia Pudding",
+                category: "Desserts",
+                price: 110,
+                description: "Chia seeds soaked in almond milk with fresh berries",
+                image: "https://images.unsplash.com/photo-1505576399279-565b52d4ac71?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=687&q=80"
+            },
+            {
+                id: 8,
+                name: "Veggie Wrap",
+                category: "Lunch",
+                price: 160,
+                description: "Whole wheat wrap with hummus and fresh vegetables",
+                image: "https://images.unsplash.com/photo-1601050690643-715a158b58f2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80"
+            },
+            {
+                id: 9,
+                name: "Acai Bowl",
+                category: "Breakfast",
+                price: 190,
+                description: "Acai berry blend topped with granola and fresh fruit",
+                image: "https://images.unsplash.com/photo-1573231567007-1d0d5858f9d3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=687&q=80"
+            }
+        ];
+    
+        // Shopping cart - load from localStorage or initialize empty
+        let cart = JSON.parse(localStorage.getItem('cart')) || [];
+        
+        // Theme toggle functionality
+        const themeToggle = document.getElementById('theme-toggle');
+        themeToggle.addEventListener('click', () => {
+            document.documentElement.classList.toggle('dark');
+            localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+        });
+    
+        // Check for saved theme preference
+        if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+    // Check if user is logged in
+    const userData = JSON.parse(localStorage.getItem('userData'));
+    
+    if (userData) {
+        // Show profile section and update with user data
+        const profileSection = document.getElementById('profile-section');
+        const profileName = document.getElementById('profile-name');
+        const profileButton = document.getElementById('profile-button');
+        
+        // Show the profile section that was hidden by default
+        profileSection.classList.remove('hidden');
+        
+        // Set the profile name
+        profileName.textContent = userData.displayName || userData.email || 'User';
+        
+        // Replace font awesome icon with profile picture if available
+        if (userData.photoURL) {
+            // Remove the existing font awesome icon
+            const iconElement = profileButton.querySelector('.fas.fa-user-circle');
+            if (iconElement) {
+                iconElement.remove();
+            }
+            
+            // Create profile picture element
+            const profilePic = document.createElement('img');
+            profilePic.src = userData.photoURL;
+            profilePic.alt = 'Profile';
+            profilePic.className = 'h-8 w-8 rounded-full object-cover mr-2';
+            
+            // Add it to the beginning of the profile button
+            profileButton.prepend(profilePic);
+        }
+        
+        // Set up dropdown toggle
+        profileButton.addEventListener('click', function() {
+            const dropdown = document.getElementById('profile-dropdown');
+            dropdown.classList.toggle('hidden');
+        });
+        
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            const dropdown = document.getElementById('profile-dropdown');
+            const profileButton = document.getElementById('profile-button');
+            
+            if (!profileButton.contains(event.target) && !dropdown.contains(event.target)) {
+                dropdown.classList.add('hidden');
+            }
+        });
+    }
+});
+    
+        // Filter menu by category
+        function filterMenu(category) {
+            const filteredItems = category === 'All' ? menuItems : menuItems.filter(item => 
+                item.category.toLowerCase().includes(category.toLowerCase()) || 
+                item.name.toLowerCase().includes(category.toLowerCase())
+            );
+            
+            renderFilteredMenu(filteredItems, category);
+        }
+    
+        // Render filtered menu items
+        function renderFilteredMenu(items, category) {
+            const menuContainer = document.querySelector('#menu .flex.flex-wrap.-m-4');
+            const menuTitle = document.querySelector('#menu .flex.flex-col.text-center.w-full.mb-12 h2');
+            const menuSubtitle = document.querySelector('#menu .flex.flex-col.text-center.w-full.mb-12 p');
+            
+            // Update the menu title
+            menuTitle.textContent = category === 'All' ? 'Our Healthy Menu' : `${category} Options`;
+            menuSubtitle.textContent = category === 'All' ? 'Discover our nutritionist-approved meals' : `Healthy ${category} options`;
+            
+            // Clear the menu
+            menuContainer.innerHTML = '';
+            
+            if (items.length === 0) {
+                menuContainer.innerHTML = `
+                    <div class="w-full text-center py-12">
+                        <p class="text-gray-500 dark:text-gray-400">No dishes found in this category.</p>
+                        <button onclick="filterMenu('All')" class="mt-4 text-primary hover:underline">
+                            View All Menu Items
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Render the filtered items
+            items.forEach(item => {
+                const menuItem = document.createElement('div');
+                menuItem.className = 'p-4 md:w-1/4 sm:w-1/2 w-full';
+                menuItem.innerHTML = `
+                    <div class="h-full border-2 border-gray-200 dark:border-gray-700 border-opacity-60 rounded-lg overflow-hidden bg-white dark:bg-gray-800 hover:shadow-md transition">
+                        <img class="lg:h-48 md:h-36 w-full object-cover object-center" src="${item.image}" alt="${item.name}">
+                        <div class="p-6">
+                            <h2 class="tracking-widest text-xs title-font font-medium text-gray-500 mb-1">${item.category}</h2>
+                            <h1 class="title-font text-lg font-medium text-gray-900 dark:text-white mb-3">${item.name}</h1>
+                            <p class="leading-relaxed mb-3 text-sm dark:text-gray-300">${item.description}</p>
+                            <div class="flex items-center justify-between flex-wrap">
+                                <span class="title-font font-medium text-lg text-dark dark:text-white">₹${item.price.toFixed(2)}</span>
+                                <button onclick="addToCart(${item.id})" class="text-white bg-primary border-0 py-1 px-3 focus:outline-none hover:bg-red-600 rounded text-sm transition">
+                                    Add to Cart
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                menuContainer.appendChild(menuItem);
+            });
+        }
+    
+        // Render menu items
+        function renderMenu() {
+            filterMenu('All'); // Show all items by default
+        }
+    
+        // Add item to cart
+        function addToCart(itemId) {
+            const item = menuItems.find(i => i.id === itemId);
+            const existingItem = cart.find(i => i.id === itemId);
+            
+            if (existingItem) {
+                existingItem.quantity += 1;
+            } else {
+                cart.push({...item, quantity: 1});
+            }
+            
+            // Save to localStorage
+            localStorage.setItem('cart', JSON.stringify(cart));
+            
+            updateCart();
+            showAddedToCartMessage(item.name);
+        }
+    
+        // Show notification when item is added to cart
+        function showAddedToCartMessage(itemName) {
+            const notification = document.createElement('div');
+            notification.className = 'fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg flex items-center';
+            notification.innerHTML = `
+                <i class="fas fa-check-circle mr-2"></i>
+                ${itemName} added to cart!
+            `;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.classList.add('opacity-0', 'transition-opacity', 'duration-300');
+                setTimeout(() => notification.remove(), 300);
+            }, 2000);
+        }
+    
+        // Update cart UI
+        function updateCart() {
+            const cartItemsContainer = document.getElementById('cart-items');
+            const cartCount = document.getElementById('cart-count');
+            const cartSubtotal = document.getElementById('cart-subtotal');
+            const cartTotal = document.getElementById('cart-total');
+            
+            // Update cart count
+            const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+            cartCount.textContent = totalItems;
+            
+            // Update cart items
+            if (cart.length === 0) {
+                cartItemsContainer.innerHTML = '<p class="text-gray-500 dark:text-gray-400 text-center py-8">Your cart is empty</p>';
+            } else {
+                cartItemsContainer.innerHTML = '';
+                cart.forEach(item => {
+                    const cartItem = document.createElement('div');
+                    cartItem.className = 'flex justify-between items-center mb-4 pb-4 border-b dark:border-gray-700';
+                    cartItem.innerHTML = `
+                        <div class="flex items-center">
+                            <img src="${item.image}" alt="${item.name}" class="w-12 h-12 object-cover rounded">
+                            <div class="ml-3">
+                                <h3 class="text-sm font-medium dark:text-white">${item.name}</h3>
+                                <p class="text-xs text-gray-500 dark:text-gray-400">₹${item.price.toFixed(2)} x ${item.quantity}</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center">
+                            <span class="text-sm font-medium dark:text-white">₹${(item.price * item.quantity).toFixed(2)}</span>
+                            <button onclick="removeFromCart(${item.id})" class="ml-2 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    `;
+                    cartItemsContainer.appendChild(cartItem);
+                });
+    
+                // Add proceed to order button
+                const orderBtn = document.createElement('button');
+                orderBtn.className = 'w-full bg-primary text-white py-2 rounded-lg mt-4 hover:bg-red-600 transition';
+                orderBtn.textContent = 'Proceed to Order';
+                orderBtn.onclick = function() {
+                    toggleCart();
+                    window.location.href = 'checkout.html';
+                };
+                
+                const cartFooter = document.querySelector('#cart-sidebar > div:nth-child(3)');
+                if (!document.querySelector('#order-btn')) {
+                    cartFooter.insertBefore(orderBtn, cartFooter.firstChild);
+                    orderBtn.id = 'order-btn';
+                }
+            }
+            
+            // Update totals
+            const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const deliveryFee = 30; // 30 INR delivery fee
+            const total = subtotal + deliveryFee;
+            
+            cartSubtotal.textContent = `₹${subtotal.toFixed(2)}`;
+            cartTotal.textContent = `₹${total.toFixed(2)}`;
+        }
+    
+        // Remove item from cart
+        function removeFromCart(itemId) {
+            const itemIndex = cart.findIndex(i => i.id === itemId);
+            
+            if (itemIndex !== -1) {
+                if (cart[itemIndex].quantity > 1) {
+                    cart[itemIndex].quantity -= 1;
+                } else {
+                    cart.splice(itemIndex, 1);
+                }
+                
+                // Save to localStorage
+                localStorage.setItem('cart', JSON.stringify(cart));
+                
+                updateCart();
+            }
+        }
+    
+        // Toggle cart visibility
+        function toggleCart() {
+            const cartSidebar = document.getElementById('cart-sidebar');
+            const cartOverlay = document.getElementById('cart-overlay');
+            
+            cartSidebar.classList.toggle('translate-x-full');
+            cartOverlay.classList.toggle('hidden');
+        }   
+           // Add smooth transition to all links
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', function(e) {
+                // Don't apply to:
+                // 1. External links
+                // 2. Anchor links (#)
+                // 3. Links to the current page
+                if (!this.href || 
+                    this.href.startsWith('http') || 
+                    this.href.includes('#') || 
+                    this.href === window.location.href) {
+                    return;
+                }
+                
+                e.preventDefault();
+                document.body.style.opacity = '0';
+                document.body.style.transition = 'opacity 0.3s ease';
+                
+                setTimeout(() => {
+                    window.location.href = this.href;
+                }, 300);
+            });
+        });
+    });
+    </script>
+</body>
+</html>

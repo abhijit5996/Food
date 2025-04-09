@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - FoodExpress</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Page transition animations */
+        body {
+            opacity: 0;
+            animation: fadeIn 0.5s ease-in forwards;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        /* Link transitions */
+        a, button {
+            transition: all 0.3s ease;
+        }
+        
+        .error-message {
+            color: #ef4444;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+    </style>
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
+      import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
+      import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyBx0Kt9o04ye0XrtA8ecp84wD8Q9OCDjlA",
+        authDomain: "foodorder-4380c.firebaseapp.com",
+        projectId: "foodorder-4380c",
+        storageBucket: "foodorder-4380c.appspot.com",
+        messagingSenderId: "735023580381",
+        appId: "1:735023580381:web:c6740bef2fc9bdee1b4734"
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const auth = getAuth(app);
+      const db = getFirestore(app);
+      const googleProvider = new GoogleAuthProvider();
+
+      // Make db and auth available to window
+      window.db = db;
+      window.auth = auth;
+
+      // Function to check user preferences and redirect accordingly
+      window.checkUserPreferencesAndRedirect = async function(userId) {
+        try {
+          console.log("Checking preferences for user:", userId);
+          const userDocRef = doc(db, "users", userId);
+          const docSnap = await getDoc(userDocRef);
+          
+          if (docSnap.exists()) {
+            console.log("User document exists");
+            const userData = docSnap.data();
+            if (userData.preferences && Object.keys(userData.preferences).length > 0) {
+              console.log("User has preferences, redirecting to homepage");
+              // User has preferences, redirect to homepage
+              const redirectAfterLogin = localStorage.getItem('redirectAfterLogin');
+              if (redirectAfterLogin) {
+                localStorage.removeItem('redirectAfterLogin');
+                window.location.href = redirectAfterLogin;
+              } else {
+                window.location.href = 'homepage.html';
+              }
+            } else {
+              console.log("User has no preferences, redirecting to preferences page");
+              // User has no preferences, redirect to preferences page
+              window.location.href = 'preferences.html';
+            }
+          } else {
+            console.log("User document doesn't exist, creating new document");
+            // Create new user document
+            await setDoc(userDocRef, {
+              email: auth.currentUser.email,
+              createdAt: new Date(),
+              preferences: {}
+            });
+            // Redirect to preferences page
+            window.location.href = 'preferences.html';
+          }
+        } catch (error) {
+          console.error("Error checking user preferences:", error);
+          document.getElementById('authError').textContent = 'An error occurred. Please try again.';
+          document.getElementById('authError').classList.remove('hidden');
+        }
+      };
+
+      // Check auth state
+      onAuthStateChanged(auth, (user) => {
+        if (user) {
+          console.log("User is signed in:", user.uid);
+          // Check if user has preferences set
+          checkUserPreferencesAndRedirect(user.uid);
+        } else {
+          console.log("No user is signed in.");
+        }
+      });
+
+      // Login form submission handler
+      window.handleLogin = async function(email, password, remember) {
+        try {
+          console.log("Attempting login with email:", email);
+          const userCredential = await signInWithEmailAndPassword(auth, email, password);
+          const user = userCredential.user;
+          console.log("Login successful for user:", user.uid);
+          
+          // Store user data in localStorage
+          const userData = {
+              displayName: user.displayName,
+              email: user.email,
+              photoURL: user.photoURL,
+              uid: user.uid
+          };
+          
+          localStorage.setItem('userData', JSON.stringify(userData));
+          
+          if (remember) {
+              localStorage.setItem('rememberEmail', email);
+          } else {
+              localStorage.removeItem('rememberEmail');
+          }
+          
+          // Check preferences and redirect
+          await checkUserPreferencesAndRedirect(user.uid);
+          
+        } catch (error) {
+          console.error('Login error:', error);
+          throw error;
+        }
+      };
+
+      // Google sign-in function
+      window.signInWithGoogle = async function() {
+        try {
+          console.log("Attempting Google sign-in");
+          googleProvider.addScope('profile');
+          googleProvider.addScope('email');
+          
+          const result = await signInWithPopup(auth, googleProvider);
+          const user = result.user;
+          console.log("Google sign-in successful for user:", user.uid);
+          
+          // Store user profile data including photo URL
+          const userData = {
+            displayName: user.displayName,
+            email: user.email,
+            photoURL: user.photoURL,
+            uid: user.uid
+          };
+          
+          localStorage.setItem('userData', JSON.stringify(userData));
+          
+          // Check if user exists in Firestore
+          const userDocRef = doc(db, "users", user.uid);
+          const docSnap = await getDoc(userDocRef);
+          
+          if (!docSnap.exists()) {
+            console.log("Creating new user document for Google sign-in");
+            // Create user document in Firestore if it doesn't exist
+            await setDoc(userDocRef, {
+              name: user.displayName,
+              email: user.email,
+              createdAt: new Date(),
+              preferences: {}
+            });
+          }
+          
+          // Check preferences and redirect
+          await checkUserPreferencesAndRedirect(user.uid);
+          
+        } catch (error) {
+          console.error('Google sign-in error:', error);
+          document.getElementById('authError').textContent = 'Google sign-in failed: ' + error.message;
+          document.getElementById('authError').classList.remove('hidden');
+        }
+      };
+    </script>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
+    <!-- Header/Navigation -->
+    <header class="sticky top-0 z-50 bg-white dark:bg-gray-800 shadow-md transition-colors duration-300">
+        <div class="container mx-auto flex flex-wrap p-5 flex-col md:flex-row items-center">
+            <a href="index.html" class="flex title-font font-medium items-center text-gray-900 dark:text-white mb-4 md:mb-0">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 text-white p-2 bg-primary rounded-full" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
+                </svg>
+                <span class="ml-3 text-xl font-bold">Food<span class="text-primary">Express</span></span>
+            </a>
+            <button id="theme-toggle" class="p-2 rounded-lg focus:outline-none text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 mr-4 transition-colors duration-300">
+                <i class="fas fa-moon dark:hidden"></i>
+                <i class="fas fa-sun hidden dark:block"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Login Section -->
+    <section class="text-gray-600 dark:text-gray-300 body-font py-12 transition-colors duration-300">
+        <div class="container px-5 py-24 mx-auto flex flex-wrap items-center">
+            <div class="lg:w-3/5 md:w-1/2 md:pr-16 lg:pr-0 pr-0 mb-10 md:mb-0">
+                <h1 class="title-font font-bold text-3xl text-dark dark:text-white mb-4">Welcome back to FoodExpress!</h1>
+                <p class="leading-relaxed mt-4">Login to access personalized food recommendations, track your orders, and enjoy faster checkout.</p>
+                <img class="mt-8 rounded-lg shadow-xl transition-transform duration-300 hover:scale-[1.02]" src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=880&q=80" alt="Healthy food">
+            </div>
+            <div class="lg:w-2/6 md:w-1/2 bg-white dark:bg-gray-800 rounded-lg p-8 flex flex-col md:ml-auto w-full mt-10 md:mt-0 shadow-lg transition-colors duration-300">
+                <h2 class="text-dark dark:text-white text-2xl font-bold title-font mb-5">Login</h2>
+                <div id="authError" class="hidden bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4"></div>
+                <form id="loginForm">
+                    <div class="relative mb-4">
+                        <label for="email" class="leading-7 text-sm text-gray-600 dark:text-gray-300">Email</label>
+                        <input type="email" id="email" name="email" required class="w-full bg-gray-100 dark:bg-gray-700 bg-opacity-50 rounded border border-gray-300 dark:border-gray-600 focus:border-primary focus:bg-white dark:focus:bg-gray-600 focus:ring-2 focus:ring-red-200 text-base outline-none text-gray-700 dark:text-white py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
+                        <div id="emailError" class="error-message"></div>
+                    </div>
+                    <div class="relative mb-4">
+                        <label for="password" class="leading-7 text-sm text-gray-600 dark:text-gray-300">Password</label>
+                        <input type="password" id="password" name="password" required class="w-full bg-gray-100 dark:bg-gray-700 bg-opacity-50 rounded border border-gray-300 dark:border-gray-600 focus:border-primary focus:bg-white dark:focus:bg-gray-600 focus:ring-2 focus:ring-red-200 text-base outline-none text-gray-700 dark:text-white py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
+                        <div id="passwordError" class="error-message"></div>
+                    </div>
+                    <div class="flex items-center mb-4">
+                        <input type="checkbox" id="remember" name="remember" class="w-4 h-4 text-primary bg-gray-100 dark:bg-gray-700 rounded border-gray-300 dark:border-gray-600 focus:ring-primary">
+                        <label for="remember" class="ml-2 text-sm text-gray-600 dark:text-gray-300">Remember me</label>
+                    </div>
+                    <button type="submit" class="w-full text-white bg-primary border-0 py-2 px-8 focus:outline-none hover:bg-red-600 rounded-lg text-lg transition-all duration-300 transform hover:scale-[1.02]">Login</button>
+                </form>
+                <div class="flex justify-between mt-4">
+                    <a href="forgot-password.html" class="text-sm text-gray-600 dark:text-gray-300 hover:text-primary">Forgot password?</a>
+                    <a href="register.html" class="text-sm text-gray-600 dark:text-gray-300 hover:text-primary">Create account</a>
+                </div>
+                <div class="relative flex py-5 items-center">
+                    <div class="flex-grow border-t border-gray-300 dark:border-gray-600 transition-colors duration-300"></div>
+                    <span class="flex-shrink mx-4 text-gray-600 dark:text-gray-300">OR</span>
+                    <div class="flex-grow border-t border-gray-300 dark:border-gray-600 transition-colors duration-300"></div>
+                </div>
+                <div class="flex flex-col space-y-3">
+                    <button type="button" id="googleSignIn" class="flex items-center justify-center bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-white py-2 px-4 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-all duration-300 transform hover:scale-[1.02]">
+                        <i class="fab fa-google text-red-500 mr-2"></i> Continue with Google
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="text-gray-600 dark:text-gray-300 body-font bg-white dark:bg-gray-800 transition-colors duration-300">
+        <div class="container px-5 py-8 mx-auto flex items-center sm:flex-row flex-col">
+            <a href="index.html" class="flex title-font font-medium items-center md:justify-start justify-center text-gray-900 dark:text-white">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 text-white p-2 bg-primary rounded-full" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
+                </svg>
+                <span class="ml-3 text-xl font-bold">Food<span class="text-primary">Express</span></span>
+            </a>
+            <p class="text-sm text-gray-500 dark:text-gray-400 sm:ml-4 sm:pl-4 sm:border-l-2 sm:border-gray-200 dark:sm:border-gray-700 sm:py-2 sm:mt-0 mt-4 transition-colors duration-300">© 2023 FoodExpress —
+                <a href="#" class="text-gray-600 dark:text-gray-300 ml-1" rel="noopener noreferrer" target="_blank">All Rights Reserved</a>
+            </p>
+            <span class="inline-flex sm:ml-auto sm:mt-0 mt-4 justify-center sm:justify-start">
+                <a href="#" class="text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-primary transition-colors duration-300">
+                    <i class="fab fa-facebook-f"></i>
+                </a>
+                <a href="#" class="ml-3 text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-primary transition-colors duration-300">
+                    <i class="fab fa-twitter"></i>
+                </a>
+                <a href="#" class="ml-3 text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-primary transition-colors duration-300">
+                    <i class="fab fa-instagram"></i>
+                </a>
+            </span>
+        </div>
+    </footer>
+
+    <script>
+        // Theme toggle functionality
+        const themeToggle = document.getElementById('theme-toggle');
+        const html = document.documentElement;
+    
+        // Check for saved user preference or use system preference
+        if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            html.classList.add('dark');
+        } else {
+            html.classList.remove('dark');
+        }
+    
+        // Toggle theme
+        themeToggle.addEventListener('click', () => {
+            html.classList.toggle('dark');
+            localStorage.setItem('theme', html.classList.contains('dark') ? 'dark' : 'light');
+        });
+    
+        // Login form submission
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Clear previous errors
+            document.getElementById('emailError').textContent = '';
+            document.getElementById('passwordError').textContent = '';
+            document.getElementById('authError').classList.add('hidden');
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const remember = document.getElementById('remember').checked;
+            
+            // Use the handleLogin function defined in the module script
+            window.handleLogin(email, password, remember).catch(error => {
+                console.error('Login error:', error);
+                
+                // Show appropriate error message
+                if (error.code === 'auth/invalid-email') {
+                    document.getElementById('emailError').textContent = 'Invalid email address';
+                } else if (error.code === 'auth/user-not-found') {
+                    document.getElementById('emailError').textContent = 'User not found';
+                } else if (error.code === 'auth/wrong-password') {
+                    document.getElementById('passwordError').textContent = 'Incorrect password';
+                } else {
+                    document.getElementById('authError').textContent = 'Login failed: ' + error.message;
+                    document.getElementById('authError').classList.remove('hidden');
+                }
+            });
+        });
+
+        // Google Sign-in button event listener
+        document.getElementById('googleSignIn').addEventListener('click', function() {
+            window.signInWithGoogle().catch(error => {
+                console.error('Google sign-in error:', error);
+                document.getElementById('authError').textContent = 'Google sign-in failed: ' + error.message;
+                document.getElementById('authError').classList.remove('hidden');
+            });
+        });
+
+        // Check for remembered email
+        document.addEventListener('DOMContentLoaded', function() {
+            const rememberedEmail = localStorage.getItem('rememberEmail');
+            if (rememberedEmail) {
+                document.getElementById('email').value = rememberedEmail;
+                document.getElementById('remember').checked = true;
+            }
+        });
+            
+        // Add smooth transition to all links
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('a').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    // Don't apply to:
+                    // 1. External links
+                    // 2. Anchor links (#)
+                    // 3. Links to the current page
+                    if (!this.href || 
+                        this.href.startsWith('http') || 
+                        this.href.includes('#') || 
+                        this.href === window.location.href) {
+                        return;
+                    }
+                    
+                    e.preventDefault();
+                    document.body.style.opacity = '0';
+                    document.body.style.transition = 'opacity 0.3s ease';
+                    
+                    setTimeout(() => {
+                        window.location.href = this.href;
+                    }, 300);
+                });
+            });
+        });
+    </script>
+</body>
+</html>

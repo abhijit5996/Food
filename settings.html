@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - FoodExpress</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Page transition animations */
+        body {
+            opacity: 0;
+            animation: fadeIn 0.5s ease-in forwards;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        /* Link transitions */
+        a, button {
+            transition: all 0.3s ease;
+        }
+    </style>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBx0Kt9o04ye0XrtA8ecp84wD8Q9OCDjlA",
+            authDomain: "foodorder-4380c.firebaseapp.com",
+            databaseURL: "https://foodorder-4380c.firebaseio.com",
+            projectId: "foodorder-4380c",
+            storageBucket: "foodorder-4380c.appspot.com",
+            messagingSenderId: "735023580381",
+            appId: "1:735023580381:web:c6740bef2fc9bdee1b4734"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const database = getDatabase(app);
+
+        // Check auth state
+        onAuthStateChanged(auth, (user) => {
+            if (!user) {
+                window.location.href = 'login.html';
+            } else {
+                document.getElementById('user-menu-button').innerHTML = `
+                    <i class="fas fa-user-circle mr-2"></i> ${user.displayName || 'User'}
+                `;
+                loadUserSettings(user.uid);
+            }
+        });
+
+        // Sign out functionality
+        document.getElementById('sign-out-btn').addEventListener('click', () => {
+            signOut(auth).then(() => {
+                window.location.href = 'index.html';
+            });
+        });
+
+        async function loadUserSettings(userId) {
+            const userRef = ref(database, 'users/' + userId);
+            get(userRef).then((snapshot) => {
+                if (snapshot.exists()) {
+                    const userData = snapshot.val();
+                    
+                    // Profile settings
+                    if (userData.profile) {
+                        document.getElementById('name').value = userData.profile.name || '';
+                        document.getElementById('email').value = userData.profile.email || '';
+                        document.getElementById('phone').value = userData.profile.phone || '';
+                    }
+                    
+                    // Notification settings
+                    if (userData.notifications) {
+                        document.getElementById('order-updates').checked = userData.notifications.orderUpdates || false;
+                        document.getElementById('promo-offers').checked = userData.notifications.promoOffers || false;
+                        document.getElementById('new-restaurants').checked = userData.notifications.newRestaurants || false;
+                    }
+                    
+                    // Appearance settings
+                    if (userData.appearance) {
+                        document.querySelector(`input[name="theme"][value="${userData.appearance.theme || 'system'}"]`).checked = true;
+                    }
+                    
+                    // Delivery settings
+                    if (userData.delivery) {
+                        document.getElementById('address').value = userData.delivery.address || '';
+                        document.getElementById('instructions').value = userData.delivery.instructions || '';
+                        document.querySelector(`input[name="delivery_speed"][value="${userData.delivery.speed || 'fastest'}"]`).checked = true;
+                    }
+                }
+            }).catch((error) => {
+                console.error("Error loading user settings:", error);
+            });
+        }
+
+        // Update profile
+        document.getElementById('update-profile-btn').addEventListener('click', async function() {
+            const userId = auth.currentUser.uid;
+            const profileData = {
+                name: document.getElementById('name').value,
+                email: document.getElementById('email').value,
+                phone: document.getElementById('phone').value
+            };
+            
+            try {
+                await update(ref(database, 'users/' + userId + '/profile'), profileData);
+                
+                const successMsg = document.getElementById('profile-success');
+                successMsg.textContent = 'Profile updated successfully!';
+                successMsg.classList.remove('hidden');
+                
+                setTimeout(() => {
+                    successMsg.classList.add('hidden');
+                }, 3000);
+            } catch (error) {
+                console.error('Error updating profile:', error);
+            }
+        });
+
+        // Save notification settings
+        document.querySelectorAll('#order-updates, #promo-offers, #new-restaurants').forEach(toggle => {
+            toggle.addEventListener('change', async function() {
+                const userId = auth.currentUser.uid;
+                const notificationData = {
+                    orderUpdates: document.getElementById('order-updates').checked,
+                    promoOffers: document.getElementById('promo-offers').checked,
+                    newRestaurants: document.getElementById('new-restaurants').checked
+                };
+                
+                try {
+                    await update(ref(database, 'users/' + userId + '/notifications'), notificationData);
+                    
+                    const successMsg = document.getElementById('notification-success');
+                    successMsg.textContent = 'Notification settings saved!';
+                    successMsg.classList.remove('hidden');
+                    
+                    setTimeout(() => {
+                        successMsg.classList.add('hidden');
+                    }, 3000);
+                } catch (error) {
+                    console.error('Error saving notification settings:', error);
+                }
+            });
+        });
+
+        // Save appearance settings
+        document.getElementById('save-appearance-btn').addEventListener('click', async function() {
+            const userId = auth.currentUser.uid;
+            const selectedTheme = document.querySelector('input[name="theme"]:checked').value;
+            
+            try {
+                await update(ref(database, 'users/' + userId + '/appearance'), {
+                    theme: selectedTheme
+                });
+                
+                const successMsg = document.getElementById('appearance-success');
+                successMsg.textContent = 'Appearance settings saved!';
+                successMsg.classList.remove('hidden');
+                
+                setTimeout(() => {
+                    successMsg.classList.add('hidden');
+                }, 3000);
+            } catch (error) {
+                console.error('Error saving appearance settings:', error);
+            }
+        });
+
+        // Save delivery settings
+        document.getElementById('save-delivery-btn').addEventListener('click', async function() {
+            const userId = auth.currentUser.uid;
+            const deliveryData = {
+                address: document.getElementById('address').value,
+                instructions: document.getElementById('instructions').value,
+                speed: document.querySelector('input[name="delivery_speed"]:checked').value
+            };
+            
+            try {
+                await update(ref(database, 'users/' + userId + '/delivery'), deliveryData);
+                
+                const successMsg = document.getElementById('delivery-success');
+                successMsg.textContent = 'Delivery settings saved!';
+                successMsg.classList.remove('hidden');
+                
+                setTimeout(() => {
+                    successMsg.classList.add('hidden');
+                }, 3000);
+            } catch (error) {
+                console.error('Error saving delivery settings:', error);
+            }
+        });
+    </script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#ef4444',
+                        secondary: '#f97316',
+                        dark: '#1f2937',
+                        light: '#f3f4f6'
+                    },
+                    animation: {
+                        'click': 'click 300ms ease-out',
+                    },
+                    keyframes: {
+                        click: {
+                            '0%, 100%': { transform: 'scale(1)' },
+                            '50%': { transform: 'scale(0.95)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
+    <!-- Header/Navigation -->
+    <header class="sticky top-0 z-50 bg-white dark:bg-gray-800 shadow-md">
+        <div class="container mx-auto flex flex-wrap p-5 flex-col md:flex-row items-center">
+            <a href="index.html" class="flex title-font font-medium items-center text-gray-900 dark:text-white mb-4 md:mb-0">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 text-white p-2 bg-primary rounded-full" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
+                </svg>
+                <span class="ml-3 text-xl font-bold">Food<span class="text-primary">Express</span></span>
+            </a>
+            <nav class="md:ml-auto flex flex-wrap items-center text-base justify-center">
+            </nav>
+            <button id="theme-toggle" class="p-2 rounded-lg focus:outline-none text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 mr-4">
+                <i class="fas fa-moon dark:hidden"></i>
+                <i class="fas fa-sun hidden dark:block"></i>
+            </button>
+            <div class="relative group">
+                <button id="user-menu-button" class="inline-flex items-center bg-gray-100 dark:bg-gray-700 text-dark dark:text-white border-0 py-2 px-4 focus:outline-none hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition mt-4 md:mt-0">
+                    <i class="fas fa-user-circle mr-2"></i> User
+                </button>
+                <div class="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg py-1 z-50 hidden group-hover:block">
+                    <a href="dashboard.html" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">Dashboard</a>
+                    <a href="settings.html" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">Settings</a>
+                    <a href="preferences.html" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">Preferences</a>
+                    <a href="orders.html" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">My Orders</a>
+                    <div class="border-t border-gray-200 dark:border-gray-700"></div>
+                    <a id="sign-out-btn" href="#" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">Sign out</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Settings Content -->
+    <section class="text-gray-600 dark:text-gray-300 body-font py-12">
+        <div class="container px-5 mx-auto max-w-4xl">
+            <div class="flex flex-col text-center w-full mb-12">
+                <h1 class="text-3xl font-bold title-font mb-4 text-dark dark:text-white">Settings</h1>
+                <p class="lg:w-2/3 mx-auto leading-relaxed">Customize your FoodExpress experience</p>
+            </div>
+            
+            <!-- Profile Settings -->
+            <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-6 mb-8">
+                <h2 class="text-xl font-semibold mb-6 text-dark dark:text-white">Profile Settings</h2>
+                
+                <div class="mb-6">
+                    <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Full Name</label>
+                    <input type="text" id="name" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-primary focus:border-primary bg-white dark:bg-gray-700">
+                </div>
+                
+                <div class="mb-6">
+                    <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Email Address</label>
+                    <input type="email" id="email" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-primary focus:border-primary bg-white dark:bg-gray-700">
+                </div>
+                
+                <div class="mb-6">
+                    <label for="phone" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Phone Number</label>
+                    <input type="tel" id="phone" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-primary focus:border-primary bg-white dark:bg-gray-700">
+                </div>
+                
+                <div class="flex justify-end">
+                    <button id="update-profile-btn" class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-red-600 transition">Update Profile</button>
+                </div>
+                <div id="profile-success" class="hidden mt-4 p-3 bg-green-100 dark:bg-green-800 text-green-800 dark:text-green-100 rounded-lg text-sm"></div>
+            </div>
+            
+            <!-- Notification Settings -->
+            <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-6 mb-8">
+                <h2 class="text-xl font-semibold mb-6 text-dark dark:text-white">Notification Settings</h2>
+                
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-md font-medium text-gray-900 dark:text-white">Order Updates</h3>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Get notified about your order status</p>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="order-updates" class="sr-only peer">
+                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary"></div>
+                        </label>
+                    </div>
+                    
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-md font-medium text-gray-900 dark:text-white">Promotions & Offers</h3>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Receive special offers and discounts</p>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="promo-offers" class="sr-only peer">
+                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary"></div>
+                        </label>
+                    </div>
+                    
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-md font-medium text-gray-900 dark:text-white">New Restaurants</h3>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Be notified when new restaurants join</p>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="new-restaurants" class="sr-only peer">
+                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary"></div>
+                        </label>
+                    </div>
+                </div>
+                <div id="notification-success" class="hidden mt-4 p-3 bg-green-100 dark:bg-green-800 text-green-800 dark:text-green-100 rounded-lg text-sm"></div>
+            </div>
+            
+            <!-- Appearance Settings -->
+            <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-6 mb-8">
+                <h2 class="text-xl font-semibold mb-6 text-dark dark:text-white">Appearance Settings</h2>
+                
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Theme</label>
+                    <div class="flex items-center space-x-4">
+                        <label class="inline-flex items-center">
+                            <input type="radio" name="theme" value="light" class="form-radio h-4 w-4 text-primary focus:ring-primary border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700">
+                            <span class="ml-2 text-gray-700 dark:text-gray-300">Light</span>
+                        </label>
+                        <label class="inline-flex items-center">
+                            <input type="radio" name="theme" value="dark" class="form-radio h-4 w-4 text-primary focus:ring-primary border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700">
+                            <span class="ml-2 text-gray-700 dark:text-gray-300">Dark</span>
+                        </label>
+                        <label class="inline-flex items-center">
+                            <input type="radio" name="theme" value="system" checked class="form-radio h-4 w-4 text-primary focus:ring-primary border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700">
+                            <span class="ml-2 text-gray-700 dark:text-gray-300">System Default</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="flex justify-end">
+                    <button id="save-appearance-btn" class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-red-600 transition">Save Appearance Settings</button>
+                </div>
+                <div id="appearance-success" class="hidden mt-4 p-3 bg-green-100 dark:bg-green-800 text-green-800 dark:text-green-100 rounded-lg text-sm"></div>
+            </div>
+            
+            <!-- Delivery Settings -->
+            <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
+                <h2 class="text-xl font-semibold mb-6 text-dark dark:text-white">Delivery Settings</h2>
+                
+                <div class="mb-6">
+                    <label for="address" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Default Delivery Address</label>
+                    <textarea id="address" rows="3" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-primary focus:border-primary bg-white dark:bg-gray-700"></textarea>
+                </div>
+                
+                <div class="mb-6">
+                    <label for="instructions" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Delivery Instructions</label>
+                    <textarea id="instructions" rows="2" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-primary focus:border-primary bg-white dark:bg-gray-700"></textarea>
+                </div>
+                
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Delivery Speed Preference</label>
+                    <div class="flex items-center space-x-4">
+                        <label class="inline-flex items-center">
+                            <input type="radio" name="delivery_speed" value="fastest" class="form-radio h-4 w-4 text-primary focus:ring-primary border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700" checked>
+                            <span class="ml-2 text-gray-700 dark:text-gray-300">Fastest</span>
+                        </label>
+                        <label class="inline-flex items-center">
+                            <input type="radio" name="delivery_speed" value="standard" class="form-radio h-4 w-4 text-primary focus:ring-primary border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700">
+                            <span class="ml-2 text-gray-700 dark:text-gray-300">Standard</span>
+                        </label>
+                        <label class="inline-flex items-center">
+                            <input type="radio" name="delivery_speed" value="scheduled" class="form-radio h-4 w-4 text-primary focus:ring-primary border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700">
+                            <span class="ml-2 text-gray-700 dark:text-gray-300">Scheduled</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="flex justify-end">
+                    <button id="save-delivery-btn" class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-red-600 transition">Save Delivery Settings</button>
+                </div>
+                <div id="delivery-success" class="hidden mt-4 p-3 bg-green-100 dark:bg-green-800 text-green-800 dark:text-green-100 rounded-lg text-sm"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="text-gray-600 dark:text-gray-300 body-font bg-white dark:bg-gray-800">
+        <div class="container px-5 py-8 mx-auto flex items-center sm:flex-row flex-col">
+            <a href="index.html" class="flex title-font font-medium items-center md:justify-start justify-center text-gray-900 dark:text-white">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 text-white p-2 bg-primary rounded-full" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
+                </svg>
+                <span class="ml-3 text-xl font-bold">Food<span class="text-primary">Express</span></span>
+            </a>
+            <p class="text-sm text-gray-500 dark:text-gray-400 sm:ml-4 sm:pl-4 sm:border-l-2 sm:border-gray-200 dark:sm:border-gray-700 sm:py-2 sm:mt-0 mt-4">© 2023 FoodExpress —
+                <a href="#" class="text-gray-600 dark:text-gray-300 ml-1" rel="noopener noreferrer" target="_blank">All Rights Reserved</a>
+            </p>
+            <span class="inline-flex sm:ml-auto sm:mt-0 mt-4 justify-center sm:justify-start">
+                <a href="#" class="text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-primary">
+                    <i class="fab fa-facebook-f"></i>
+                </a>
+                <a href="#" class="ml-3 text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-primary">
+                    <i class="fab fa-twitter"></i>
+                </a>
+                <a href="#" class="ml-3 text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-primary">
+                    <i class="fab fa-instagram"></i>
+                </a>
+            </span>
+        </div>
+    </footer>
+
+    <!-- Theme Toggle Script -->
+    <script>
+        const themeToggle = document.getElementById('theme-toggle');
+        const html = document.documentElement;
+        
+        // Check for saved user preference or use system preference
+        const savedTheme = localStorage.getItem('theme') || 'system';
+        
+        // Apply the saved theme
+        if (savedTheme === 'dark' || (savedTheme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            html.classList.add('dark');
+        } else {
+            html.classList.remove('dark');
+        }
+        
+        // Toggle between light/dark/system
+        themeToggle.addEventListener('click', () => {
+            if (html.classList.contains('dark')) {
+                html.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+            } else {
+                html.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+            }
+        });
+
+           // Add smooth transition to all links
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', function(e) {
+                // Don't apply to:
+                // 1. External links
+                // 2. Anchor links (#)
+                // 3. Links to the current page
+                if (!this.href || 
+                    this.href.startsWith('http') || 
+                    this.href.includes('#') || 
+                    this.href === window.location.href) {
+                    return;
+                }
+                
+                e.preventDefault();
+                document.body.style.opacity = '0';
+                document.body.style.transition = 'opacity 0.3s ease';
+                
+                setTimeout(() => {
+                    window.location.href = this.href;
+                }, 300);
+            });
+        });
+    });
+    </script>
+</body>
+</html>
