@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en" class="light">
+<html lang="en" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Recipe Details - FoodExpress</title>
+    <title>Recipe Details - NutriOrder</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -11,6 +11,7 @@
         body {
             opacity: 0;
             animation: fadeIn 0.5s ease-in forwards;
+            font-family: 'Poppins', sans-serif;
         }
         
         @keyframes fadeIn {
@@ -22,30 +23,43 @@
         a, button {
             transition: all 0.3s ease;
         }
-    </style>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#ef4444',
-                        secondary: '#f97316',
-                        dark: '#1f2937',
-                        light: '#f3f4f6'
-                    }
-                }
-            }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
         }
-    </script>
-    <style>
+
+        ::-webkit-scrollbar-track {
+            background: #1a202c;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #4a5568;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #718096;
+        }
+
+        /* Animation for hover effects */
+        .hover\:scale-105:hover {
+            transform: scale(1.05);
+        }
+
+        /* Custom glow effect */
+        .glow {
+            box-shadow: 0 0 15px rgba(139, 92, 246, 0.5);
+        }
+
+        /* Recipe step styling */
         .recipe-step {
             counter-increment: step-counter;
             margin-bottom: 1rem;
         }
         .recipe-step::before {
             content: counter(step-counter);
-            background-color: #ef4444;
+            background-color: #8b5cf6;
             color: white;
             font-weight: bold;
             padding: 0.2rem 0.6rem;
@@ -53,42 +67,64 @@
             margin-right: 0.5rem;
         }
     </style>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#8b5cf6',
+                        secondary: '#7c3aed',
+                        dark: '#1f2937',
+                        light: '#f3f4f6'
+                    },
+                    animation: {
+                        'click': 'click 300ms ease-out',
+                    },
+                    keyframes: {
+                        click: {
+                            '0%, 100%': { transform: 'scale(1)' },
+                            '50%': { transform: 'scale(0.95)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
 </head>
-<body class="bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
+<body class="bg-gray-900 text-gray-100 transition-colors duration-300 min-h-screen">
     <!-- Header/Navigation -->
-    <header class="sticky top-0 z-50 bg-white dark:bg-gray-800 shadow-md">
+    <header class="sticky top-0 z-50 bg-gray-800 shadow-md">
         <div class="container mx-auto flex flex-wrap p-5 flex-col md:flex-row items-center">
-            <a href="index.html" class="flex title-font font-medium items-center text-gray-900 dark:text-white mb-4 md:mb-0">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 text-white p-2 bg-primary rounded-full" viewBox="0 0 20 20" fill="currentColor">
-                    <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
-                </svg>
-                <span class="ml-3 text-xl font-bold">Food<span class="text-primary">Express</span></span>
+            <a href="index.html" class="flex title-font font-medium items-center text-white mb-4 md:mb-0">
+                <i class="fas fa-utensils text-purple-500 text-2xl mr-2"></i>
+                <span class="ml-3 text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-600">NutriOrder</span>
             </a>
             <nav class="md:ml-auto flex flex-wrap items-center text-base justify-center">
-                <a href="homepage.html" class="mr-5 hover:text-primary transition dark:text-gray-300 dark:hover:text-primary">Home</a>
-                <a href="recommended.html" class="mr-5 hover:text-primary transition dark:text-gray-300 dark:hover:text-primary">Recommended</a>
-                <a href="restaurants.html" class="mr-5 hover:text-primary transition dark:text-gray-300 dark:hover:text-primary">Restaurants</a>
-                <a href="index.html#contact" class="mr-5 hover:text-primary transition dark:text-gray-300 dark:hover:text-primary">Contact</a>
+                <a href="homepage.html" class="mr-5 hover:text-purple-400 transition">Home</a>
+                <a href="recommended.html" class="mr-5 hover:text-purple-400 transition">Recommended</a>
+                <a href="restaurants.html" class="mr-5 hover:text-purple-400 transition">Restaurants</a>
+                <a href="index.html#contact" class="mr-5 hover:text-purple-400 transition">Contact</a>
             </nav>
-            <button id="theme-toggle" class="p-2 rounded-lg focus:outline-none text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 mr-4">
+            <button id="theme-toggle" class="p-2 rounded-lg focus:outline-none text-gray-300 hover:bg-gray-700 mr-4">
                 <i class="fas fa-moon dark:hidden"></i>
                 <i class="fas fa-sun hidden dark:block"></i>
             </button>
-            <button onclick="window.history.back()" class="inline-flex items-center bg-primary text-white border-0 py-2 px-4 focus:outline-none hover:bg-red-600 rounded-lg transition mt-4 md:mt-0">
+            <button onclick="window.history.back()" class="inline-flex items-center bg-purple-600 text-white border-0 py-2 px-4 focus:outline-none hover:bg-purple-700 rounded-lg transition mt-4 md:mt-0">
                 <i class="fas fa-arrow-left mr-2"></i> Back
             </button>
         </div>
     </header>
 
     <!-- Recipe Details Section -->
-    <section class="text-gray-600 dark:text-gray-300 body-font py-12">
+    <section class="text-gray-300 body-font py-12">
         <div class="container px-5 mx-auto">
             <div class="flex flex-col lg:flex-row gap-8">
                 <!-- Recipe Image and Basic Info -->
                 <div class="lg:w-1/2">
                     <img id="recipe-main-image" class="w-full h-96 object-cover rounded-lg shadow-lg" src="" alt="">
-                    <div class="mt-6 bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
-                        <h1 id="recipe-title" class="text-3xl font-bold title-font mb-2 text-dark dark:text-white"></h1>
+                    <div class="mt-6 bg-gray-800 p-6 rounded-lg shadow">
+                        <h1 id="recipe-title" class="text-3xl font-bold title-font mb-2 text-white"></h1>
                         <div class="flex items-center mb-4">
                             <div class="flex text-yellow-400 mr-4">
                                 <i class="fas fa-star"></i>
@@ -97,30 +133,30 @@
                                 <i class="fas fa-star"></i>
                                 <i class="fas fa-star-half-alt"></i>
                             </div>
-                            <span class="text-gray-600 dark:text-gray-300">4.7 (120 reviews)</span>
+                            <span class="text-gray-400">4.7 (120 reviews)</span>
                         </div>
-                        <p id="recipe-description" class="text-gray-700 dark:text-gray-300 mb-6"></p>
+                        <p id="recipe-description" class="text-gray-300 mb-6"></p>
                         
                         <div class="grid grid-cols-3 gap-4 mb-6">
-                            <div class="bg-gray-100 dark:bg-gray-700 p-3 rounded-lg text-center">
-                                <div class="text-lg font-bold text-dark dark:text-white" id="recipe-prep-time">15 min</div>
-                                <div class="text-sm text-gray-600 dark:text-gray-400">Prep Time</div>
+                            <div class="bg-gray-700 p-3 rounded-lg text-center">
+                                <div class="text-lg font-bold text-white" id="recipe-prep-time">15 min</div>
+                                <div class="text-sm text-gray-400">Prep Time</div>
                             </div>
-                            <div class="bg-gray-100 dark:bg-gray-700 p-3 rounded-lg text-center">
-                                <div class="text-lg font-bold text-dark dark:text-white" id="recipe-cook-time">30 min</div>
-                                <div class="text-sm text-gray-600 dark:text-gray-400">Cook Time</div>
+                            <div class="bg-gray-700 p-3 rounded-lg text-center">
+                                <div class="text-lg font-bold text-white" id="recipe-cook-time">30 min</div>
+                                <div class="text-sm text-gray-400">Cook Time</div>
                             </div>
-                            <div class="bg-gray-100 dark:bg-gray-700 p-3 rounded-lg text-center">
-                                <div class="text-lg font-bold text-dark dark:text-white" id="recipe-servings">4</div>
-                                <div class="text-sm text-gray-600 dark:text-gray-400">Servings</div>
+                            <div class="bg-gray-700 p-3 rounded-lg text-center">
+                                <div class="text-lg font-bold text-white" id="recipe-servings">4</div>
+                                <div class="text-sm text-gray-400">Servings</div>
                             </div>
                         </div>
                         
                         <div class="flex space-x-4">
-                            <button onclick="addToCartFromRecipe()" class="flex-1 bg-primary text-white py-3 rounded-lg hover:bg-red-600 transition flex items-center justify-center">
+                            <button onclick="addToCartFromRecipe()" class="flex-1 bg-purple-600 text-white py-3 rounded-lg hover:bg-purple-700 transition flex items-center justify-center">
                                 <i class="fas fa-shopping-cart mr-2"></i> Add to Cart
                             </button>
-                            <button class="w-12 h-12 bg-gray-100 dark:bg-gray-700 text-primary rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition flex items-center justify-center">
+                            <button class="w-12 h-12 bg-gray-700 text-purple-400 rounded-lg hover:bg-gray-600 transition flex items-center justify-center">
                                 <i class="fas fa-heart"></i>
                             </button>
                         </div>
@@ -129,44 +165,44 @@
                 
                 <!-- Recipe Content -->
                 <div class="lg:w-1/2">
-                    <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow mb-8">
-                        <h2 class="text-xl font-bold title-font mb-4 text-dark dark:text-white flex items-center">
-                            <i class="fas fa-list-ul text-primary mr-2"></i> Ingredients
+                    <div class="bg-gray-800 p-6 rounded-lg shadow mb-8">
+                        <h2 class="text-xl font-bold title-font mb-4 text-white flex items-center">
+                            <i class="fas fa-list-ul text-purple-400 mr-2"></i> Ingredients
                         </h2>
                         <ul id="recipe-ingredients" class="space-y-2">
                             <!-- Ingredients will be added here dynamically -->
                         </ul>
                     </div>
                     
-                    <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
-                        <h2 class="text-xl font-bold title-font mb-4 text-dark dark:text-white flex items-center">
-                            <i class="fas fa-list-ol text-primary mr-2"></i> Instructions
+                    <div class="bg-gray-800 p-6 rounded-lg shadow">
+                        <h2 class="text-xl font-bold title-font mb-4 text-white flex items-center">
+                            <i class="fas fa-list-ol text-purple-400 mr-2"></i> Instructions
                         </h2>
                         <div id="recipe-instructions" class="space-y-4">
                             <!-- Instructions will be added here dynamically -->
                         </div>
                     </div>
                     
-                    <div class="mt-8 bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
-                        <h2 class="text-xl font-bold title-font mb-4 text-dark dark:text-white flex items-center">
-                            <i class="fas fa-utensils text-primary mr-2"></i> Nutrition Information
+                    <div class="mt-8 bg-gray-800 p-6 rounded-lg shadow">
+                        <h2 class="text-xl font-bold title-font mb-4 text-white flex items-center">
+                            <i class="fas fa-utensils text-purple-400 mr-2"></i> Nutrition Information
                         </h2>
                         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                            <div class="bg-gray-100 dark:bg-gray-700 p-3 rounded-lg text-center">
-                                <div class="text-lg font-bold text-dark dark:text-white" id="recipe-calories">350</div>
-                                <div class="text-sm text-gray-600 dark:text-gray-400">Calories</div>
+                            <div class="bg-gray-700 p-3 rounded-lg text-center">
+                                <div class="text-lg font-bold text-white" id="recipe-calories">350</div>
+                                <div class="text-sm text-gray-400">Calories</div>
                             </div>
-                            <div class="bg-gray-100 dark:bg-gray-700 p-3 rounded-lg text-center">
-                                <div class="text-lg font-bold text-dark dark:text-white" id="recipe-protein">22g</div>
-                                <div class="text-sm text-gray-600 dark:text-gray-400">Protein</div>
+                            <div class="bg-gray-700 p-3 rounded-lg text-center">
+                                <div class="text-lg font-bold text-white" id="recipe-protein">22g</div>
+                                <div class="text-sm text-gray-400">Protein</div>
                             </div>
-                            <div class="bg-gray-100 dark:bg-gray-700 p-3 rounded-lg text-center">
-                                <div class="text-lg font-bold text-dark dark:text-white" id="recipe-carbs">45g</div>
-                                <div class="text-sm text-gray-600 dark:text-gray-400">Carbs</div>
+                            <div class="bg-gray-700 p-3 rounded-lg text-center">
+                                <div class="text-lg font-bold text-white" id="recipe-carbs">45g</div>
+                                <div class="text-sm text-gray-400">Carbs</div>
                             </div>
-                            <div class="bg-gray-100 dark:bg-gray-700 p-3 rounded-lg text-center">
-                                <div class="text-lg font-bold text-dark dark:text-white" id="recipe-fat">15g</div>
-                                <div class="text-sm text-gray-600 dark:text-gray-400">Fat</div>
+                            <div class="bg-gray-700 p-3 rounded-lg text-center">
+                                <div class="text-lg font-bold text-white" id="recipe-fat">15g</div>
+                                <div class="text-sm text-gray-400">Fat</div>
                             </div>
                         </div>
                     </div>
@@ -176,25 +212,23 @@
     </section>
 
     <!-- Footer -->
-    <footer class="text-gray-600 dark:text-gray-300 body-font bg-white dark:bg-gray-800">
+    <footer class="text-gray-400 body-font bg-gray-800">
         <div class="container px-5 py-8 mx-auto flex items-center sm:flex-row flex-col">
-            <a href="index.html" class="flex title-font font-medium items-center md:justify-start justify-center text-gray-900 dark:text-white">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 text-white p-2 bg-primary rounded-full" viewBox="0 0 20 20" fill="currentColor">
-                    <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
-                </svg>
-                <span class="ml-3 text-xl font-bold">Food<span class="text-primary">Express</span></span>
+            <a href="index.html" class="flex title-font font-medium items-center md:justify-start justify-center text-white">
+                <i class="fas fa-utensils text-purple-500 text-2xl mr-2"></i>
+                <span class="ml-3 text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-600">NutriOrder</span>
             </a>
-            <p class="text-sm text-gray-500 dark:text-gray-400 sm:ml-4 sm:pl-4 sm:border-l-2 sm:border-gray-200 dark:sm:border-gray-700 sm:py-2 sm:mt-0 mt-4">© 2023 FoodExpress —
-                <a href="#" class="text-gray-600 dark:text-gray-300 ml-1" rel="noopener noreferrer" target="_blank">All Rights Reserved</a>
+            <p class="text-sm text-gray-500 sm:ml-4 sm:pl-4 sm:border-l-2 sm:border-gray-700 sm:py-2 sm:mt-0 mt-4">© 2023 NutriOrder —
+                <a href="#" class="text-gray-400 ml-1" rel="noopener noreferrer" target="_blank">All Rights Reserved</a>
             </p>
             <span class="inline-flex sm:ml-auto sm:mt-0 mt-4 justify-center sm:justify-start">
-                <a href="#" class="text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-primary">
+                <a href="#" class="text-gray-500 hover:text-purple-400">
                     <i class="fab fa-facebook-f"></i>
                 </a>
-                <a href="#" class="ml-3 text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-primary">
+                <a href="#" class="ml-3 text-gray-500 hover:text-purple-400">
                     <i class="fab fa-twitter"></i>
                 </a>
-                <a href="#" class="ml-3 text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-primary">
+                <a href="#" class="ml-3 text-gray-500 hover:text-purple-400">
                     <i class="fab fa-instagram"></i>
                 </a>
             </span>
@@ -202,23 +236,6 @@
     </footer>
 
     <script>
-        // Theme toggle functionality
-        const themeToggle = document.getElementById('theme-toggle');
-        const html = document.documentElement;
-
-        // Check for saved user preference or use system preference
-        if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-            html.classList.add('dark');
-        } else {
-            html.classList.remove('dark');
-        }
-
-        // Toggle theme
-        themeToggle.addEventListener('click', () => {
-            html.classList.toggle('dark');
-            localStorage.setItem('theme', html.classList.contains('dark') ? 'dark' : 'light');
-        });
-
         // Recipe database (combined from homepage and recommended)
         const recipes = {
             // Existing recipes from homepage (1-10)
@@ -885,8 +902,8 @@
                 const li = document.createElement('li');
                 li.className = 'flex items-start';
                 li.innerHTML = `
-                    <span class="inline-block w-5 h-5 bg-primary text-white text-center rounded-full mr-2 mt-0.5">✓</span>
-                    <span class="text-gray-700 dark:text-gray-300">${ingredient}</span>
+                    <span class="inline-block w-5 h-5 bg-purple-600 text-white text-center rounded-full mr-2 mt-0.5">✓</span>
+                    <span class="text-gray-300">${ingredient}</span>
                 `;
                 ingredientsList.appendChild(li);
             });
@@ -898,7 +915,7 @@
                 const div = document.createElement('div');
                 div.className = 'recipe-step flex items-start';
                 div.innerHTML = `
-                    <span class="text-gray-700 dark:text-gray-300">${instruction}</span>
+                    <span class="text-gray-300">${instruction}</span>
                 `;
                 instructionsContainer.appendChild(div);
             });
@@ -914,31 +931,48 @@
         // Initialize page
         document.addEventListener('DOMContentLoaded', loadRecipe);
 
-           // Add smooth transition to all links
-    document.addEventListener('DOMContentLoaded', function() {
-        document.querySelectorAll('a').forEach(link => {
-            link.addEventListener('click', function(e) {
-                // Don't apply to:
-                // 1. External links
-                // 2. Anchor links (#)
-                // 3. Links to the current page
-                if (!this.href || 
-                    this.href.startsWith('http') || 
-                    this.href.includes('#') || 
-                    this.href === window.location.href) {
-                    return;
-                }
-                
-                e.preventDefault();
-                document.body.style.opacity = '0';
-                document.body.style.transition = 'opacity 0.3s ease';
-                
-                setTimeout(() => {
-                    window.location.href = this.href;
-                }, 300);
+        // Theme toggle functionality
+        const themeToggle = document.getElementById('theme-toggle');
+        const html = document.documentElement;
+
+        // Check for saved user preference or use system preference
+        if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            html.classList.add('dark');
+        } else {
+            html.classList.remove('dark');
+        }
+
+        // Toggle theme
+        themeToggle.addEventListener('click', () => {
+            html.classList.toggle('dark');
+            localStorage.setItem('theme', html.classList.contains('dark') ? 'dark' : 'light');
+        });
+
+        // Add smooth transition to all links
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('a').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    // Don't apply to:
+                    // 1. External links
+                    // 2. Anchor links (#)
+                    // 3. Links to the current page
+                    if (!this.href || 
+                        this.href.startsWith('http') || 
+                        this.href.includes('#') || 
+                        this.href === window.location.href) {
+                        return;
+                    }
+                    
+                    e.preventDefault();
+                    document.body.style.opacity = '0';
+                    document.body.style.transition = 'opacity 0.3s ease';
+                    
+                    setTimeout(() => {
+                        window.location.href = this.href;
+                    }, 300);
+                });
             });
         });
-    });
     </script>
 </body>
 </html>

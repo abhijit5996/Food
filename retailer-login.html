@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Retailer Login | NutriOrder</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            opacity: 0;
+            animation: fadeIn 0.5s ease-in forwards;
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        a, button {
+            transition: all 0.3s ease;
+        }
+
+        .auth-container {
+            background: rgba(31, 41, 55, 0.8);
+            backdrop-filter: blur(10px);
+        }
+    </style>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
+        import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBx0Kt9o04ye0XrtA8ecp84wD8Q9OCDjlA",
+            authDomain: "foodorder-4380c.firebaseapp.com",
+            projectId: "foodorder-4380c",
+            storageBucket: "foodorder-4380c.appspot.com",
+            messagingSenderId: "735023580381",
+            appId: "1:735023580381:web:c6740bef2fc9bdee1b4734"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Check auth state
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // Check if user is a retailer
+                const userDocRef = doc(db, 'retailers', user.uid);
+                getDoc(userDocRef).then((doc) => {
+                    if (doc.exists()) {
+                        window.location.href = 'retailer-dashboard.html';
+                    }
+                });
+            }
+        });
+
+        // Login function
+        window.loginRetailer = async function() {
+            const email = document.getElementById('retailer-email').value;
+            const password = document.getElementById('retailer-password').value;
+            
+            try {
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+                
+                // Check if user is registered as retailer
+                const userDocRef = doc(db, 'retailers', user.uid);
+                const docSnap = await getDoc(userDocRef);
+                
+                if (docSnap.exists()) {
+                    window.location.href = 'retailer-dashboard.html';
+                } else {
+                    alert('This account is not registered as a retailer.');
+                    await auth.signOut();
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                alert('Login failed: ' + error.message);
+            }
+        };
+
+        // Signup function
+        window.signupRetailer = async function() {
+            const email = document.getElementById('signup-email').value;
+            const password = document.getElementById('signup-password').value;
+            const restaurantName = document.getElementById('restaurant-name').value;
+            const phone = document.getElementById('phone').value;
+            const address = document.getElementById('address').value;
+            
+            try {
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+                
+                // Save retailer info to Firestore
+                await setDoc(doc(db, 'retailers', user.uid), {
+                    email: email,
+                    restaurantName: restaurantName,
+                    phone: phone,
+                    address: address,
+                    createdAt: new Date(),
+                    status: 'active'
+                });
+                
+                window.location.href = 'retailer-dashboard.html';
+            } catch (error) {
+                console.error('Signup error:', error);
+                alert('Signup failed: ' + error.message);
+            }
+        };
+
+        // Toggle between login and signup forms
+        window.toggleAuthForm = function() {
+            document.getElementById('login-form').classList.toggle('hidden');
+            document.getElementById('signup-form').classList.toggle('hidden');
+        };
+    </script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#8b5cf6',
+                        secondary: '#7c3aed',
+                        dark: '#1f2937',
+                        light: '#f3f4f6'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-900 text-gray-100 min-h-screen flex items-center justify-center bg-[url('https://images.unsplash.com/photo-1504674900247-0877df9cc836?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80')] bg-cover bg-center">
+    <div class="auth-container rounded-xl shadow-2xl overflow-hidden w-full max-w-md">
+        <!-- Login Form -->
+        <div id="login-form" class="p-8">
+            <div class="text-center mb-8">
+                <div class="flex items-center justify-center space-x-2 mb-4">
+                    <i class="fas fa-utensils text-purple-500 text-2xl"></i>
+                    <span class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-600">NutriOrder Retailer</span>
+                </div>
+                <h2 class="text-2xl font-bold">Welcome Back</h2>
+                <p class="text-gray-400">Login to your retailer account</p>
+            </div>
+            
+            <div class="space-y-4">
+                <div>
+                    <label for="retailer-email" class="block text-sm font-medium mb-1">Email</label>
+                    <input type="email" id="retailer-email" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                </div>
+                <div>
+                    <label for="retailer-password" class="block text-sm font-medium mb-1">Password</label>
+                    <input type="password" id="retailer-password" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                </div>
+                <button onclick="loginRetailer()" class="w-full bg-purple-600 hover:bg-purple-700 text-white py-2 rounded-lg font-bold transition transform hover:scale-[1.02]">
+                    Login
+                </button>
+            </div>
+            
+            <div class="text-center mt-6">
+                <p class="text-gray-400">Don't have an account? <button onclick="toggleAuthForm()" class="text-purple-400 hover:underline">Sign up</button></p>
+                <a href="index.html" class="text-sm text-gray-400 hover:text-white mt-4 inline-block">
+                    <i class="fas fa-arrow-left mr-1"></i> Back to main site
+                </a>
+            </div>
+        </div>
+        
+        <!-- Signup Form -->
+        <div id="signup-form" class="p-8 hidden">
+            <div class="text-center mb-8">
+                <div class="flex items-center justify-center space-x-2 mb-4">
+                    <i class="fas fa-utensils text-purple-500 text-2xl"></i>
+                    <span class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-600">NutriOrder Retailer</span>
+                </div>
+                <h2 class="text-2xl font-bold">Create Account</h2>
+                <p class="text-gray-400">Register your restaurant with us</p>
+            </div>
+            
+            <div class="space-y-4">
+                <div>
+                    <label for="restaurant-name" class="block text-sm font-medium mb-1">Restaurant Name</label>
+                    <input type="text" id="restaurant-name" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                </div>
+                <div>
+                    <label for="signup-email" class="block text-sm font-medium mb-1">Email</label>
+                    <input type="email" id="signup-email" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                </div>
+                <div>
+                    <label for="signup-password" class="block text-sm font-medium mb-1">Password</label>
+                    <input type="password" id="signup-password" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                </div>
+                <div>
+                    <label for="phone" class="block text-sm font-medium mb-1">Phone Number</label>
+                    <input type="tel" id="phone" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                </div>
+                <div>
+                    <label for="address" class="block text-sm font-medium mb-1">Restaurant Address</label>
+                    <textarea id="address" rows="2" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"></textarea>
+                </div>
+                <button onclick="signupRetailer()" class="w-full bg-purple-600 hover:bg-purple-700 text-white py-2 rounded-lg font-bold transition transform hover:scale-[1.02]">
+                    Register Restaurant
+                </button>
+            </div>
+            
+            <div class="text-center mt-6">
+                <p class="text-gray-400">Already have an account? <button onclick="toggleAuthForm()" class="text-purple-400 hover:underline">Login</button></p>
+                <a href="index.html" class="text-sm text-gray-400 hover:text-white mt-4 inline-block">
+                    <i class="fas fa-arrow-left mr-1"></i> Back to main site
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Add smooth transition to all links
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('a').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    if (!this.href || this.href.startsWith('http') || this.href.includes('#') || this.href === window.location.href) {
+                        return;
+                    }
+                    
+                    e.preventDefault();
+                    document.body.style.opacity = '0';
+                    document.body.style.transition = 'opacity 0.3s ease';
+                    
+                    setTimeout(() => {
+                        window.location.href = this.href;
+                    }, 300);
+                });
+            });
+        });
+    </script>
+</body>
+</html>

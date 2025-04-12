@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Retailer Dashboard | NutriOrder</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            opacity: 0;
+            animation: fadeIn 0.5s ease-in forwards;
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        a, button {
+            transition: all 0.3s ease;
+        }
+
+        .sidebar {
+            transition: all 0.3s ease;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            .sidebar.open {
+                transform: translateX(0);
+            }
+        }
+
+        .menu-item-card:hover .menu-item-actions {
+            opacity: 1;
+        }
+    </style>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc, collection, query, where, getDocs, addDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
+        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-storage.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBx0Kt9o04ye0XrtA8ecp84wD8Q9OCDjlA",
+            authDomain: "foodorder-4380c.firebaseapp.com",
+            projectId: "foodorder-4380c",
+            storageBucket: "foodorder-4380c.appspot.com",
+            messagingSenderId: "735023580381",
+            appId: "1:735023580381:web:c6740bef2fc9bdee1b4734"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const storage = getStorage(app);
+
+        // Check auth state
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) {
+                window.location.href = 'retailer-login.html';
+            } else {
+                // Check if user is a retailer
+                const userDocRef = doc(db, 'retailers', user.uid);
+                const docSnap = await getDoc(userDocRef);
+                
+                if (!docSnap.exists()) {
+                    await signOut(auth);
+                    window.location.href = 'retailer-login.html';
+                } else {
+                    // Load retailer data
+                    const retailerData = docSnap.data();
+                    document.getElementById('restaurant-name').textContent = retailerData.restaurantName;
+                    document.getElementById('restaurant-email').textContent = retailerData.email;
+                    document.getElementById('restaurant-phone').textContent = retailerData.phone || 'Not provided';
+                    document.getElementById('restaurant-address').textContent = retailerData.address || 'Not provided';
+                    
+                    // Load menu items
+                    loadMenuItems(user.uid);
+                }
+            }
+        });
+
+        // Load menu items for this retailer
+        async function loadMenuItems(retailerId) {
+            const menuContainer = document.getElementById('menu-items-container');
+            menuContainer.innerHTML = '<div class="col-span-3 flex justify-center items-center h-32"><div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div></div>';
+            
+            const q = query(collection(db, "menuItems"), where("retailerId", "==", retailerId));
+            const querySnapshot = await getDocs(q);
+            
+            menuContainer.innerHTML = '';
+            
+            if (querySnapshot.empty) {
+                menuContainer.innerHTML = `
+                    <div class="col-span-3 text-center py-12">
+                        <i class="fas fa-utensils text-4xl text-gray-500 mb-4"></i>
+                        <h3 class="text-xl font-medium text-gray-400">No menu items yet</h3>
+                        <p class="text-gray-500 mt-2">Add your first menu item to get started</p>
+                        <button onclick="openAddItemModal()" class="mt-4 bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg">
+                            Add First Item
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+            
+            querySnapshot.forEach((doc) => {
+                const item = doc.data();
+                const menuItem = document.createElement('div');
+                menuItem.className = 'bg-gray-800 rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition menu-item-card';
+                menuItem.innerHTML = `
+                    <div class="relative">
+                        <img src="${item.imageUrl}" alt="${item.name}" class="w-full h-48 object-cover">
+                        <div class="absolute top-2 right-2 menu-item-actions opacity-0 transition-opacity">
+                            <button onclick="editMenuItem('${doc.id}')" class="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-full mr-1">
+                                <i class="fas fa-edit text-sm"></i>
+                            </button>
+                            <button onclick="deleteMenuItem('${doc.id}')" class="bg-red-600 hover:bg-red-700 text-white p-2 rounded-full">
+                                <i class="fas fa-trash text-sm"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <div class="flex justify-between items-start">
+                            <h3 class="text-xl font-bold">${item.name}</h3>
+                            <span class="bg-purple-900 text-purple-300 text-xs px-2 py-1 rounded">₹${item.price.toFixed(2)}</span>
+                        </div>
+                        <p class="text-gray-400 text-sm mt-1">${item.category}</p>
+                        <p class="text-gray-300 mt-2 text-sm">${item.description}</p>
+                        <div class="mt-3 flex flex-wrap gap-1">
+                            ${item.dietaryTags.map(tag => `<span class="bg-gray-700 text-gray-300 text-xs px-2 py-1 rounded">${tag}</span>`).join('')}
+                        </div>
+                    </div>
+                `;
+                menuContainer.appendChild(menuItem);
+            });
+        }
+
+        // Open add item modal
+        window.openAddItemModal = function() {
+            document.getElementById('add-item-modal').classList.remove('hidden');
+            document.getElementById('item-form-title').textContent = 'Add New Menu Item';
+            document.getElementById('item-form').reset();
+            document.getElementById('item-id').value = '';
+            document.getElementById('item-image-preview').src = '';
+            document.getElementById('item-image-preview').classList.add('hidden');
+            document.getElementById('upload-label').classList.remove('hidden');
+        }
+
+        // Open edit item modal
+        window.editMenuItem = async function(itemId) {
+            const itemDoc = await getDoc(doc(db, "menuItems", itemId));
+            if (itemDoc.exists()) {
+                const item = itemDoc.data();
+                
+                document.getElementById('item-id').value = itemId;
+                document.getElementById('item-name').value = item.name;
+                document.getElementById('item-category').value = item.category;
+                document.getElementById('item-price').value = item.price;
+                document.getElementById('item-description').value = item.description;
+                
+                // Set dietary preferences
+                document.querySelectorAll('input[name="dietary"]').forEach(checkbox => {
+                    checkbox.checked = item.dietaryOptions.includes(checkbox.value);
+                });
+                
+                // Set health conditions
+                document.querySelectorAll('input[name="health-condition"]').forEach(checkbox => {
+                    checkbox.checked = item.healthConditions.includes(checkbox.value);
+                });
+                
+                // Set allergies
+                document.querySelectorAll('input[name="allergy"]').forEach(checkbox => {
+                    checkbox.checked = item.allergies.includes(checkbox.value);
+                });
+                
+                // Set image preview
+                if (item.imageUrl) {
+                    document.getElementById('item-image-preview').src = item.imageUrl;
+                    document.getElementById('item-image-preview').classList.remove('hidden');
+                    document.getElementById('upload-label').classList.add('hidden');
+                } else {
+                    document.getElementById('item-image-preview').src = '';
+                    document.getElementById('item-image-preview').classList.add('hidden');
+                    document.getElementById('upload-label').classList.remove('hidden');
+                }
+                
+                document.getElementById('item-form-title').textContent = 'Edit Menu Item';
+                document.getElementById('add-item-modal').classList.remove('hidden');
+            }
+        }
+
+        // Delete menu item
+        window.deleteMenuItem = async function(itemId) {
+            if (confirm('Are you sure you want to delete this menu item?')) {
+                try {
+                    await deleteDoc(doc(db, "menuItems", itemId));
+                    const user = auth.currentUser;
+                    if (user) {
+                        loadMenuItems(user.uid);
+                    }
+                } catch (error) {
+                    console.error('Error deleting item:', error);
+                    alert('Failed to delete item: ' + error.message);
+                }
+            }
+        }
+
+        // Handle image upload
+        window.handleImageUpload = function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('item-image-preview').src = e.target.result;
+                    document.getElementById('item-image-preview').classList.remove('hidden');
+                    document.getElementById('upload-label').classList.add('hidden');
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // Save menu item (add or update)
+        window.saveMenuItem = async function(event) {
+            event.preventDefault();
+            
+            const user = auth.currentUser;
+            if (!user) {
+                alert('You need to be logged in to perform this action');
+                return;
+            }
+            
+            const form = event.target;
+            const itemId = form.itemId.value;
+            const name = form.itemName.value;
+            const category = form.itemCategory.value;
+            const price = parseFloat(form.itemPrice.value);
+            const description = form.itemDescription.value;
+            const imageFile = form.itemImage.files[0];
+            
+            // Get selected dietary options
+            const dietaryOptions = Array.from(document.querySelectorAll('input[name="dietary"]:checked')).map(el => el.value);
+            
+            // Get selected health conditions
+            const healthConditions = Array.from(document.querySelectorAll('input[name="health-condition"]:checked')).map(el => el.value);
+            
+            // Get selected allergies
+            const allergies = Array.from(document.querySelectorAll('input[name="allergy"]:checked')).map(el => el.value);
+            
+            // Generate tags for display
+            const dietaryTags = [...dietaryOptions, ...healthConditions.filter(hc => hc !== 'none')];
+            
+            try {
+                let imageUrl = document.getElementById('item-image-preview').src || '';
+                
+                // Upload new image if selected
+                if (imageFile) {
+                    const storageRef = ref(storage, `menu-items/${user.uid}/${Date.now()}_${imageFile.name}`);
+                    const snapshot = await uploadBytes(storageRef, imageFile);
+                    imageUrl = await getDownloadURL(snapshot.ref);
+                }
+                
+                const itemData = {
+                    retailerId: user.uid,
+                    name,
+                    category,
+                    price,
+                    description,
+                    dietaryOptions,
+                    healthConditions,
+                    allergies,
+                    dietaryTags,
+                    imageUrl,
+                    createdAt: new Date(),
+                    updatedAt: new Date()
+                };
+                
+                if (itemId) {
+                    // Update existing item
+                    await updateDoc(doc(db, "menuItems", itemId), itemData);
+                } else {
+                    // Add new item
+                    await addDoc(collection(db, "menuItems"), itemData);
+                }
+                
+                // Reload menu items
+                loadMenuItems(user.uid);
+                
+                // Close modal
+                document.getElementById('add-item-modal').classList.add('hidden');
+                
+            } catch (error) {
+                console.error('Error saving menu item:', error);
+                alert('Failed to save menu item: ' + error.message);
+            }
+        }
+
+        // Logout function
+        window.logoutRetailer = async function() {
+            try {
+                await signOut(auth);
+                window.location.href = 'retailer-login.html';
+            } catch (error) {
+                console.error('Logout error:', error);
+            }
+        };
+
+        // Toggle mobile sidebar
+        window.toggleSidebar = function() {
+            document.getElementById('sidebar').classList.toggle('open');
+        };
+    </script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#8b5cf6',
+                        secondary: '#7c3aed',
+                        dark: '#1f2937',
+                        light: '#f3f4f6'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-900 text-gray-100 min-h-screen">
+    <!-- Mobile Header -->
+    <header class="md:hidden bg-gray-800 py-4 px-6 flex items-center justify-between sticky top-0 z-40">
+        <button onclick="toggleSidebar()" class="text-gray-300 hover:text-white">
+            <i class="fas fa-bars text-xl"></i>
+        </button>
+        <div class="flex items-center space-x-2">
+            <i class="fas fa-utensils text-purple-500"></i>
+            <span class="font-bold">Retailer Portal</span>
+        </div>
+        <div class="w-6"></div> <!-- Spacer for balance -->
+    </header>
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="sidebar fixed inset-y-0 left-0 w-64 bg-gray-800 shadow-lg z-50 md:relative md:translate-x-0">
+        <div class="flex items-center justify-between p-4 border-b border-gray-700">
+            <div class="flex items-center space-x-2">
+                <i class="fas fa-utensils text-purple-500 text-2xl"></i>
+                <span class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-600">NutriOrder</span>
+            </div>
+            <button onclick="toggleSidebar()" class="md:hidden text-gray-400 hover:text-white">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div class="p-4">
+            <div class="flex items-center space-x-3 mb-6">
+                <div class="w-12 h-12 rounded-full bg-purple-600 flex items-center justify-center text-white text-xl">
+                    <i class="fas fa-store"></i>
+                </div>
+                <div>
+                    <h3 id="restaurant-name" class="font-medium">Restaurant Name</h3>
+                    <p class="text-sm text-gray-400">Retailer</p>
+                </div>
+            </div>
+            
+            <nav class="space-y-2">
+                <a href="#" class="flex items-center space-x-3 p-3 bg-gray-700 rounded-lg text-white">
+                    <i class="fas fa-chart-line w-5"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#" class="flex items-center space-x-3 p-3 hover:bg-gray-700 rounded-lg text-gray-300 hover:text-white">
+                    <i class="fas fa-utensils w-5"></i>
+                    <span>Menu Items</span>
+                </a>
+                <a href="#" class="flex items-center space-x-3 p-3 hover:bg-gray-700 rounded-lg text-gray-300 hover:text-white">
+                    <i class="fas fa-receipt w-5"></i>
+                    <span>Orders</span>
+                </a>
+                <a href="#" class="flex items-center space-x-3 p-3 hover:bg-gray-700 rounded-lg text-gray-300 hover:text-white">
+                    <i class="fas fa-chart-pie w-5"></i>
+                    <span>Analytics</span>
+                </a>
+                <a href="#" class="flex items-center space-x-3 p-3 hover:bg-gray-700 rounded-lg text-gray-300 hover:text-white">
+                    <i class="fas fa-cog w-5"></i>
+                    <span>Settings</span>
+                </a>
+            </nav>
+        </div>
+        
+        <div class="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-700">
+            <button onclick="logoutRetailer()" class="flex items-center space-x-3 p-3 w-full hover:bg-gray-700 rounded-lg text-gray-300 hover:text-white">
+                <i class="fas fa-sign-out-alt w-5"></i>
+                <span>Logout</span>
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="md:ml-64 min-h-screen">
+        <!-- Top Bar -->
+        <div class="bg-gray-800 py-4 px-6 flex items-center justify-between sticky top-0 z-30">
+            <h1 class="text-xl font-bold">Menu Management</h1>
+            <div class="flex items-center space-x-4">
+                <button onclick="openAddItemModal()" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2">
+                    <i class="fas fa-plus"></i>
+                    <span>Add Item</span>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Content -->
+        <div class="p-6">
+            <!-- Restaurant Info -->
+            <div class="bg-gray-800 rounded-lg p-6 mb-6">
+                <h2 class="text-lg font-bold mb-4">Restaurant Information</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <p class="text-gray-400">Name</p>
+                        <p id="restaurant-name" class="font-medium">Loading...</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-400">Email</p>
+                        <p id="restaurant-email" class="font-medium">Loading...</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-400">Phone</p>
+                        <p id="restaurant-phone" class="font-medium">Loading...</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-400">Address</p>
+                        <p id="restaurant-address" class="font-medium">Loading...</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Menu Items -->
+            <div class="bg-gray-800 rounded-lg p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-lg font-bold">Your Menu Items</h2>
+                    <div class="relative w-64">
+                        <input type="text" placeholder="Search items..." class="bg-gray-700 text-white px-4 py-2 rounded-lg pl-10 w-full focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                    </div>
+                </div>
+                
+                <div id="menu-items-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Menu items will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Add/Edit Item Modal -->
+    <div id="add-item-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-gray-800 rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 id="item-form-title" class="text-xl font-bold">Add New Menu Item</h3>
+                    <button onclick="document.getElementById('add-item-modal').classList.add('hidden')" class="text-gray-400 hover:text-white">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <form id="item-form" onsubmit="saveMenuItem(event)">
+                    <input type="hidden" id="item-id" name="itemId">
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Left Column -->
+                        <div>
+                            <!-- Item Image -->
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium mb-2">Item Image</label>
+                                <label id="upload-label" for="item-image" class="flex flex-col items-center justify-center w-full h-48 border-2 border-gray-600 border-dashed rounded-lg cursor-pointer bg-gray-700 hover:bg-gray-600">
+                                    <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                                        <i class="fas fa-cloud-upload-alt text-3xl text-gray-400 mb-2"></i>
+                                        <p class="mb-2 text-sm text-gray-400">Click to upload</p>
+                                        <p class="text-xs text-gray-500">PNG, JPG or JPEG (MAX. 2MB)</p>
+                                    </div>
+                                    <input id="item-image" name="itemImage" type="file" class="hidden" accept="image/*" onchange="handleImageUpload(event)">
+                                </label>
+                                <img id="item-image-preview" src="" alt="Preview" class="w-full h-48 object-cover rounded-lg hidden">
+                            </div>
+                            
+                            <!-- Basic Info -->
+                            <div class="mb-4">
+                                <label for="item-name" class="block text-sm font-medium mb-2">Item Name</label>
+                                <input type="text" id="item-name" name="itemName" required class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                            </div>
+                            
+                            <div class="grid grid-cols-2 gap-4 mb-4">
+                                <div>
+                                    <label for="item-category" class="block text-sm font-medium mb-2">Category</label>
+                                    <select id="item-category" name="itemCategory" required class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                                        <option value="">Select Category</option>
+                                        <option value="Breakfast">Breakfast</option>
+                                        <option value="Lunch">Lunch</option>
+                                        <option value="Dinner">Dinner</option>
+                                        <option value="Appetizer">Appetizer</option>
+                                        <option value="Main Course">Main Course</option>
+                                        <option value="Dessert">Dessert</option>
+                                        <option value="Beverage">Beverage</option>
+                                        <option value="Snack">Snack</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="item-price" class="block text-sm font-medium mb-2">Price (₹)</label>
+                                    <input type="number" id="item-price" name="itemPrice" step="0.01" min="0" required class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                                </div>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label for="item-description" class="block text-sm font-medium mb-2">Description</label>
+                                <textarea id="item-description" name="itemDescription" rows="3" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"></textarea>
+                            </div>
+                        </div>
+                        
+                        <!-- Right Column - Dietary Preferences -->
+                        <div>
+                            <h4 class="text-lg font-medium mb-4">Dietary Preferences</h4>
+                            
+                            <!-- Dietary Options -->
+                            <div class="mb-6">
+                                <h5 class="text-sm font-medium mb-3">Diet Type</h5>
+                                <div class="space-y-2">
+                                    <label class="flex items-center">
+                                        <input type="checkbox" name="dietary" value="vegetarian" class="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-600 rounded">
+                                        <span class="ml-2 text-gray-300">Vegetarian</span>
+                                    </label>
+                                    <label class="flex items-center">
+                                        <input type="checkbox" name="dietary" value="vegan" class="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-600 rounded">
+                                        <span class="ml-2 text-gray-300">Vegan</span>
+                                    </label>
+                                    <label class="flex items-center">
+                                        <input type="checkbox" name="dietary" value="gluten-free" class="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-600 rounded">
+                                        <span class="ml-2 text-gray-300">Gluten-Free</span>
+                                    </label>
+                                    <label class="flex items-center">
+                                        <input type="checkbox" name="dietary" value="halal" class="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-600 rounded">
+                                        <span class="ml-2 text-gray-300">Halal</span>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <!-- Health Conditions -->
+                            <div class="mb-6">
+                                <h5 class="text-sm font-medium mb-3">Suitable For Health Conditions</h5>
+                                <div class="space-y-2">
+                                    <label class="flex items-center">
+                                        <input type="checkbox" name="health-condition" value="diabetes" class="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-600 rounded">
+                                        <span class="ml-2 text-gray-300">Diabetes</span>
+                                    </label>
+                                    <label class="flex items-center">
+                                        <input type="checkbox" name="health-condition" value="hypertension" class="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-600 rounded">
+                                        <span class="ml-2 text-gray-300">High Blood Pressure</span>
+                                    </label>
+                                    <label class="flex items-center">
+                                        <input type="checkbox" name="health-condition" value="heart-disease" class="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-600 rounded">
+                                        <span class="ml-2 text-gray-300">Heart Disease</span>
+                                    </label>
+                                    <label class="flex items-center">
+                                        <input type="checkbox" name="health-condition" value="cholesterol" class="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-600 rounded">
+                                        <span class="ml-2 text-gray-300">High Cholesterol</span>
+                                    </label>
+                                    <label class="flex items-center">
+                                        <input type="checkbox" name="health-condition" value="none" class="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-600 rounded">
+                                        <span class="ml-2 text-gray-300">No Specific Conditions</span>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <!-- Allergies -->
+                            <div class="mb-6">
+                                <h5 class="text-sm font-medium mb-3">Free From Allergens</h5>
+                                <div class="space-y-2">
+                                    <label class="flex items-center">
+                                        <input type="checkbox" name="allergy" value="nuts" class="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-600 rounded">
+                                        <span class="ml-2 text-gray-300">Nuts</span>
+                                    </label>
+                                    <label class="flex items-center">
+                                        <input type="checkbox" name="allergy" value="dairy" class="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-600 rounded">
+                                        <span class="ml-2 text-gray-300">Dairy</span>
+                                    </label>
+                                    <label class="flex items-center">
+                                        <input type="checkbox" name="allergy" value="gluten" class="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-600 rounded">
+                                        <span class="ml-2 text-gray-300">Gluten</span>
+                                    </label>
+                                    <label class="flex items-center">
+                                        <input type="checkbox" name="allergy" value="shellfish" class="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-600 rounded">
+                                        <span class="ml-2 text-gray-300">Shellfish</span>
+                                    </label>
+                                    <label class="flex items-center">
+                                        <input type="checkbox" name="allergy" value="none" class="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-600 rounded">
+                                        <span class="ml-2 text-gray-300">No Common Allergens</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-6 flex justify-end space-x-3">
+                        <button type="button" onclick="document.getElementById('add-item-modal').classList.add('hidden')" class="px-4 py-2 border border-gray-600 rounded-lg text-gray-300 hover:bg-gray-700">
+                            Cancel
+                        </button>
+                        <button type="submit" class="px-4 py-2 bg-purple-600 rounded-lg text-white hover:bg-purple-700">
+                            Save Item
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Add smooth transition to all links
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('a').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    if (!this.href || this.href.startsWith('http') || this.href.includes('#') || this.href === window.location.href) {
+                        return;
+                    }
+                    
+                    e.preventDefault();
+                    document.body.style.opacity = '0';
+                    document.body.style.transition = 'opacity 0.3s ease';
+                    
+                    setTimeout(() => {
+                        window.location.href = this.href;
+                    }, 300);
+                });
+            });
+            
+            // Close modal when clicking outside
+            document.getElementById('add-item-modal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    this.classList.add('hidden');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,393 +1,263 @@
 <!DOCTYPE html>
-<html lang="en" class="light">
+<html lang="en" class="dark">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Checkout - FoodExpress</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout | NutriOrder</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-    />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-      /* Page transition animations */
-      body {
-          opacity: 0;
-          animation: fadeIn 0.5s ease-in forwards;
-      }
-      
-      @keyframes fadeIn {
-          from { opacity: 0; }
-          to { opacity: 1; }
-      }
-      
-      /* Link transitions */
-      a, button {
-          transition: all 0.3s ease;
-      }
+        /* Page transition animations */
+        body {
+            opacity: 0;
+            animation: fadeIn 0.5s ease-in forwards;
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        /* Link transitions */
+        a, button {
+            transition: all 0.3s ease;
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #1a202c;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #4a5568;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #718096;
+        }
+
+        /* Animation for hover effects */
+        .hover\:scale-105:hover {
+            transform: scale(1.05);
+        }
+
+        /* Custom glow effect */
+        .glow {
+            box-shadow: 0 0 15px rgba(139, 92, 246, 0.5);
+        }
+
+        /* Responsive tweaks */
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2.5rem;
+            }
+            
+            .hero-subtitle {
+                font-size: 1.1rem;
+            }
+        }
     </style>
     <script>
-      tailwind.config = {
-        darkMode: 'class',
-        theme: {
-          extend: {
-            colors: {
-              primary: "#ef4444",
-              secondary: "#f97316",
-              dark: "#1f2937",
-              light: "#f3f4f6",
-            },
-            animation: {
-              click: "click 300ms ease-out",
-            },
-            keyframes: {
-              click: {
-                "0%, 100%": { transform: "scale(1)" },
-                "50%": { transform: "scale(0.95)" },
-              },
-            },
-          },
-        },
-      };
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#8b5cf6', // Purple color from previous theme
+                        secondary: '#7c3aed',
+                        dark: '#1f2937',
+                        light: '#f3f4f6'
+                    },
+                    animation: {
+                        'click': 'click 300ms ease-out',
+                    },
+                    keyframes: {
+                        click: {
+                            '0%, 100%': { transform: 'scale(1)' },
+                            '50%': { transform: 'scale(0.95)' },
+                        }
+                    }
+                }
+            }
+        }
     </script>
 </head>
-<body class="bg-gray-100 dark:bg-gray-900 transition-colors duration-300">
-    <!-- Navigation Bar -->
-    <header class="bg-white dark:bg-gray-800 shadow-md transition-colors duration-300">
-      <div
-        class="container mx-auto flex p-5 flex-col md:flex-row items-center justify-between"
-      >
-        <a
-          href="index.html"
-          class="flex title-font font-medium items-center text-gray-900 dark:text-white mb-4 md:mb-0"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="w-10 h-10 text-white p-2 bg-primary rounded-full"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-          >
-            <path
-              d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"
-            />
-          </svg>
-          <span class="ml-3 text-xl font-bold"
-            >Food<span class="text-primary">Express</span></span
-          >
-        </a>
-        <nav class="flex flex-wrap items-center justify-center md:ml-auto">
-          <a href="index.html" class="mr-5 hover:text-primary transition dark:text-gray-300 dark:hover:text-primary">Home</a>
-          <a href="menu.html" class="mr-5 hover:text-primary transition dark:text-gray-300 dark:hover:text-primary">Menu</a>
-          <a href="orders.html" class="mr-5 hover:text-primary transition dark:text-gray-300 dark:hover:text-primary">My Orders</a>
-        </nav>
-        <div class="inline-flex items-center mt-4 md:mt-0">
-          <button id="theme-toggle" class="p-2 rounded-lg focus:outline-none text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 mr-4">
-              <i class="fas fa-moon dark:hidden"></i>
-              <i class="fas fa-sun hidden dark:block"></i>
-          </button>
-          <a
-            href="cart.html"
-            class="inline-flex items-center bg-gray-100 dark:bg-gray-700 text-dark dark:text-white border-0 py-1 px-3 focus:outline-none hover:bg-gray-200 dark:hover:bg-gray-600 rounded text-base md:mt-0 transition"
-          >
-            <i class="fas fa-shopping-cart mr-2 text-primary"></i>Cart
-            <span
-              id="cart-count"
-              class="ml-1 bg-primary text-white rounded-full text-xs py-0.5 px-1.5"
-              >0</span
-            >
-          </a>
+<body class="bg-gray-900 text-gray-100 min-h-screen">
+    <!-- Navigation -->
+    <nav class="bg-gray-800 py-4 px-6 shadow-lg sticky top-0 z-50">
+        <div class="container mx-auto flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <i class="fas fa-utensils text-purple-500 text-2xl"></i>
+                <span class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-600">NutriOrder</span>
+            </div>
+            <div class="hidden md:flex space-x-6">
+                <a href="homepage.html" class="hover:text-purple-400 transition">Home</a>
+                <a href="#menu" class="hover:text-purple-400 transition">Menu</a>
+                <a href="orders.html" class="hover:text-purple-400 transition">My Orders</a>
+            </div>
+            <div class="flex items-center space-x-4">
+                <a href="cart.html" class="flex items-center space-x-2 bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded-full transition">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span id="cart-count">0</span>
+                </a>
+            </div>
         </div>
-      </div>
-    </header>
+    </nav>
 
     <!-- Checkout Section -->
-    <section class="text-gray-600 dark:text-gray-300 body-font py-12 transition-colors duration-300">
-      <div class="container px-5 mx-auto">
-        <div class="flex flex-col text-center w-full mb-12">
-          <h1
-            class="text-3xl font-bold title-font mb-4 text-dark dark:text-white"
-          >
-            Complete Your Order
-          </h1>
-          <p class="lg:w-2/3 mx-auto leading-relaxed">
-            Please provide your delivery details and payment information
-          </p>
-        </div>
-
-        <div class="lg:w-2/3 mx-auto">
-          <div class="flex flex-wrap -mx-2">
-            <div class="w-full lg:w-1/2 px-2 mb-8 lg:mb-0">
-              <div
-                class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 h-full transition-colors duration-300"
-              >
-                <h2 class="text-xl font-bold mb-4 text-dark dark:text-white">
-                  Delivery Information
-                </h2>
-
-                <form id="deliveryForm">
-                  <div class="mb-4">
-                    <label
-                      for="name"
-                      class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                      >Full Name</label
-                    >
-                    <input
-                      type="text"
-                      id="name"
-                      name="name"
-                      required
-                      class="w-full bg-gray-100 dark:bg-gray-700 rounded border border-gray-300 dark:border-gray-600 focus:border-primary focus:bg-white dark:focus:bg-gray-600 focus:ring-2 focus:ring-red-200 text-base outline-none text-gray-700 dark:text-white py-1 px-3 leading-8 transition-colors duration-200 ease-in-out"
-                    />
-                  </div>
-
-                  <div class="mb-4">
-                    <label
-                      for="phone"
-                      class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                      >Phone Number</label
-                    >
-                    <input
-                      type="tel"
-                      id="phone"
-                      name="phone"
-                      required
-                      class="w-full bg-gray-100 dark:bg-gray-700 rounded border border-gray-300 dark:border-gray-600 focus:border-primary focus:bg-white dark:focus:bg-gray-600 focus:ring-2 focus:ring-red-200 text-base outline-none text-gray-700 dark:text-white py-1 px-3 leading-8 transition-colors duration-200 ease-in-out"
-                    />
-                  </div>
-
-                  <div class="mb-4">
-                    <label
-                      for="address"
-                      class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                      >Delivery Address</label
-                    >
-                    <textarea
-                      id="address"
-                      name="address"
-                      rows="3"
-                      required
-                      class="w-full bg-gray-100 dark:bg-gray-700 rounded border border-gray-300 dark:border-gray-600 focus:border-primary focus:bg-white dark:focus:bg-gray-600 focus:ring-2 focus:ring-red-200 text-base outline-none text-gray-700 dark:text-white py-1 px-3 leading-8 transition-colors duration-200 ease-in-out"
-                    ></textarea>
-                  </div>
-
-                  <div class="mb-4">
-                    <label
-                      for="instructions"
-                      class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                      >Delivery Instructions (Optional)</label
-                    >
-                    <textarea
-                      id="instructions"
-                      name="instructions"
-                      rows="2"
-                      class="w-full bg-gray-100 dark:bg-gray-700 rounded border border-gray-300 dark:border-gray-600 focus:border-primary focus:bg-white dark:focus:bg-gray-600 focus:ring-2 focus:ring-red-200 text-base outline-none text-gray-700 dark:text-white py-1 px-3 leading-8 transition-colors duration-200 ease-in-out"
-                    ></textarea>
-                  </div>
-                </form>
-              </div>
+    <section class="py-12 px-6">
+        <div class="container mx-auto">
+            <div class="text-center mb-12">
+                <h1 class="text-3xl md:text-4xl font-bold mb-4">Complete Your Order</h1>
+                <p class="text-lg text-gray-400">Please provide your delivery details and payment information</p>
             </div>
 
-            <div class="w-full lg:w-1/2 px-2">
-              <div
-                class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 h-full transition-colors duration-300"
-              >
-                <h2 class="text-xl font-bold mb-4 text-dark dark:text-white">
-                  Order Summary
-                </h2>
-
-                <div id="order-summary" class="mb-6">
-                  <!-- Order items will be dynamically inserted here -->
-                  <p class="text-gray-500 dark:text-gray-400">
-                    Loading your cart items...
-                  </p>
+            <div class="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- Delivery Information -->
+                <div class="bg-gray-800 rounded-lg shadow-lg p-6">
+                    <h2 class="text-xl font-bold mb-6 pb-4 border-b border-gray-700">Delivery Information</h2>
+                    
+                    <form id="deliveryForm" class="space-y-4">
+                        <div>
+                            <label for="name" class="block text-sm font-medium text-gray-400 mb-1">Full Name</label>
+                            <input type="text" id="name" name="name" required 
+                                   class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 focus:border-purple-500 focus:ring-2 focus:ring-purple-900 transition">
+                        </div>
+                        
+                        <div>
+                            <label for="phone" class="block text-sm font-medium text-gray-400 mb-1">Phone Number</label>
+                            <input type="tel" id="phone" name="phone" required 
+                                   class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 focus:border-purple-500 focus:ring-2 focus:ring-purple-900 transition">
+                        </div>
+                        
+                        <div>
+                            <label for="address" class="block text-sm font-medium text-gray-400 mb-1">Delivery Address</label>
+                            <textarea id="address" name="address" rows="3" required 
+                                      class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 focus:border-purple-500 focus:ring-2 focus:ring-purple-900 transition"></textarea>
+                        </div>
+                        
+                        <div>
+                            <label for="instructions" class="block text-sm font-medium text-gray-400 mb-1">Delivery Instructions (Optional)</label>
+                            <textarea id="instructions" name="instructions" rows="2" 
+                                      class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 focus:border-purple-500 focus:ring-2 focus:ring-purple-900 transition"></textarea>
+                        </div>
+                    </form>
                 </div>
-
-                <div
-                  class="border-t border-gray-200 dark:border-gray-700 pt-4 mb-6"
-                >
-                  <div class="flex justify-between mb-2">
-                    <span class="text-gray-600 dark:text-gray-300"
-                      >Subtotal</span
-                    >
-                    <span id="subtotal" class="text-gray-900 dark:text-white"
-                      >₹0.00</span
-                    >
-                  </div>
-                  <div class="flex justify-between mb-2">
-                    <span class="text-gray-600 dark:text-gray-300"
-                      >Delivery Fee</span
-                    >
-                    <span
-                      id="delivery-fee"
-                      class="text-gray-900 dark:text-white"
-                      >₹30.00</span
-                    >
-                  </div>
-                  <div class="flex justify-between font-bold text-lg">
-                    <span class="text-gray-900 dark:text-white">Total</span>
-                    <span id="total" class="text-primary">₹30.00</span>
-                  </div>
+                
+                <!-- Order Summary -->
+                <div class="bg-gray-800 rounded-lg shadow-lg p-6 h-fit sticky top-4">
+                    <h2 class="text-xl font-bold mb-6 pb-4 border-b border-gray-700">Order Summary</h2>
+                    
+                    <div id="order-summary" class="space-y-4 mb-6">
+                        <!-- Order items will be dynamically inserted here -->
+                        <p class="text-gray-400">Loading your cart items...</p>
+                    </div>
+                    
+                    <div class="border-t border-gray-700 pt-4 mb-6 space-y-2">
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">Subtotal</span>
+                            <span id="subtotal" class="text-gray-100">₹0.00</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">Delivery Fee</span>
+                            <span id="delivery-fee" class="text-gray-100">₹30.00</span>
+                        </div>
+                        <div class="flex justify-between text-lg font-bold mt-4">
+                            <span class="text-gray-100">Total</span>
+                            <span id="total" class="text-purple-400">₹30.00</span>
+                        </div>
+                    </div>
+                    
+                    <h3 class="text-lg font-semibold mb-4">Payment Method</h3>
+                    <div class="space-y-3 mb-6">
+                        <div class="flex items-center">
+                            <input id="cash-on-delivery" name="payment-method" type="radio" checked 
+                                   class="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-600">
+                            <label for="cash-on-delivery" class="ml-3 text-gray-300">Cash on Delivery</label>
+                        </div>
+                        <div class="flex items-center">
+                            <input id="credit-card" name="payment-method" type="radio" 
+                                   class="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-600">
+                            <label for="credit-card" class="ml-3 text-gray-300">Credit/Debit Card</label>
+                        </div>
+                        <div class="flex items-center">
+                            <input id="upi" name="payment-method" type="radio" 
+                                   class="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-600">
+                            <label for="upi" class="ml-3 text-gray-300">UPI Payment</label>
+                        </div>
+                    </div>
+                    
+                    <button id="place-order-btn" 
+                            class="w-full bg-purple-600 hover:bg-purple-700 text-white py-3 rounded-lg font-bold transition transform hover:scale-[1.02]">
+                        Place Order
+                    </button>
                 </div>
-
-                <h3
-                  class="text-lg font-semibold mb-3 text-dark dark:text-white"
-                >
-                  Payment Method
-                </h3>
-                <div class="space-y-3 mb-6">
-                  <div class="flex items-center">
-                    <input
-                      id="cash-on-delivery"
-                      name="payment-method"
-                      type="radio"
-                      checked
-                      class="h-4 w-4 text-primary focus:ring-primary border-gray-300 dark:border-gray-600"
-                    />
-                    <label
-                      for="cash-on-delivery"
-                      class="ml-3 block text-sm font-medium text-gray-700 dark:text-gray-300"
-                      >Cash on Delivery</label
-                    >
-                  </div>
-                  <div class="flex items-center">
-                    <input
-                      id="credit-card"
-                      name="payment-method"
-                      type="radio"
-                      class="h-4 w-4 text-primary focus:ring-primary border-gray-300 dark:border-gray-600"
-                    />
-                    <label
-                      for="credit-card"
-                      class="ml-3 block text-sm font-medium text-gray-700 dark:text-gray-300"
-                      >Credit/Debit Card</label
-                    >
-                  </div>
-                  <div class="flex items-center">
-                    <input
-                      id="upi"
-                      name="payment-method"
-                      type="radio"
-                      class="h-4 w-4 text-primary focus:ring-primary border-gray-300 dark:border-gray-600"
-                    />
-                    <label
-                      for="upi"
-                      class="ml-3 block text-sm font-medium text-gray-700 dark:text-gray-300"
-                      >UPI Payment</label
-                    >
-                  </div>
-                </div>
-
-                <button
-                  id="place-order-btn"
-                  class="w-full bg-primary text-white py-3 rounded-lg hover:bg-red-600 transition font-bold"
-                >
-                  Place Order
-                </button>
-              </div>
             </div>
-          </div>
         </div>
-      </div>
     </section>
 
     <!-- Footer -->
-    <footer
-      class="text-gray-600 dark:text-gray-300 body-font bg-white dark:bg-gray-800 transition-colors duration-300"
-    >
-      <div
-        class="container px-5 py-8 mx-auto flex items-center sm:flex-row flex-col"
-      >
-        <a
-          href="index.html"
-          class="flex title-font font-medium items-center md:justify-start justify-center text-gray-900 dark:text-white"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="w-10 h-10 text-white p-2 bg-primary rounded-full"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-          >
-            <path
-              d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"
-            />
-          </svg>
-          <span class="ml-3 text-xl font-bold"
-            >Food<span class="text-primary">Express</span></span
-          >
-        </a>
-        <p
-          class="text-sm text-gray-500 dark:text-gray-400 sm:ml-4 sm:pl-4 sm:border-l-2 sm:border-gray-200 dark:sm:border-gray-700 sm:py-2 sm:mt-0 mt-4"
-        >
-          © 2023 FoodExpress —
-          <a
-            href="#"
-            class="text-gray-600 dark:text-gray-300 ml-1"
-            rel="noopener noreferrer"
-            target="_blank"
-            >All Rights Reserved</a
-          >
-        </p>
-        <span
-          class="inline-flex sm:ml-auto sm:mt-0 mt-4 justify-center sm:justify-start"
-        >
-          <a
-            href="#"
-            class="text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-primary"
-          >
-            <i class="fab fa-facebook-f"></i>
-          </a>
-          <a
-            href="#"
-            class="ml-3 text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-primary"
-          >
-            <i class="fab fa-twitter"></i>
-          </a>
-          <a
-            href="#"
-            class="ml-3 text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-primary"
-          >
-            <i class="fab fa-instagram"></i>
-          </a>
-        </span>
-      </div>
+    <footer class="bg-gray-900 py-12 px-6 border-t border-gray-800">
+        <div class="container mx-auto">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <h3 class="text-xl font-bold mb-4 flex items-center">
+                        <i class="fas fa-utensils text-purple-500 mr-2"></i> NutriOrder
+                    </h3>
+                    <p class="text-gray-400">Where food meets health intelligence.</p>
+                    <div class="flex space-x-4 mt-4">
+                        <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="font-bold text-lg mb-4">Explore</h4>
+                    <ul class="space-y-2">
+                        <li><a href="homepage.html" class="text-gray-400 hover:text-white">Home</a></li>
+                        <li><a href="#menu" class="text-gray-400 hover:text-white">Menu</a></li>
+                        <li><a href="orders.html" class="text-gray-400 hover:text-white">My Orders</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold text-lg mb-4">Company</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white">About Us</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Careers</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Blog</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Press</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold text-lg mb-4">Get Help</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white">FAQ</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Contact</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Privacy</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Terms</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-500">
+                <p>© 2023 NutriOrder. All rights reserved.</p>
+            </div>
+        </div>
     </footer>
 
     <!-- Loading indicator -->
-    <div
-      id="loading-overlay"
-      class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 hidden"
-    >
-      <div
-        class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-xl text-center transition-colors duration-300"
-      >
-        <div
-          class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mx-auto"
-        ></div>
-        <p class="mt-4 text-gray-900 dark:text-white">
-          Processing your order...
-        </p>
-      </div>
+    <div id="loading-overlay" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 hidden">
+        <div class="bg-gray-800 p-6 rounded-lg shadow-xl text-center">
+            <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500 mx-auto"></div>
+            <p class="mt-4 text-white">Processing your order...</p>
+        </div>
     </div>
 
     <!-- Scripts -->
-    <script>
-        // Theme toggle functionality
-        const themeToggle = document.getElementById('theme-toggle');
-        const html = document.documentElement;
-
-        // Check for saved user preference or use system preference
-        if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-            html.classList.add('dark');
-        } else {
-            html.classList.remove('dark');
-        }
-
-        // Toggle theme
-        themeToggle.addEventListener('click', () => {
-            html.classList.toggle('dark');
-            localStorage.setItem('theme', html.classList.contains('dark') ? 'dark' : 'light');
-        });
-    </script>
     <script type="module">
       import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
       import {
@@ -476,7 +346,7 @@
 
         if (cart.length === 0) {
           orderSummary.innerHTML =
-            '<p class="text-gray-500 dark:text-gray-400">Your cart is empty</p>';
+            '<p class="text-gray-400">Your cart is empty</p>';
           subtotalElement.textContent = "₹0.00";
           totalElement.textContent = "₹30.00";
           return;
@@ -490,14 +360,14 @@
 
           const itemElement = document.createElement("div");
           itemElement.className =
-            "flex justify-between py-2 border-b border-gray-200 dark:border-gray-700";
+            "flex justify-between py-2 border-b border-gray-700";
           itemElement.innerHTML = `
                     <div class="flex items-center">
-                        <span class="text-gray-900 dark:text-white font-medium">${
+                        <span class="text-gray-100 font-medium">${
                           item.quantity
                         } × ${item.name}</span>
                     </div>
-                    <span class="text-gray-900 dark:text-white">₹${itemTotal.toFixed(
+                    <span class="text-gray-100">₹${itemTotal.toFixed(
                       2
                     )}</span>
                 `;
@@ -710,31 +580,33 @@
             );
           }
         });
-           // Add smooth transition to all links
-    document.addEventListener('DOMContentLoaded', function() {
-        document.querySelectorAll('a').forEach(link => {
-            link.addEventListener('click', function(e) {
-                // Don't apply to:
-                // 1. External links
-                // 2. Anchor links (#)
-                // 3. Links to the current page
-                if (!this.href || 
-                    this.href.startsWith('http') || 
-                    this.href.includes('#') || 
-                    this.href === window.location.href) {
-                    return;
-                }
-                
-                e.preventDefault();
-                document.body.style.opacity = '0';
-                document.body.style.transition = 'opacity 0.3s ease';
-                
-                setTimeout(() => {
-                    window.location.href = this.href;
-                }, 300);
+    </script>
+    <script>
+        // Add smooth transition to all links
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('a').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    // Don't apply to:
+                    // 1. External links
+                    // 2. Anchor links (#)
+                    // 3. Links to the current page
+                    if (!this.href || 
+                        this.href.startsWith('http') || 
+                        this.href.includes('#') || 
+                        this.href === window.location.href) {
+                        return;
+                    }
+                    
+                    e.preventDefault();
+                    document.body.style.opacity = '0';
+                    document.body.style.transition = 'opacity 0.3s ease';
+                    
+                    setTimeout(() => {
+                        window.location.href = this.href;
+                    }, 300);
+                });
             });
         });
-    });
     </script>
-  </body>
+</body>
 </html>

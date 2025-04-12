@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FoodExpress - Healthy Meals Delivered Fast</title>
+    <title>NutriOrder | Food Meets Health</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -11,6 +11,7 @@
         body {
             opacity: 0;
             animation: fadeIn 0.5s ease-in forwards;
+            font-family: 'Poppins', sans-serif;
         }
         
         @keyframes fadeIn {
@@ -22,6 +23,45 @@
         a, button {
             transition: all 0.3s ease;
         }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #1a202c;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #4a5568;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #718096;
+        }
+
+        /* Animation for hover effects */
+        .hover\:scale-105:hover {
+            transform: scale(1.05);
+        }
+
+        /* Custom glow effect */
+        .glow {
+            box-shadow: 0 0 15px rgba(139, 92, 246, 0.5);
+        }
+
+        /* Responsive tweaks */
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2.5rem;
+            }
+            
+            .hero-subtitle {
+                font-size: 1.1rem;
+            }
+        }
     </style>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
@@ -31,7 +71,7 @@
           apiKey: "AIzaSyBx0Kt9o04ye0XrtA8ecp84wD8Q9OCDjlA",
           authDomain: "foodorder-4380c.firebaseapp.com",
           projectId: "foodorder-4380c",
-          storageBucket: "foodorder-4380c.firebasestorage.app",
+          storageBucket: "foodorder-4380c.appspot.com",
           messagingSenderId: "735023580381",
           appId: "1:735023580381:web:c6740bef2fc9bdee1b4734"
         };
@@ -84,12 +124,11 @@
     </script>
     <script>
         tailwind.config = {
-            darkMode: 'class',
             theme: {
                 extend: {
                     colors: {
-                        primary: '#ef4444',
-                        secondary: '#f97316',
+                        primary: '#8b5cf6', // Purple color from previous theme
+                        secondary: '#7c3aed',
                         dark: '#1f2937',
                         light: '#f3f4f6'
                     },
@@ -107,325 +146,253 @@
         }
     </script>
 </head>
-<body class="bg-gray-50 dark:bg-gray-900">
-    <!-- Header/Navigation -->
-    <header class="sticky top-0 z-50 bg-white dark:bg-gray-800 shadow-md">
-        <div class="container mx-auto flex flex-wrap p-5 flex-col md:flex-row items-center">
-            <a href="index.html" class="flex title-font font-medium items-center text-gray-900 dark:text-white mb-4 md:mb-0">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 text-white p-2 bg-primary rounded-full" viewBox="0 0 20 20" fill="currentColor">
-                    <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
-                </svg>
-                <span class="ml-3 text-xl font-bold">Food<span class="text-primary">Express</span></span>
-            </a>
-            <nav class="md:ml-auto flex flex-wrap items-center text-base justify-center">
-                <a href="homepage.html" class="mr-5 hover:text-primary transition dark:text-gray-300 dark:hover:text-primary">Home</a>
-                <a href="#menu" class="mr-5 hover:text-primary transition dark:text-gray-300 dark:hover:text-primary">Menu</a>
-                <a href="#about" class="mr-5 hover:text-primary transition dark:text-gray-300 dark:hover:text-primary">About</a>
-                <a href="#contact" class="mr-5 hover:text-primary transition dark:text-gray-300 dark:hover:text-primary">Contact</a>
-            </nav>
-            <button id="theme-toggle" class="p-2 rounded-lg focus:outline-none text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 mr-2">
-                <i class="fas fa-moon dark:hidden"></i>
-                <i class="fas fa-sun hidden dark:block"></i>
-            </button>
-            <a href="login.html" id="login-btn" class="inline-flex items-center bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-white border-0 py-2 px-4 focus:outline-none hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition mr-2">
-                <i class="fas fa-user mr-2"></i> Login
-            </a>
-            <div id="profile-section" class="hidden relative">
-                <button id="profile-button" class="inline-flex items-center bg-gray-100 dark:bg-gray-700 text-dark dark:text-white border-0 py-2 px-4 focus:outline-none hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition">
-                    <i class="fas fa-user-circle mr-2"></i> <span id="profile-name"></span>
-                </button>
-                <div id="profile-dropdown" class="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg py-1 z-50 hidden">
-                    <a href="homepage.html" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">Dashboard</a>
-                    <a href="preferences.html" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">Preferences</a>
-                    <a href="orders.html" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">My Orders</a>
-                    <a href="#" onclick="logout()" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">Sign out</a>
+<body class="bg-gray-900 text-gray-100 min-h-screen">
+    <!-- Navigation -->
+    <nav class="bg-gray-800 py-4 px-6 shadow-lg sticky top-0 z-50">
+        <div class="container mx-auto flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <i class="fas fa-utensils text-purple-500 text-2xl"></i>
+                <span class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-600">NutriOrder</span>
+            </div>
+            <div class="hidden md:flex space-x-6">
+                <a href="homepage.html" class="hover:text-purple-400 transition">Home</a>
+                <a href="#menu" class="hover:text-purple-400 transition">Menu</a>
+                <a href="#about" class="hover:text-purple-400 transition">About</a>
+                <a href="#contact" class="hover:text-purple-400 transition">Contact</a>
+            </div>
+            <div class="flex items-center space-x-4">
+                <a href="retailer-login.html" class="flex items-center space-x-2 bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-full transition">
+                    <i class="fas fa-store"></i>
+                    <span>Retailer Login</span>
+                </a>
+                <a href="login.html" id="login-btn" class="flex items-center space-x-2 bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded-full transition">
+                    <i class="fas fa-sign-in-alt"></i>
+                    <span>Login</span>
+                </a>
+                <div id="profile-section" class="hidden relative">
+                    <button id="profile-button" class="flex items-center space-x-2 bg-gray-700 px-4 py-2 rounded-full hover:bg-gray-600 transition">
+                        <i class="fas fa-user-circle"></i>
+                        <span id="profile-name"></span>
+                    </button>
+                    <div id="profile-dropdown" class="absolute right-0 mt-2 w-48 bg-gray-800 rounded-md shadow-lg py-1 z-50 hidden border border-gray-700">
+                        <a href="homepage.html" class="block px-4 py-2 text-sm hover:bg-gray-700">Dashboard</a>
+                        <a href="preferences.html" class="block px-4 py-2 text-sm hover:bg-gray-700">Preferences</a>
+                        <a href="orders.html" class="block px-4 py-2 text-sm hover:bg-gray-700">My Orders</a>
+                        <a href="#" onclick="logout()" class="block px-4 py-2 text-sm hover:bg-gray-700">Sign out</a>
+                    </div>
                 </div>
+                <button onclick="toggleCart()" class="flex items-center space-x-2 bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded-full transition">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span id="cart-count" class="bg-white text-purple-600 rounded-full w-6 h-6 flex items-center justify-center">0</span>
+                </button>
             </div>
-            <button onclick="toggleCart()" class="inline-flex items-center bg-primary text-white border-0 py-2 px-4 focus:outline-none hover:bg-red-600 rounded-lg transition mt-4 md:mt-0">
-                <i class="fas fa-shopping-cart mr-2"></i> Cart
-                <span id="cart-count" class="ml-2 bg-white text-primary rounded-full w-6 h-6 flex items-center justify-center">0</span>
-            </button>
         </div>
-    </header>
-
-    <!-- Shopping Cart Sidebar -->
-    <div id="cart-sidebar" class="fixed top-0 right-0 h-full w-80 bg-white dark:bg-gray-800 shadow-lg transform translate-x-full transition-transform duration-300 ease-in-out z-50 overflow-y-auto">
-        <div class="p-4 border-b dark:border-gray-700 flex justify-between items-center">
-            <h3 class="text-lg font-semibold dark:text-white">Your Order</h3>
-            <button onclick="toggleCart()" class="text-gray-500 hover:text-primary dark:text-gray-400 dark:hover:text-primary">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-        <div id="cart-items" class="p-4">
-            <!-- Cart items will be added here dynamically -->
-            <p class="text-gray-500 dark:text-gray-400 text-center py-8">Your cart is empty</p>
-        </div>
-        <div class="p-4 border-t dark:border-gray-700">
-            <div class="flex justify-between mb-2 dark:text-white">
-                <span>Subtotal:</span>
-                <span id="cart-subtotal">₹0.00</span>
-            </div>
-            <div class="flex justify-between mb-4 dark:text-white">
-                <span>Delivery:</span>
-                <span>₹30.00</span>
-            </div>
-            <div class="flex justify-between font-bold text-lg dark:text-white">
-                <span>Total:</span>
-                <span id="cart-total">₹30.00</span>
-            </div>
-            <a href="orders.html" class="w-full bg-primary text-white py-2 rounded-lg mt-4 hover:bg-red-600 transition flex items-center justify-center">
-                Checkout
-            </a>
-        </div>
-    </div>
-    <div id="cart-overlay" class="hidden fixed inset-0 bg-black bg-opacity-50 z-40" onclick="toggleCart()"></div>
+    </nav>
 
     <!-- Hero Section -->
-    <section id="home" class="text-gray-600 body-font bg-gradient-to-r from-primary to-secondary">
-        <div class="container mx-auto flex px-5 py-24 md:flex-row flex-col items-center">
-            <div class="lg:flex-grow md:w-1/2 lg:pr-24 md:pr-16 flex flex-col md:items-start md:text-left mb-16 md:mb-0 items-center text-center">
-                <h1 class="title-font sm:text-4xl text-3xl mb-4 font-bold text-white">
-                    Healthy Food <br class="hidden lg:inline-block">Delivered to Your Door
-                </h1>
-                <p class="mb-8 leading-relaxed text-white opacity-90">
-                    Experience nutritious meals prepared by our chefs with fresh, organic ingredients. Eat well without compromising on taste.
-                </p>
-                <div class="flex justify-center">
-                    <a href="#menu" class="inline-flex text-white bg-dark border-0 py-3 px-6 focus:outline-none hover:bg-gray-800 rounded-lg text-lg transition">
-                        Order Now
-                    </a>
-                    <a href="#about" class="ml-4 inline-flex text-dark bg-white border-0 py-3 px-6 focus:outline-none hover:bg-gray-100 rounded-lg text-lg transition">
-                        Learn More
-                    </a>
-                </div>
-            </div>
-            <div class="lg:max-w-lg lg:w-full md:w-1/2 w-5/6">
-                <img class="object-cover object-center rounded-lg shadow-xl" alt="hero" src="https://images.unsplash.com/photo-1490645935967-10de6ba17061?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1453&q=80">
+    <section class="relative bg-gradient-to-br from-gray-800 to-gray-900 py-20 px-6">
+        <div class="container mx-auto text-center">
+            <h1 class="text-4xl md:text-6xl font-bold mb-6">Food That <span class="text-purple-400">Cares</span> About You</h1>
+            <p class="text-xl md:text-2xl mb-8 max-w-3xl mx-auto">Personalized meal recommendations based on your health profile. Order from restaurants or cook at home with our recipes.</p>
+            <div class="flex flex-col md:flex-row justify-center gap-4">
+               <a href="homepage.html"> 
+                <button class="bg-purple-600 hover:bg-purple-700 text-white px-8 py-3 rounded-full font-bold transition transform hover:scale-105">Get Started</button>
+               </a>
+                <button class="bg-gray-700 hover:bg-gray-600 text-white px-8 py-3 rounded-full font-bold transition transform hover:scale-105">How It Works</button>
             </div>
         </div>
+        <div class="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-gray-900 to-transparent"></div>
     </section>
 
-    <!-- Featured Categories -->
-    <section class="text-gray-600 body-font py-12 bg-white dark:bg-gray-800">
-        <div class="container px-5 mx-auto">
-            <div class="flex flex-col text-center w-full mb-12">
-                <h2 class="text-2xl font-bold title-font mb-4 text-dark dark:text-white">Our Healthy Categories</h2>
-                <p class="lg:w-2/3 mx-auto leading-relaxed text-gray-500 dark:text-gray-400">Explore our nutritious selection of food categories</p>
-            </div>
-            <div class="flex flex-wrap -m-4 text-center">
-                <div class="p-4 md:w-1/4 sm:w-1/2 w-full">
-                    <div onclick="filterMenu('Salads')" class="border-2 border-gray-200 dark:border-gray-700 px-4 py-6 rounded-lg transform hover:scale-105 transition duration-300 cursor-pointer">
-                        <div class="w-12 h-12 inline-flex items-center justify-center rounded-full bg-red-100 text-primary mb-5 mx-auto">
-                            <i class="fas fa-leaf text-xl"></i>
-                        </div>
-                        <h2 class="title-font font-medium text-lg text-gray-900 dark:text-white">Salads</h2>
-                        <p class="leading-relaxed mt-2 dark:text-gray-300">Fresh, nutrient-packed salads</p>
+    <!-- Features Section -->
+    <section class="py-16 px-6 bg-gray-900">
+        <div class="container mx-auto">
+            <h2 class="text-3xl font-bold text-center mb-12">Your Health, Our Priority</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <div class="bg-gray-800 p-6 rounded-lg hover:bg-gray-700 transition transform hover:-translate-y-2">
+                    <div class="text-purple-500 text-4xl mb-4">
+                        <i class="fas fa-utensils"></i>
                     </div>
+                    <h3 class="text-xl font-bold mb-2">Smart Ordering</h3>
+                    <p class="text-gray-400">Order from restaurants with dishes tailored to your dietary needs.</p>
                 </div>
-                <div class="p-4 md:w-1/4 sm:w-1/2 w-full">
-                    <div onclick="filterMenu('Bowls')" class="border-2 border-gray-200 dark:border-gray-700 px-4 py-6 rounded-lg transform hover:scale-105 transition duration-300 cursor-pointer">
-                        <div class="w-12 h-12 inline-flex items-center justify-center rounded-full bg-red-100 text-primary mb-5 mx-auto">
-                            <i class="fas fa-utensils text-xl"></i>
-                        </div>
-                        <h2 class="title-font font-medium text-lg text-gray-900 dark:text-white">Bowls</h2>
-                        <p class="leading-relaxed mt-2 dark:text-gray-300">Balanced, wholesome bowls</p>
+                <div class="bg-gray-800 p-6 rounded-lg hover:bg-gray-700 transition transform hover:-translate-y-2">
+                    <div class="text-purple-500 text-4xl mb-4">
+                        <i class="fas fa-heartbeat"></i>
                     </div>
+                    <h3 class="text-xl font-bold mb-2">Health Tracking</h3>
+                    <p class="text-gray-400">Monitor how your food choices affect your health metrics.</p>
                 </div>
-                <div class="p-4 md:w-1/4 sm:w-1/2 w-full">
-                    <div onclick="filterMenu('Soups')" class="border-2 border-gray-200 dark:border-gray-700 px-4 py-6 rounded-lg transform hover:scale-105 transition duration-300 cursor-pointer">
-                        <div class="w-12 h-12 inline-flex items-center justify-center rounded-full bg-red-100 text-primary mb-5 mx-auto">
-                            <i class="fas fa-utensil-spoon text-xl"></i>
-                        </div>
-                        <h2 class="title-font font-medium text-lg text-gray-900 dark:text-white">Soups</h2>
-                        <p class="leading-relaxed mt-2 dark:text-gray-300">Hearty and healthy soups</p>
+                <div class="bg-gray-800 p-6 rounded-lg hover:bg-gray-700 transition transform hover:-translate-y-2">
+                    <div class="text-purple-500 text-4xl mb-4">
+                        <i class="fas fa-book-open"></i>
                     </div>
+                    <h3 class="text-xl font-bold mb-2">Recipe Library</h3>
+                    <p class="text-gray-400">Access thousands of recipes with nutritional information.</p>
                 </div>
-                <div class="p-4 md:w-1/4 sm:w-1/2 w-full">
-                    <div onclick="filterMenu('Smoothies')" class="border-2 border-gray-200 dark:border-gray-700 px-4 py-6 rounded-lg transform hover:scale-105 transition duration-300 cursor-pointer">
-                        <div class="w-12 h-12 inline-flex items-center justify-center rounded-full bg-red-100 text-primary mb-5 mx-auto">
-                            <i class="fas fa-glass-whiskey text-xl"></i>
-                        </div>
-                        <h2 class="title-font font-medium text-lg text-gray-900 dark:text-white">Smoothies</h2>
-                        <p class="leading-relaxed mt-2 dark:text-gray-300">Nutrient-rich blends</p>
+                <div class="bg-gray-800 p-6 rounded-lg hover:bg-gray-700 transition transform hover:-translate-y-2">
+                    <div class="text-purple-500 text-4xl mb-4">
+                        <i class="fas fa-robot"></i>
                     </div>
+                    <h3 class="text-xl font-bold mb-2">AI Personalization</h3>
+                    <p class="text-gray-400">Our AI learns your preferences for better recommendations.</p>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- Menu Section -->
-    <section id="menu" class="text-gray-600 body-font bg-gray-50 dark:bg-gray-900 py-12">
-        <div class="container px-5 mx-auto">
-            <div class="flex flex-col text-center w-full mb-12">
-                <h2 class="text-2xl font-bold title-font mb-4 text-dark dark:text-white">Our Healthy Menu</h2>
-                <p class="lg:w-2/3 mx-auto leading-relaxed text-gray-500 dark:text-gray-400">Discover our nutritionist-approved meals</p>
-                <button onclick="filterMenu('All')" class="mt-4 mx-auto text-primary hover:underline focus:outline-none">
-                    Show All Dishes
-                </button>
+    <section id="menu" class="py-16 px-6 bg-gray-900">
+        <div class="container mx-auto">
+            <div class="flex justify-between items-center mb-8">
+                <h2 class="text-3xl font-bold">Healthy Menu Options</h2>
+                <div class="relative">
+                    <input type="text" placeholder="Search dishes..." class="bg-gray-800 text-white px-4 py-2 rounded-full pl-10 w-64 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                    <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                </div>
             </div>
             
-            <div class="flex flex-wrap -m-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <!-- Menu items will be added here dynamically -->
             </div>
         </div>
     </section>
 
     <!-- About Section -->
-    <section id="about" class="text-gray-600 body-font py-12 bg-white dark:bg-gray-800">
-        <div class="container px-5 mx-auto">
-            <div class="flex flex-col text-center w-full mb-12">
-                <h2 class="text-2xl font-bold title-font mb-4 text-dark dark:text-white">About FoodExpress</h2>
-                <p class="lg:w-2/3 mx-auto leading-relaxed text-gray-500 dark:text-gray-400">Our story and what makes us special</p>
-            </div>
-            <div class="flex flex-wrap sm:-m-4 -mx-4 -mb-10 -mt-4 md:space-y-0 space-y-6">
-                <div class="p-4 md:w-1/3 flex">
-                    <div class="w-12 h-12 inline-flex items-center justify-center rounded-full bg-red-100 text-primary mb-4 flex-shrink-0">
-                        <i class="fas fa-history text-xl"></i>
+    <section id="about" class="py-16 px-6 bg-gray-900">
+        <div class="container mx-auto">
+            <h2 class="text-3xl font-bold text-center mb-12">About NutriOrder</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-gray-800 p-6 rounded-lg">
+                    <div class="text-purple-500 text-4xl mb-4">
+                        <i class="fas fa-history"></i>
                     </div>
-                    <div class="flex-grow pl-6">
-                        <h2 class="text-gray-900 dark:text-white text-lg title-font font-medium mb-2">Our Mission</h2>
-                        <p class="leading-relaxed text-base dark:text-gray-300">Founded in 2010, FoodExpress is committed to making healthy eating convenient. We believe nutritious food should be delicious and accessible to everyone.</p>
-                    </div>
+                    <h3 class="text-xl font-bold mb-2">Our Mission</h3>
+                    <p class="text-gray-400">Founded in 2010, NutriOrder is committed to making healthy eating convenient. We believe nutritious food should be delicious and accessible to everyone.</p>
                 </div>
-                <div class="p-4 md:w-1/3 flex">
-                    <div class="w-12 h-12 inline-flex items-center justify-center rounded-full bg-red-100 text-primary mb-4 flex-shrink-0">
-                        <i class="fas fa-leaf text-xl"></i>
+                <div class="bg-gray-800 p-6 rounded-lg">
+                    <div class="text-purple-500 text-4xl mb-4">
+                        <i class="fas fa-leaf"></i>
                     </div>
-                    <div class="flex-grow pl-6">
-                        <h2 class="text-gray-900 dark:text-white text-lg title-font font-medium mb-2">Organic Ingredients</h2>
-                        <p class="leading-relaxed text-base dark:text-gray-300">We source only organic, fresh ingredients from local farmers. Our meals are free from artificial additives and preservatives.</p>
-                    </div>
+                    <h3 class="text-xl font-bold mb-2">Organic Ingredients</h3>
+                    <p class="text-gray-400">We source only organic, fresh ingredients from local farmers. Our meals are free from artificial additives and preservatives.</p>
                 </div>
-                <div class="p-4 md:w-1/3 flex">
-                    <div class="w-12 h-12 inline-flex items-center justify-center rounded-full bg-red-100 text-primary mb-4 flex-shrink-0">
-                        <i class="fas fa-bolt text-xl"></i>
+                <div class="bg-gray-800 p-6 rounded-lg">
+                    <div class="text-purple-500 text-4xl mb-4">
+                        <i class="fas fa-bolt"></i>
                     </div>
-                    <div class="flex-grow pl-6">
-                        <h2 class="text-gray-900 dark:text-white text-lg title-font font-medium mb-2">Nutritionist Approved</h2>
-                        <p class="leading-relaxed text-base dark:text-gray-300">Every meal is designed by nutritionists to provide balanced nutrition without compromising on taste.</p>
-                    </div>
+                    <h3 class="text-xl font-bold mb-2">Nutritionist Approved</h3>
+                    <p class="text-gray-400">Every meal is designed by nutritionists to provide balanced nutrition without compromising on taste.</p>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- Testimonials -->
-    <section class="text-gray-600 body-font py-12 bg-gray-50 dark:bg-gray-900">
-        <div class="container px-5 mx-auto">
-            <div class="flex flex-col text-center w-full mb-12">
-                <h2 class="text-2xl font-bold title-font mb-4 text-dark dark:text-white">What Our Customers Say</h2>
-                <p class="lg:w-2/3 mx-auto leading-relaxed text-gray-500 dark:text-gray-400">Don't just take our word for it</p>
-            </div>
-            <div class="flex flex-wrap -m-4">
-                <div class="p-4 md:w-1/3">
-                    <div class="h-full bg-white dark:bg-gray-800 p-8 rounded-lg shadow-sm">
-                        <div class="flex items-center mb-4">
-                            <div class="w-12 h-12 rounded-full bg-primary inline-flex items-center justify-center text-white">
-                                <span class="font-bold">JD</span>
-                            </div>
-                            <div class="ml-4">
-                                <h3 class="text-gray-900 dark:text-white title-font font-medium">John D.</h3>
-                                <div class="flex text-yellow-400">
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                </div>
+    <section class="py-16 px-6 bg-gray-800">
+        <div class="container mx-auto">
+            <h2 class="text-3xl font-bold text-center mb-12">What Our Customers Say</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-gray-800 p-6 rounded-lg">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 rounded-full bg-purple-600 inline-flex items-center justify-center text-white">
+                            <span class="font-bold">JD</span>
+                        </div>
+                        <div class="ml-4">
+                            <h3 class="text-white font-medium">John D.</h3>
+                            <div class="flex text-yellow-400">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
                             </div>
                         </div>
-                        <p class="leading-relaxed mb-6 dark:text-gray-300">The quinoa bowls from FoodExpress are my go-to lunch! Always fresh and packed with nutrients. I've never felt better!</p>
                     </div>
+                    <p class="text-gray-300">The quinoa bowls from NutriOrder are my go-to lunch! Always fresh and packed with nutrients. I've never felt better!</p>
                 </div>
-                <div class="p-4 md:w-1/3">
-                    <div class="h-full bg-white dark:bg-gray-800 p-8 rounded-lg shadow-sm">
-                        <div class="flex items-center mb-4">
-                            <div class="w-12 h-12 rounded-full bg-primary inline-flex items-center justify-center text-white">
-                                <span class="font-bold">SM</span>
-                            </div>
-                            <div class="ml-4">
-                                <h3 class="text-gray-900 dark:text-white title-font font-medium">Sarah M.</h3>
-                                <div class="flex text-yellow-400">
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                </div>
+                <div class="bg-gray-800 p-6 rounded-lg">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 rounded-full bg-purple-600 inline-flex items-center justify-center text-white">
+                            <span class="font-bold">SM</span>
+                        </div>
+                        <div class="ml-4">
+                            <h3 class="text-white font-medium">Sarah M.</h3>
+                            <div class="flex text-yellow-400">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
                             </div>
                         </div>
-                        <p class="leading-relaxed mb-6 dark:text-gray-300">I order from FoodExpress at least twice a week. Their green smoothies give me the energy boost I need for my morning workouts.</p>
                     </div>
+                    <p class="text-gray-300">I order from NutriOrder at least twice a week. Their green smoothies give me the energy boost I need for my morning workouts.</p>
                 </div>
-                <div class="p-4 md:w-1/3">
-                    <div class="h-full bg-white dark:bg-gray-800 p-8 rounded-lg shadow-sm">
-                        <div class="flex items-center mb-4">
-                            <div class="w-12 h-12 rounded-full bg-primary inline-flex items-center justify-center text-white">
-                                <span class="font-bold">RT</span>
-                            </div>
-                            <div class="ml-4">
-                                <h3 class="text-gray-900 dark:text-white title-font font-medium">Robert T.</h3>
-                                <div class="flex text-yellow-400">
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star-half-alt"></i>
-                                </div>
+                <div class="bg-gray-800 p-6 rounded-lg">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 rounded-full bg-purple-600 inline-flex items-center justify-center text-white">
+                            <span class="font-bold">RT</span>
+                        </div>
+                        <div class="ml-4">
+                            <h3 class="text-white font-medium">Robert T.</h3>
+                            <div class="flex text-yellow-400">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star-half-alt"></i>
                             </div>
                         </div>
-                        <p class="leading-relaxed mb-6 dark:text-gray-300">Since switching to FoodExpress, I've lost 10 pounds without feeling deprived. The lentil soup is my favorite!</p>
                     </div>
+                    <p class="text-gray-300">Since switching to NutriOrder, I've lost 10 pounds without feeling deprived. The lentil soup is my favorite!</p>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- Contact Section -->
-    <section id="contact" class="text-gray-600 body-font relative py-12 bg-white dark:bg-gray-800">
-        <div class="container px-5 mx-auto">
-            <div class="flex flex-col text-center w-full mb-12">
-                <h2 class="text-2xl font-bold title-font mb-4 text-dark dark:text-white">Contact Us</h2>
-                <p class="lg:w-2/3 mx-auto leading-relaxed text-gray-500 dark:text-gray-400">Have questions? Get in touch with us</p>
-            </div>
+    <section id="contact" class="py-16 px-6 bg-gray-900">
+        <div class="container mx-auto">
+            <h2 class="text-3xl font-bold text-center mb-12">Contact Us</h2>
             <div class="lg:w-1/2 md:w-2/3 mx-auto">
                 <div class="flex flex-wrap -m-2">
                     <div class="p-2 w-1/2">
                         <div class="relative">
-                            <label for="name" class="leading-7 text-sm text-gray-600 dark:text-gray-400">Name</label>
-                            <input type="text" id="name" name="name" class="w-full bg-gray-100 dark:bg-gray-700 bg-opacity-50 rounded border border-gray-300 dark:border-gray-600 focus:border-primary focus:bg-white dark:focus:bg-gray-800 focus:ring-2 focus:ring-red-200 text-base outline-none text-gray-700 dark:text-white py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
+                            <label for="name" class="leading-7 text-sm text-gray-400">Name</label>
+                            <input type="text" id="name" name="name" class="w-full bg-gray-800 bg-opacity-50 rounded border border-gray-700 focus:border-purple-500 focus:bg-gray-800 focus:ring-2 focus:ring-purple-900 text-base outline-none text-gray-100 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
                         </div>
                     </div>
                     <div class="p-2 w-1/2">
                         <div class="relative">
-                            <label for="email" class="leading-7 text-sm text-gray-600 dark:text-gray-400">Email</label>
-                            <input type="email" id="email" name="email" class="w-full bg-gray-100 dark:bg-gray-700 bg-opacity-50 rounded border border-gray-300 dark:border-gray-600 focus:border-primary focus:bg-white dark:focus:bg-gray-800 focus:ring-2 focus:ring-red-200 text-base outline-none text-gray-700 dark:text-white py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
+                            <label for="email" class="leading-7 text-sm text-gray-400">Email</label>
+                            <input type="email" id="email" name="email" class="w-full bg-gray-800 bg-opacity-50 rounded border border-gray-700 focus:border-purple-500 focus:bg-gray-800 focus:ring-2 focus:ring-purple-900 text-base outline-none text-gray-100 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
                         </div>
                     </div>
                     <div class="p-2 w-full">
                         <div class="relative">
-                            <label for="message" class="leading-7 text-sm text-gray-600 dark:text-gray-400">Message</label>
-                            <textarea id="message" name="message" class="w-full bg-gray-100 dark:bg-gray-700 bg-opacity-50 rounded border border-gray-300 dark:border-gray-600 focus:border-primary focus:bg-white dark:focus:bg-gray-800 focus:ring-2 focus:ring-red-200 h-32 text-base outline-none text-gray-700 dark:text-white py-1 px-3 resize-none leading-6 transition-colors duration-200 ease-in-out"></textarea>
+                            <label for="message" class="leading-7 text-sm text-gray-400">Message</label>
+                            <textarea id="message" name="message" class="w-full bg-gray-800 bg-opacity-50 rounded border border-gray-700 focus:border-purple-500 focus:bg-gray-800 focus:ring-2 focus:ring-purple-900 h-32 text-base outline-none text-gray-100 py-1 px-3 resize-none leading-6 transition-colors duration-200 ease-in-out"></textarea>
                         </div>
                     </div>
                     <div class="p-2 w-full">
-                        <button class="flex mx-auto text-white bg-primary border-0 py-2 px-8 focus:outline-none hover:bg-red-600 rounded-lg text-lg transition">
+                        <button class="flex mx-auto text-white bg-purple-600 border-0 py-2 px-8 focus:outline-none hover:bg-purple-700 rounded-lg text-lg transition">
                             Send Message
                         </button>
                     </div>
-                    <div class="p-2 w-full pt-8 mt-8 border-t border-gray-200 dark:border-gray-700 text-center">
-                        <a class="text-primary">hello@foodexpress.com</a>
-                        <p class="leading-normal my-5 dark:text-gray-400">123 Food Street
+                    <div class="p-2 w-full pt-8 mt-8 border-t border-gray-700 text-center">
+                        <a class="text-purple-400">hello@nutriorder.com</a>
+                        <p class="leading-normal my-5 text-gray-400">123 Health Street
                             <br>New York, NY 10001
                         </p>
                         <span class="inline-flex">
-                            <a class="text-gray-500 hover:text-primary mx-2 dark:text-gray-400 dark:hover:text-primary">
+                            <a class="text-gray-400 hover:text-purple-400 mx-2">
                                 <i class="fab fa-facebook-f"></i>
                             </a>
-                            <a class="text-gray-500 hover:text-primary mx-2 dark:text-gray-400 dark:hover:text-primary">
+                            <a class="text-gray-400 hover:text-purple-400 mx-2">
                                 <i class="fab fa-twitter"></i>
                             </a>
-                            <a class="text-gray-500 hover:text-primary mx-2 dark:text-gray-400 dark:hover:text-primary">
+                            <a class="text-gray-400 hover:text-purple-400 mx-2">
                                 <i class="fab fa-instagram"></i>
                             </a>
                         </span>
@@ -435,71 +402,86 @@
         </div>
     </section>
 
-    <!-- Footer -->
-    <footer class="text-gray-600 body-font bg-dark dark:bg-gray-900">
-        <div class="container px-5 py-8 mx-auto flex items-center sm:flex-row flex-col">
-            <a href="#" class="flex title-font font-medium items-center md:justify-start justify-center text-white">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 text-white p-2 bg-primary rounded-full" viewBox="0 0 20 20" fill="currentColor">
-                    <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
-                </svg>
-                <span class="ml-3 text-xl font-bold">Food<span class="text-primary">Express</span></span>
-            </a>
-            <p class="text-sm text-gray-400 sm:ml-4 sm:pl-4 sm:border-l-2 sm:border-gray-800 sm:py-2 sm:mt-0 mt-4">© 2023 FoodExpress —
-                <a href="#" class="text-gray-500 ml-1" rel="noopener noreferrer" target="_blank">All Rights Reserved</a>
-            </p>
-            <span class="inline-flex sm:ml-auto sm:mt-0 mt-4 justify-center sm:justify-start">
-                <a href="#" class="text-gray-400 hover:text-white">
-                    <i class="fab fa-facebook-f"></i>
-                </a>
-                <a href="#" class="ml-3 text-gray-400 hover:text-white">
-                    <i class="fab fa-twitter"></i>
-                </a>
-                <a href="#" class="ml-3 text-gray-400 hover:text-white">
-                    <i class="fab fa-instagram"></i>
-                </a>
-            </span>
+    <!-- Shopping Cart Sidebar -->
+    <div id="cart-sidebar" class="fixed top-0 right-0 h-full w-80 bg-gray-800 shadow-lg transform translate-x-full transition-transform duration-300 ease-in-out z-50 overflow-y-auto">
+        <div class="p-4 border-b border-gray-700 flex justify-between items-center">
+            <h3 class="text-lg font-semibold text-white">Your Order</h3>
+            <button onclick="toggleCart()" class="text-gray-400 hover:text-white">
+                <i class="fas fa-times"></i>
+            </button>
         </div>
-    </footer>
-
-    <!-- Recipe Modal -->
-    <div id="recipe-modal" class="hidden fixed inset-0 z-50 overflow-y-auto">
-        <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            <div class="fixed inset-0 transition-opacity" aria-hidden="true">
-                <div class="absolute inset-0 bg-gray-500 dark:bg-gray-900 opacity-75" onclick="hideRecipe()"></div>
+        <div id="cart-items" class="p-4">
+            <!-- Cart items will be added here dynamically -->
+            <p class="text-gray-400 text-center py-8">Your cart is empty</p>
+        </div>
+        <div class="p-4 border-t border-gray-700">
+            <div class="flex justify-between mb-2 text-white">
+                <span>Subtotal:</span>
+                <span id="cart-subtotal">₹0.00</span>
             </div>
-            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-            <div class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
-                <div class="px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                    <div class="sm:flex sm:items-start">
-                        <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
-                            <div class="flex justify-between items-center">
-                                <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white" id="recipe-title"></h3>
-                                <button onclick="hideRecipe()" class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300">
-                                    <i class="fas fa-times"></i>
-                                </button>
-                            </div>
-                            <div class="mt-4">
-                                <img id="recipe-image" class="w-full h-48 object-cover rounded-lg mb-4" src="" alt="">
-                                <div class="bg-gray-100 dark:bg-gray-700 p-4 rounded-lg">
-                                    <h4 class="font-medium text-gray-900 dark:text-white mb-2">Ingredients:</h4>
-                                    <ul id="recipe-ingredients" class="list-disc list-inside text-gray-700 dark:text-gray-300"></ul>
-                                </div>
-                                <div class="mt-4">
-                                    <h4 class="font-medium text-gray-900 dark:text-white mb-2">Instructions:</h4>
-                                    <p id="recipe-instructions" class="text-gray-700 dark:text-gray-300"></p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="bg-gray-50 dark:bg-gray-700 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                    <button type="button" onclick="hideRecipe()" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-primary text-base font-medium text-white hover:bg-red-600 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm transition">
-                        Close
-                    </button>
-                </div>
+            <div class="flex justify-between mb-4 text-white">
+                <span>Delivery:</span>
+                <span>₹30.00</span>
             </div>
+            <div class="flex justify-between font-bold text-lg text-white">
+                <span>Total:</span>
+                <span id="cart-total">₹30.00</span>
+            </div>
+            <a href="orders.html" class="w-full bg-purple-600 text-white py-2 rounded-lg mt-4 hover:bg-purple-700 transition flex items-center justify-center">
+                Checkout
+            </a>
         </div>
     </div>
+    <div id="cart-overlay" class="hidden fixed inset-0 bg-black bg-opacity-50 z-40" onclick="toggleCart()"></div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 py-12 px-6 border-t border-gray-800">
+        <div class="container mx-auto">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <h3 class="text-xl font-bold mb-4 flex items-center">
+                        <i class="fas fa-utensils text-purple-500 mr-2"></i> NutriOrder
+                    </h3>
+                    <p class="text-gray-400">Where food meets health intelligence.</p>
+                    <div class="flex space-x-4 mt-4">
+                        <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="font-bold text-lg mb-4">Explore</h4>
+                    <ul class="space-y-2">
+                        <li><a href="homepage.html" class="text-gray-400 hover:text-white">Home</a></li>
+                        <li><a href="#menu" class="text-gray-400 hover:text-white">Menu</a></li>
+                        <li><a href="#about" class="text-gray-400 hover:text-white">About</a></li>
+                        <li><a href="#contact" class="text-gray-400 hover:text-white">Contact</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold text-lg mb-4">Company</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white">About Us</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Careers</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Blog</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Press</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold text-lg mb-4">Get Help</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white">FAQ</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Contact</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Privacy</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Terms</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-500">
+                <p>© 2023 NutriOrder. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
 
     <script>
         // Updated menu data with proper food images
@@ -581,69 +563,85 @@
         // Shopping cart - load from localStorage or initialize empty
         let cart = JSON.parse(localStorage.getItem('cart')) || [];
         
-        // Theme toggle functionality
-        const themeToggle = document.getElementById('theme-toggle');
-        themeToggle.addEventListener('click', () => {
-            document.documentElement.classList.toggle('dark');
-            localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
-        });
-    
-        // Check for saved theme preference
-        if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-            document.documentElement.classList.add('dark');
-        }
-        
         document.addEventListener('DOMContentLoaded', function() {
-    // Check if user is logged in
-    const userData = JSON.parse(localStorage.getItem('userData'));
-    
-    if (userData) {
-        // Show profile section and update with user data
-        const profileSection = document.getElementById('profile-section');
-        const profileName = document.getElementById('profile-name');
-        const profileButton = document.getElementById('profile-button');
-        
-        // Show the profile section that was hidden by default
-        profileSection.classList.remove('hidden');
-        
-        // Set the profile name
-        profileName.textContent = userData.displayName || userData.email || 'User';
-        
-        // Replace font awesome icon with profile picture if available
-        if (userData.photoURL) {
-            // Remove the existing font awesome icon
-            const iconElement = profileButton.querySelector('.fas.fa-user-circle');
-            if (iconElement) {
-                iconElement.remove();
+            // Check if user is logged in
+            const userData = JSON.parse(localStorage.getItem('userData'));
+            
+            if (userData) {
+                // Show profile section and update with user data
+                const profileSection = document.getElementById('profile-section');
+                const profileName = document.getElementById('profile-name');
+                const profileButton = document.getElementById('profile-button');
+                
+                // Show the profile section that was hidden by default
+                profileSection.classList.remove('hidden');
+                
+                // Set the profile name
+                profileName.textContent = userData.displayName || userData.email || 'User';
+                
+                // Replace font awesome icon with profile picture if available
+                if (userData.photoURL) {
+                    // Remove the existing font awesome icon
+                    const iconElement = profileButton.querySelector('.fas.fa-user-circle');
+                    if (iconElement) {
+                        iconElement.remove();
+                    }
+                    
+                    // Create profile picture element
+                    const profilePic = document.createElement('img');
+                    profilePic.src = userData.photoURL;
+                    profilePic.alt = 'Profile';
+                    profilePic.className = 'h-8 w-8 rounded-full object-cover mr-2';
+                    
+                    // Add it to the beginning of the profile button
+                    profileButton.prepend(profilePic);
+                }
+                
+                // Set up dropdown toggle
+                profileButton.addEventListener('click', function() {
+                    const dropdown = document.getElementById('profile-dropdown');
+                    dropdown.classList.toggle('hidden');
+                });
+                
+                // Close dropdown when clicking outside
+                document.addEventListener('click', function(event) {
+                    const dropdown = document.getElementById('profile-dropdown');
+                    const profileButton = document.getElementById('profile-button');
+                    
+                    if (!profileButton.contains(event.target) && !dropdown.contains(event.target)) {
+                        dropdown.classList.add('hidden');
+                    }
+                });
             }
             
-            // Create profile picture element
-            const profilePic = document.createElement('img');
-            profilePic.src = userData.photoURL;
-            profilePic.alt = 'Profile';
-            profilePic.className = 'h-8 w-8 rounded-full object-cover mr-2';
+            // Initialize menu
+            renderMenu();
+            updateCart();
             
-            // Add it to the beginning of the profile button
-            profileButton.prepend(profilePic);
-        }
-        
-        // Set up dropdown toggle
-        profileButton.addEventListener('click', function() {
-            const dropdown = document.getElementById('profile-dropdown');
-            dropdown.classList.toggle('hidden');
+            // Add smooth transition to all links
+            document.querySelectorAll('a').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    // Don't apply to:
+                    // 1. External links
+                    // 2. Anchor links (#)
+                    // 3. Links to the current page
+                    if (!this.href || 
+                        this.href.startsWith('http') || 
+                        this.href.includes('#') || 
+                        this.href === window.location.href) {
+                        return;
+                    }
+                    
+                    e.preventDefault();
+                    document.body.style.opacity = '0';
+                    document.body.style.transition = 'opacity 0.3s ease';
+                    
+                    setTimeout(() => {
+                        window.location.href = this.href;
+                    }, 300);
+                });
+            });
         });
-        
-        // Close dropdown when clicking outside
-        document.addEventListener('click', function(event) {
-            const dropdown = document.getElementById('profile-dropdown');
-            const profileButton = document.getElementById('profile-button');
-            
-            if (!profileButton.contains(event.target) && !dropdown.contains(event.target)) {
-                dropdown.classList.add('hidden');
-            }
-        });
-    }
-});
     
         // Filter menu by category
         function filterMenu(category) {
@@ -657,13 +655,11 @@
     
         // Render filtered menu items
         function renderFilteredMenu(items, category) {
-            const menuContainer = document.querySelector('#menu .flex.flex-wrap.-m-4');
-            const menuTitle = document.querySelector('#menu .flex.flex-col.text-center.w-full.mb-12 h2');
-            const menuSubtitle = document.querySelector('#menu .flex.flex-col.text-center.w-full.mb-12 p');
+            const menuContainer = document.querySelector('#menu .grid.grid-cols-1');
+            const menuTitle = document.querySelector('#menu h2');
             
             // Update the menu title
-            menuTitle.textContent = category === 'All' ? 'Our Healthy Menu' : `${category} Options`;
-            menuSubtitle.textContent = category === 'All' ? 'Discover our nutritionist-approved meals' : `Healthy ${category} options`;
+            menuTitle.textContent = category === 'All' ? 'Healthy Menu Options' : `${category} Options`;
             
             // Clear the menu
             menuContainer.innerHTML = '';
@@ -671,8 +667,8 @@
             if (items.length === 0) {
                 menuContainer.innerHTML = `
                     <div class="w-full text-center py-12">
-                        <p class="text-gray-500 dark:text-gray-400">No dishes found in this category.</p>
-                        <button onclick="filterMenu('All')" class="mt-4 text-primary hover:underline">
+                        <p class="text-gray-400">No dishes found in this category.</p>
+                        <button onclick="filterMenu('All')" class="mt-4 text-purple-400 hover:underline">
                             View All Menu Items
                         </button>
                     </div>
@@ -683,20 +679,22 @@
             // Render the filtered items
             items.forEach(item => {
                 const menuItem = document.createElement('div');
-                menuItem.className = 'p-4 md:w-1/4 sm:w-1/2 w-full';
+                menuItem.className = 'bg-gray-800 rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition';
                 menuItem.innerHTML = `
-                    <div class="h-full border-2 border-gray-200 dark:border-gray-700 border-opacity-60 rounded-lg overflow-hidden bg-white dark:bg-gray-800 hover:shadow-md transition">
-                        <img class="lg:h-48 md:h-36 w-full object-cover object-center" src="${item.image}" alt="${item.name}">
-                        <div class="p-6">
-                            <h2 class="tracking-widest text-xs title-font font-medium text-gray-500 mb-1">${item.category}</h2>
-                            <h1 class="title-font text-lg font-medium text-gray-900 dark:text-white mb-3">${item.name}</h1>
-                            <p class="leading-relaxed mb-3 text-sm dark:text-gray-300">${item.description}</p>
-                            <div class="flex items-center justify-between flex-wrap">
-                                <span class="title-font font-medium text-lg text-dark dark:text-white">₹${item.price.toFixed(2)}</span>
-                                <button onclick="addToCart(${item.id})" class="text-white bg-primary border-0 py-1 px-3 focus:outline-none hover:bg-red-600 rounded text-sm transition">
-                                    Add to Cart
-                                </button>
-                            </div>
+                    <div class="relative">
+                        <img src="${item.image}" alt="${item.name}" class="w-full h-48 object-cover">
+                    </div>
+                    <div class="p-4">
+                        <div class="flex justify-between items-start">
+                            <h3 class="text-xl font-bold">${item.name}</h3>
+                            <span class="bg-purple-900 text-purple-300 text-xs px-2 py-1 rounded">${item.category}</span>
+                        </div>
+                        <p class="text-gray-400 text-sm mt-1">₹${item.price.toFixed(2)}</p>
+                        <p class="text-gray-300 mt-2">${item.description}</p>
+                        <div class="mt-4 flex justify-between items-center">
+                            <button onclick="addToCart(${item.id})" class="text-purple-400 hover:text-purple-300 text-sm font-bold">
+                                Add to Cart
+                            </button>
                         </div>
                     </div>
                 `;
@@ -756,23 +754,23 @@
             
             // Update cart items
             if (cart.length === 0) {
-                cartItemsContainer.innerHTML = '<p class="text-gray-500 dark:text-gray-400 text-center py-8">Your cart is empty</p>';
+                cartItemsContainer.innerHTML = '<p class="text-gray-400 text-center py-8">Your cart is empty</p>';
             } else {
                 cartItemsContainer.innerHTML = '';
                 cart.forEach(item => {
                     const cartItem = document.createElement('div');
-                    cartItem.className = 'flex justify-between items-center mb-4 pb-4 border-b dark:border-gray-700';
+                    cartItem.className = 'flex justify-between items-center mb-4 pb-4 border-b border-gray-700';
                     cartItem.innerHTML = `
                         <div class="flex items-center">
                             <img src="${item.image}" alt="${item.name}" class="w-12 h-12 object-cover rounded">
                             <div class="ml-3">
-                                <h3 class="text-sm font-medium dark:text-white">${item.name}</h3>
-                                <p class="text-xs text-gray-500 dark:text-gray-400">₹${item.price.toFixed(2)} x ${item.quantity}</p>
+                                <h3 class="text-sm font-medium text-white">${item.name}</h3>
+                                <p class="text-xs text-gray-400">₹${item.price.toFixed(2)} x ${item.quantity}</p>
                             </div>
                         </div>
                         <div class="flex items-center">
-                            <span class="text-sm font-medium dark:text-white">₹${(item.price * item.quantity).toFixed(2)}</span>
-                            <button onclick="removeFromCart(${item.id})" class="ml-2 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300">
+                            <span class="text-sm font-medium text-white">₹${(item.price * item.quantity).toFixed(2)}</span>
+                            <button onclick="removeFromCart(${item.id})" class="ml-2 text-red-400 hover:text-red-300">
                                 <i class="fas fa-times"></i>
                             </button>
                         </div>
@@ -782,7 +780,7 @@
     
                 // Add proceed to order button
                 const orderBtn = document.createElement('button');
-                orderBtn.className = 'w-full bg-primary text-white py-2 rounded-lg mt-4 hover:bg-red-600 transition';
+                orderBtn.className = 'w-full bg-purple-600 text-white py-2 rounded-lg mt-4 hover:bg-purple-700 transition';
                 orderBtn.textContent = 'Proceed to Order';
                 orderBtn.onclick = function() {
                     toggleCart();
@@ -830,32 +828,7 @@
             
             cartSidebar.classList.toggle('translate-x-full');
             cartOverlay.classList.toggle('hidden');
-        }   
-           // Add smooth transition to all links
-    document.addEventListener('DOMContentLoaded', function() {
-        document.querySelectorAll('a').forEach(link => {
-            link.addEventListener('click', function(e) {
-                // Don't apply to:
-                // 1. External links
-                // 2. Anchor links (#)
-                // 3. Links to the current page
-                if (!this.href || 
-                    this.href.startsWith('http') || 
-                    this.href.includes('#') || 
-                    this.href === window.location.href) {
-                    return;
-                }
-                
-                e.preventDefault();
-                document.body.style.opacity = '0';
-                document.body.style.transition = 'opacity 0.3s ease';
-                
-                setTimeout(() => {
-                    window.location.href = this.href;
-                }, 300);
-            });
-        });
-    });
+        }
     </script>
 </body>
 </html>
