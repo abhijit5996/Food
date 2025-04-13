@@ -432,24 +432,35 @@
                     });
                 });
         
-                // SIMPLE STEP NAVIGATION THAT WILL WORK
+                // Initialize step navigation
                 let currentStep = 1;
                 const totalSteps = 3;
                 const stepIndicator = document.getElementById('step-indicator');
-                
-                // Show only the first step initially
-                document.querySelectorAll('.step').forEach((step, index) => {
-                    step.style.display = index === 0 ? 'block' : 'none';
-                });
-        
-                // Update step indicator
+
+                // Reset to initial state
+                function initializeSteps() {
+                    // Hide all steps except first
+                    document.querySelectorAll('.step').forEach((step, index) => {
+                        if (index === 0) {
+                            step.classList.add('active');
+                            step.classList.remove('hidden');
+                        } else {
+                            step.classList.remove('active');
+                            step.classList.add('hidden');
+                        }
+                    });
+                    
+                    // Reset current step and update indicator
+                    currentStep = 1;
+                    updateStepIndicator();
+                }
+
                 function updateStepIndicator() {
                     if (stepIndicator) {
                         stepIndicator.textContent = `Step ${currentStep} of ${totalSteps}`;
                     }
                 }
-        
-                // Navigation functions
+
                 function goToStep(step) {
                     if (step < 1 || step > totalSteps) return;
                     
@@ -461,27 +472,29 @@
                     
                     // Show current step
                     const currentStepElement = document.getElementById(`step${step}`);
-                    currentStepElement.classList.remove('hidden');
-                    currentStepElement.classList.add('active');
-                    
-                    currentStep = step;
-                    updateStepIndicator();
+                    if (currentStepElement) {
+                        currentStepElement.classList.remove('hidden');
+                        currentStepElement.classList.add('active');
+                        
+                        currentStep = step;
+                        updateStepIndicator();
+                    }
                 }
-        
+
                 function nextStep() {
                     if (currentStep < totalSteps) {
                         goToStep(currentStep + 1);
                     }
                 }
-        
+
                 function prevStep() {
                     if (currentStep > 1) {
                         goToStep(currentStep - 1);
                     }
                 }
-        
-                // Attach event listeners to ALL buttons (even if dynamically added)
-                document.body.addEventListener('click', function(e) {
+
+                // Attach event listeners to buttons
+                document.addEventListener('click', function(e) {
                     if (e.target.classList.contains('next-step')) {
                         e.preventDefault();
                         nextStep();
@@ -491,8 +504,9 @@
                         prevStep();
                     }
                 });
-        
-                updateStepIndicator();
+
+                // Initialize the steps on page load
+                initializeSteps();
         
                 // Smooth page transitions for links
                 document.querySelectorAll('a').forEach(link => {
