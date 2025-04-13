@@ -201,9 +201,9 @@
                                         <span class="sr-only">Previous</span>
                                         <i class="fas fa-chevron-left h-5 w-5"></i>
                                     </button>
-                                    <button aria-current="page" class="z-10 bg-purple-600 border-purple-600 text-white relative inline-flex items-center px-4 py-2 border text-sm font-medium page-link current-page">1</button>
-                                    <button class="bg-gray-800 border-gray-700 text-gray-400 hover:bg-gray-700 relative inline-flex items-center px-4 py-2 border text-sm font-medium page-link">2</button>
-                                    <button class="bg-gray-800 border-gray-700 text-gray-400 hover:bg-gray-700 relative inline-flex items-center px-4 py-2 border text-sm font-medium page-link">3</button>
+                                    <div id="pagination-numbers" class="flex">
+                                        <!-- Page numbers will be inserted here -->
+                                    </div>
                                     <button id="next-page" class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-700 bg-gray-800 text-sm font-medium text-gray-400 hover:bg-gray-700">
                                         <span class="sr-only">Next</span>
                                         <i class="fas fa-chevron-right h-5 w-5"></i>
@@ -414,6 +414,12 @@
         const auth = getAuth(app);
         const database = getDatabase(app);
 
+        // Global variables for pagination and filtering
+        let allOrders = [];
+        let filteredOrders = [];
+        let currentPage = 1;
+        const ordersPerPage = 5;
+
         // Check auth state
         onAuthStateChanged(auth, (user) => {
             if (!user) {
@@ -459,19 +465,21 @@
                             id: childSnapshot.key,
                             ...order,
                             // Convert Firebase timestamp to readable date
-                            date: order.createdAt ? new Date(order.createdAt).toLocaleString() : 'Date not available'
+                            date: order.createdAt ? new Date(order.createdAt).toLocaleString() : 'Date not available',
+                            timestamp: order.createdAt || 0
                         });
                     });
                 }
                 
                 // Sort orders by date (newest first)
-                orders.sort((a, b) => {
-                    const dateA = a.createdAt ? new Date(a.createdAt) : new Date(0);
-                    const dateB = b.createdAt ? new Date(b.createdAt) : new Date(0);
-                    return dateB - dateA;
-                });
+                orders.sort((a, b) => b.timestamp - a.timestamp);
                 
-                renderOrders(orders);
+                allOrders = orders;
+                filteredOrders = [...allOrders];
+                
+                renderOrders();
+                setupFilterAndSearch();
+                setupPagination();
                 hideLoading();
             }, (error) => {
                 console.error("Error loading orders:", error);
@@ -480,13 +488,13 @@
             });
         }
 
-        function renderOrders(orders) {
-            const activeOrders = orders.filter(order => order.status === 'active');
-            const pastOrders = orders.filter(order => order.status !== 'active');
+        function renderOrders() {
+            const activeOrders = filteredOrders.filter(order => order.status === 'active');
+            const pastOrders = filteredOrders.filter(order => order.status !== 'active');
             
             renderActiveOrders(activeOrders);
             renderPastOrders(pastOrders);
-            renderFrequentItems(orders);
+            renderFrequentItems(allOrders); // Always show frequent items from all orders
         }
 
         function renderActiveOrders(activeOrders) {
@@ -548,7 +556,7 @@
                             </div>
                             <div class="w-full md:w-1/3">
                                 <span class="text-sm text-gray-400">Estimated Delivery</span>
-                                <p class="text-white">${getEstimatedDeliveryTime(order.createdAt)}</p>
+                                <p class="text-white">${getEstimatedDeliveryTime(order.timestamp)}</p>
                             </div>
                         </div>
                         
@@ -602,9 +610,15 @@
                 return;
             }
             
+            // Calculate pagination
+            const totalPages = Math.ceil(pastOrders.length / ordersPerPage);
+            const startIndex = (currentPage - 1) * ordersPerPage;
+            const endIndex = Math.min(startIndex + ordersPerPage, pastOrders.length);
+            const paginatedOrders = pastOrders.slice(startIndex, endIndex);
+            
             ordersTableBody.innerHTML = '';
             
-            pastOrders.forEach(order => {
+            paginatedOrders.forEach(order => {
                 // Calculate items count and total
                 const itemsCount = order.items ? order.items.length : 0;
                 const subtotal = order.subtotal || 0;
@@ -642,6 +656,26 @@
                 
                 ordersTableBody.appendChild(row);
             });
+            
+            // Update pagination info
+            document.getElementById('pagination-info').innerHTML = `
+                Showing <span class="font-medium">${startIndex + 1}</span> to <span class="font-medium">${endIndex}</span> of <span class="font-medium">${pastOrders.length}</span> results
+            `;
+            
+            // Update pagination numbers
+            const paginationNumbers = document.getElementById('pagination-numbers');
+            paginationNumbers.innerHTML = '';
+            
+            for (let i = 1; i <= totalPages; i++) {
+                const pageButton = document.createElement('button');
+                pageButton.className = `relative inline-flex items-center px-4 py-2 border text-sm font-medium page-link ${i === currentPage ? 'bg-purple-600 border-purple-600 text-white' : 'bg-gray-800 border-gray-700 text-gray-400 hover:bg-gray-700'}`;
+                pageButton.textContent = i;
+                pageButton.addEventListener('click', () => {
+                    currentPage = i;
+                    renderOrders();
+                });
+                paginationNumbers.appendChild(pageButton);
+            }
         }
 
         function renderFrequentItems(orders) {
@@ -742,10 +776,10 @@
             return stars;
         }
 
-        function getEstimatedDeliveryTime(orderDate) {
-            if (!orderDate) return 'Not available';
+        function getEstimatedDeliveryTime(orderTimestamp) {
+            if (!orderTimestamp) return 'Not available';
             
-            const orderTime = new Date(orderDate);
+            const orderTime = new Date(orderTimestamp);
             const deliveryTime = new Date(orderTime.getTime() + 45 * 60000); // Add 45 minutes
             
             return deliveryTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -779,6 +813,93 @@
             setTimeout(() => {
                 successElement.remove();
             }, 3000);
+        }
+
+        function setupFilterAndSearch() {
+            // Filter by status
+            document.getElementById('filter').addEventListener('change', (e) => {
+                const filterValue = e.target.value;
+                
+                if (filterValue === 'all') {
+                    filteredOrders = [...allOrders];
+                } else {
+                    filteredOrders = allOrders.filter(order => {
+                        if (filterValue === 'active') {
+                            return order.status === 'active';
+                        } else if (filterValue === 'completed') {
+                            return order.statusText === 'Delivered' || order.status === 'completed';
+                        } else if (filterValue === 'cancelled') {
+                            return order.statusText === 'Cancelled';
+                        }
+                        return true;
+                    });
+                }
+                
+                currentPage = 1; // Reset to first page when filtering
+                renderOrders();
+            });
+            
+            // Search functionality
+            document.getElementById('search').addEventListener('input', (e) => {
+                const searchTerm = e.target.value.toLowerCase();
+                
+                if (searchTerm.trim() === '') {
+                    filteredOrders = [...allOrders];
+                } else {
+                    filteredOrders = allOrders.filter(order => {
+                        return (
+                            order.id.toLowerCase().includes(searchTerm) ||
+                            (order.items && order.items.some(item => 
+                                item.name.toLowerCase().includes(searchTerm)
+                            )) ||
+                            (order.statusText && order.statusText.toLowerCase().includes(searchTerm))
+                        );
+                    });
+                }
+                
+                currentPage = 1; // Reset to first page when searching
+                renderOrders();
+            });
+        }
+
+        function setupPagination() {
+            // Previous page button
+            document.getElementById('prev-page').addEventListener('click', () => {
+                if (currentPage > 1) {
+                    currentPage--;
+                    renderOrders();
+                }
+            });
+            
+            // Next page button
+            document.getElementById('next-page').addEventListener('click', () => {
+                const pastOrders = filteredOrders.filter(order => order.status !== 'active');
+                const totalPages = Math.ceil(pastOrders.length / ordersPerPage);
+                
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    renderOrders();
+                }
+            });
+            
+            // Mobile previous page button
+            document.getElementById('prev-page-mobile').addEventListener('click', () => {
+                if (currentPage > 1) {
+                    currentPage--;
+                    renderOrders();
+                }
+            });
+            
+            // Mobile next page button
+            document.getElementById('next-page-mobile').addEventListener('click', () => {
+                const pastOrders = filteredOrders.filter(order => order.status !== 'active');
+                const totalPages = Math.ceil(pastOrders.length / ordersPerPage);
+                
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    renderOrders();
+                }
+            });
         }
 
         // Setup event listeners
@@ -905,29 +1026,34 @@
         }
 
         function showOrderDetails(orderId) {
-            // In a real app, you would fetch the order details from Firebase
-            // For now, we'll just show a generic order details modal
-            const order = {
-                id: orderId,
-                restaurant: 'NutriOrder',
-                date: new Date().toLocaleString(),
-                items: [
-                    { name: 'Sample Item 1', quantity: 1, price: 100 },
-                    { name: 'Sample Item 2', quantity: 2, price: 50 }
-                ],
-                status: 'completed',
-                statusText: 'Delivered',
-                statusClass: 'bg-green-900 text-green-200',
-                total: 200
-            };
+            // Find the order in allOrders
+            const order = allOrders.find(o => o.id === orderId);
+            
+            if (!order) {
+                showErrorMessage('Order details not found');
+                return;
+            }
             
             document.getElementById('modal-order-title').textContent = `Order Details - ${orderId}`;
+            
+            // Calculate total
+            const subtotal = order.subtotal || 0;
+            const deliveryFee = order.deliveryFee || 0;
+            const total = subtotal + deliveryFee;
+            
+            // Get status class
+            let statusClass = 'bg-yellow-900 text-yellow-200';
+            if (order.statusText === 'Delivered') {
+                statusClass = 'bg-green-900 text-green-200';
+            } else if (order.statusText === 'Cancelled') {
+                statusClass = 'bg-red-900 text-red-200';
+            }
             
             document.getElementById('modal-order-content').innerHTML = `
                 <div class="space-y-4">
                     <div>
                         <h4 class="font-medium text-white">Restaurant</h4>
-                        <p class="text-gray-300">${order.restaurant}</p>
+                        <p class="text-gray-300">NutriOrder</p>
                     </div>
                     <div>
                         <h4 class="font-medium text-white">Order Date</h4>
@@ -935,22 +1061,22 @@
                     </div>
                     <div>
                         <h4 class="font-medium text-white">Status</h4>
-                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${order.statusClass}">${order.statusText}</span>
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${statusClass}">${order.statusText || 'Processing'}</span>
                     </div>
                     <div>
                         <h4 class="font-medium text-white">Items</h4>
                         <div class="mt-2">
-                            ${order.items.map(item => `
+                            ${order.items ? order.items.map(item => `
                                 <div class="flex justify-between py-2 border-b border-gray-700">
                                     <span class="text-gray-300">${item.quantity}× ${item.name}</span>
                                     <span class="text-gray-300">₹${(item.quantity * item.price).toFixed(2)}</span>
                                 </div>
-                            `).join('')}
+                            `).join('') : '<div class="text-gray-500">No items found</div>'}
                         </div>
                     </div>
                     <div class="flex justify-between font-medium text-white pt-2">
                         <span>Total</span>
-                        <span>₹${order.total.toFixed(2)}</span>
+                        <span>₹${total.toFixed(2)}</span>
                     </div>
                 </div>
             `;
@@ -982,31 +1108,32 @@
         document.addEventListener('DOMContentLoaded', function() {
             setupEventListeners();
         });
-           // Add smooth transition to all links
-    document.addEventListener('DOMContentLoaded', function() {
-        document.querySelectorAll('a').forEach(link => {
-            link.addEventListener('click', function(e) {
-                // Don't apply to:
-                // 1. External links
-                // 2. Anchor links (#)
-                // 3. Links to the current page
-                if (!this.href || 
-                    this.href.startsWith('http') || 
-                    this.href.includes('#') || 
-                    this.href === window.location.href) {
-                    return;
-                }
-                
-                e.preventDefault();
-                document.body.style.opacity = '0';
-                document.body.style.transition = 'opacity 0.3s ease';
-                
-                setTimeout(() => {
-                    window.location.href = this.href;
-                }, 300);
+        
+        // Add smooth transition to all links
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('a').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    // Don't apply to:
+                    // 1. External links
+                    // 2. Anchor links (#)
+                    // 3. Links to the current page
+                    if (!this.href || 
+                        this.href.startsWith('http') || 
+                        this.href.includes('#') || 
+                        this.href === window.location.href) {
+                        return;
+                    }
+                    
+                    e.preventDefault();
+                    document.body.style.opacity = '0';
+                    document.body.style.transition = 'opacity 0.3s ease';
+                    
+                    setTimeout(() => {
+                        window.location.href = this.href;
+                    }, 300);
+                });
             });
         });
-    });
     </script>
 </body>
 </html>

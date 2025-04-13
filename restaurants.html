@@ -145,6 +145,9 @@
                             <option value="biryani">Biryani</option>
                             <option value="vegetarian">Vegetarian</option>
                             <option value="desserts">Desserts</option>
+                            <option value="mediterranean">Mediterranean</option>
+                            <option value="japanese">Japanese</option>
+                            <option value="thai">Thai</option>
                         </select>
                         <select id="diet-filter" class="bg-gray-700 rounded border border-gray-600 focus:border-purple-500 focus:bg-gray-600 focus:ring-2 focus:ring-purple-900 text-base outline-none text-white py-2 px-3 leading-8 transition-colors duration-200 ease-in-out">
                             <option value="">All Diets</option>
@@ -152,6 +155,8 @@
                             <option value="vegan">Vegan</option>
                             <option value="gluten-free">Gluten-Free</option>
                             <option value="jain">Jain</option>
+                            <option value="keto">Keto</option>
+                            <option value="low-carb">Low-Carb</option>
                         </select>
                         <button id="reset-filters" class="text-gray-300 hover:text-purple-400 border border-gray-600 py-2 px-4 rounded-lg transition">
                             Reset
@@ -298,10 +303,12 @@
     <script>
         // Theme toggle functionality
         const themeToggle = document.getElementById('theme-toggle');
-        themeToggle.addEventListener('click', () => {
-            document.documentElement.classList.toggle('dark');
-            localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
-        });
+        if (themeToggle) {
+            themeToggle.addEventListener('click', () => {
+                document.documentElement.classList.toggle('dark');
+                localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+            });
+        }
 
         // Check for saved theme preference
         if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
@@ -422,6 +429,54 @@
         // Close menu modal
         function hideRecipe() {
             document.getElementById('menu-modal').classList.add('hidden');
+        }
+
+        // View restaurant menu
+        function viewRestaurantMenu(restaurantId) {
+            const restaurant = restaurants.find(r => r.id === restaurantId);
+            if (!restaurant) return;
+            
+            document.getElementById('menu-restaurant-name').textContent = restaurant.name;
+            document.getElementById('menu-restaurant-cuisine').textContent = restaurant.cuisine.map(c => c.charAt(0).toUpperCase() + c.slice(1)).join(', ');
+            
+            const menuSections = document.getElementById('menu-sections');
+            menuSections.innerHTML = '';
+            
+            for (const [sectionName, items] of Object.entries(restaurant.menu)) {
+                const section = document.createElement('div');
+                section.className = 'menu-section';
+                section.innerHTML = `
+                    <h3 class="text-lg font-semibold text-white mb-4">${sectionName}</h3>
+                    <div class="space-y-4">
+                        ${items.map(item => `
+                            <div class="flex items-start">
+                                <div class="w-20 h-20 bg-gray-700 rounded-md overflow-hidden flex-shrink-0">
+                                    <img src="${item.image}" alt="${item.name}" class="w-full h-full object-cover">
+                                </div>
+                                <div class="ml-4 flex-grow">
+                                    <h4 class="font-medium text-white">${item.name}</h4>
+                                    <p class="text-sm text-gray-300 mt-1">${item.description}</p>
+                                    <div class="flex items-center justify-between mt-2">
+                                        <span class="font-medium text-purple-400">₹${item.price.toFixed(2)}</span>
+                                        <button onclick="addToCart(${JSON.stringify({
+                                            id: item.id,
+                                            name: item.name,
+                                            price: item.price,
+                                            image: item.image,
+                                            restaurant: restaurant.name
+                                        }).replace(/"/g, '&quot;')})" class="text-sm bg-purple-600 text-white py-1 px-3 rounded hover:bg-purple-700 transition">
+                                            Add to Cart
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+                menuSections.appendChild(section);
+            }
+            
+            document.getElementById('menu-modal').classList.remove('hidden');
         }
 
         // Sample restaurant data with healthy food options
@@ -546,6 +601,75 @@
                         { id: 1502, name: "Beetroot Boost", description: "Beetroot, apple and lemon juice", price: 180, image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=880&q=80" }
                     ]
                 }
+            },
+            {
+                id: 7,
+                name: "Spice & Herb",
+                cuisine: ["north indian", "vegetarian", "healthy"],
+                rating: 4.1,
+                reviewCount: 135,
+                description: "Traditional Indian cuisine with a healthy twist.",
+                image: "https://images.unsplash.com/photo-1601050690597-df0568f70950?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+                recommended: true,
+                menu: {
+                    "Healthy Indian Starters": [
+                        { id: 1601, name: "Baked Samosa", description: "Whole wheat samosas with healthy fillings", price: 150, image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=880&q=80" },
+                        { id: 1602, name: "Sprouts Chaat", description: "Healthy sprouts with Indian spices", price: 120, image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=880&q=80" }
+                    ],
+                    "Main Course": [
+                        { id: 1701, name: "Dal Tadka", description: "Protein-rich lentils with minimal oil", price: 180, image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=880&q=80" },
+                        { id: 1702, name: "Paneer Tikka", description: "Grilled cottage cheese with veggies", price: 220, image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=880&q=80" }
+                    ]
+                }
+            },
+            {
+                id: 8,
+                name: "Zen Sushi",
+                cuisine: ["japanese", "sushi", "healthy"],
+                rating: 4.8,
+                reviewCount: 240,
+                description: "Authentic Japanese sushi with fresh ingredients.",
+                image: "https://images.unsplash.com/photo-1553621042-f6e147245754?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1025&q=80",
+                recommended: true,
+                menu: {
+                    "Sushi Selection": [
+                        { id: 1801, name: "Salmon Avocado Roll", description: "Fresh salmon and avocado sushi roll", price: 320, image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=880&q=80" },
+                        { id: 1802, name: "Vegetable Tempura Roll", description: "Crispy vegetable tempura sushi", price: 280, image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=880&q=80" }
+                    ],
+                    "Healthy Bowls": [
+                        { id: 1901, name: "Poke Bowl", description: "Fresh fish with rice and vegetables", price: 350, image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=880&q=80" }
+                    ]
+                }
+            },
+            {
+                id: 9,
+                name: "Thai Fresh",
+                cuisine: ["thai", "healthy", "asian"],
+                rating: 4.4,
+                reviewCount: 110,
+                description: "Authentic Thai cuisine with fresh ingredients.",
+                image: "https://images.unsplash.com/photo-1601050690597-df0568f70950?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+                menu: {
+                    "Thai Specialties": [
+                        { id: 2001, name: "Pad Thai", description: "Stir-fried rice noodles with tofu", price: 280, image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=880&q=80" },
+                        { id: 2002, name: "Tom Yum Soup", description: "Spicy and sour Thai soup", price: 220, image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=880&q=80" }
+                    ]
+                }
+            },
+            {
+                id: 10,
+                name: "The Keto Kitchen",
+                cuisine: ["keto", "low-carb", "healthy"],
+                rating: 4.3,
+                reviewCount: 95,
+                description: "Delicious keto-friendly meals that keep you in ketosis.",
+                image: "https://images.unsplash.com/photo-1601050690597-df0568f70950?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+                menu: {
+                    "Keto Specials": [
+                        { id: 2101, name: "Keto Burger", description: "Bunless burger with cheese and avocado", price: 250, image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=880&q=80" },
+                        { id: 2102, name: "Cauliflower Rice Bowl", description: "Cauliflower rice with vegetables and protein", price: 230, image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=880&q=80" }
+                    ]
+                }
             }
         ];
 
@@ -588,54 +712,6 @@
                 }
                 allContainer.appendChild(restaurantCard);
             });
-        }
-
-        // View restaurant menu
-        function viewRestaurantMenu(restaurantId) {
-            const restaurant = restaurants.find(r => r.id === restaurantId);
-            if (!restaurant) return;
-            
-            document.getElementById('menu-restaurant-name').textContent = restaurant.name;
-            document.getElementById('menu-restaurant-cuisine').textContent = restaurant.cuisine.map(c => c.charAt(0).toUpperCase() + c.slice(1)).join(', ');
-            
-            const menuSections = document.getElementById('menu-sections');
-            menuSections.innerHTML = '';
-            
-            for (const [sectionName, items] of Object.entries(restaurant.menu)) {
-                const section = document.createElement('div');
-                section.className = 'menu-section';
-                section.innerHTML = `
-                    <h3 class="text-lg font-semibold text-white mb-4">${sectionName}</h3>
-                    <div class="space-y-4">
-                        ${items.map(item => `
-                            <div class="flex items-start">
-                                <div class="w-20 h-20 bg-gray-700 rounded-md overflow-hidden flex-shrink-0">
-                                    <img src="${item.image}" alt="${item.name}" class="w-full h-full object-cover">
-                                </div>
-                                <div class="ml-4 flex-grow">
-                                    <h4 class="font-medium text-white">${item.name}</h4>
-                                    <p class="text-sm text-gray-300 mt-1">${item.description}</p>
-                                    <div class="flex items-center justify-between mt-2">
-                                        <span class="font-medium text-purple-400">₹${item.price.toFixed(2)}</span>
-                                        <button onclick="addToCart(${JSON.stringify({
-                                            id: item.id,
-                                            name: item.name,
-                                            price: item.price,
-                                            image: item.image,
-                                            restaurant: restaurant.name
-                                        }).replace(/"/g, '&quot;')})" class="text-sm bg-purple-600 text-white py-1 px-3 rounded hover:bg-purple-700 transition">
-                                            Add to Cart
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        `).join('')}
-                    </div>
-                `;
-                menuSections.appendChild(section);
-            }
-            
-            document.getElementById('menu-modal').classList.remove('hidden');
         }
 
         // Initialize page

@@ -26,97 +26,176 @@
             background: rgba(31, 41, 55, 0.8);
             backdrop-filter: blur(10px);
         }
+
+        .error-message {
+            color: #ef4444;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
     </style>
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
-        import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
+      import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, GoogleAuthProvider, createUserWithEmailAndPassword, signInWithPopup } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
+      import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyBx0Kt9o04ye0XrtA8ecp84wD8Q9OCDjlA",
-            authDomain: "foodorder-4380c.firebaseapp.com",
-            projectId: "foodorder-4380c",
-            storageBucket: "foodorder-4380c.appspot.com",
-            messagingSenderId: "735023580381",
-            appId: "1:735023580381:web:c6740bef2fc9bdee1b4734"
-        };
+      const firebaseConfig = {
+        apiKey: "AIzaSyBx0Kt9o04ye0XrtA8ecp84wD8Q9OCDjlA",
+        authDomain: "foodorder-4380c.firebaseapp.com",
+        projectId: "foodorder-4380c",
+        storageBucket: "foodorder-4380c.appspot.com",
+        messagingSenderId: "735023580381",
+        appId: "1:735023580381:web:c6740bef2fc9bdee1b4734"
+      };
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
+      const app = initializeApp(firebaseConfig);
+      const auth = getAuth(app);
+      const db = getFirestore(app);
+      const googleProvider = new GoogleAuthProvider();
 
-        // Check auth state
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                // Check if user is a retailer
-                const userDocRef = doc(db, 'retailers', user.uid);
-                getDoc(userDocRef).then((doc) => {
-                    if (doc.exists()) {
-                        window.location.href = 'retailer-dashboard.html';
-                    }
-                });
-            }
-        });
+      window.db = db;
+      window.auth = auth;
 
-        // Login function
-        window.loginRetailer = async function() {
-            const email = document.getElementById('retailer-email').value;
-            const password = document.getElementById('retailer-password').value;
-            
-            try {
-                const userCredential = await signInWithEmailAndPassword(auth, email, password);
-                const user = userCredential.user;
-                
-                // Check if user is registered as retailer
-                const userDocRef = doc(db, 'retailers', user.uid);
-                const docSnap = await getDoc(userDocRef);
-                
-                if (docSnap.exists()) {
-                    window.location.href = 'retailer-dashboard.html';
-                } else {
-                    alert('This account is not registered as a retailer.');
-                    await auth.signOut();
-                }
-            } catch (error) {
-                console.error('Login error:', error);
-                alert('Login failed: ' + error.message);
-            }
-        };
+      window.checkRetailerAndRedirect = async function(userId) {
+        try {
+          console.log("Checking retailer status for user:", userId);
+          const retailerDocRef = doc(db, "retailers", userId);
+          const docSnap = await getDoc(retailerDocRef);
+          
+          if (docSnap.exists()) {
+            console.log("Retailer document exists, redirecting to dashboard");
+            window.location.href = 'retailer-dashboard.html';
+          } else {
+            console.log("User is not registered as a retailer");
+            alert('This account is not registered as a retailer.');
+            await auth.signOut();
+          }
+        } catch (error) {
+          console.error("Error checking retailer status:", error);
+          document.getElementById('authError').textContent = 'An error occurred. Please try again.';
+          document.getElementById('authError').classList.remove('hidden');
+        }
+      };
 
-        // Signup function
-        window.signupRetailer = async function() {
-            const email = document.getElementById('signup-email').value;
-            const password = document.getElementById('signup-password').value;
-            const restaurantName = document.getElementById('restaurant-name').value;
-            const phone = document.getElementById('phone').value;
-            const address = document.getElementById('address').value;
-            
-            try {
-                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                const user = userCredential.user;
-                
-                // Save retailer info to Firestore
-                await setDoc(doc(db, 'retailers', user.uid), {
-                    email: email,
-                    restaurantName: restaurantName,
-                    phone: phone,
-                    address: address,
-                    createdAt: new Date(),
-                    status: 'active'
-                });
-                
-                window.location.href = 'retailer-dashboard.html';
-            } catch (error) {
-                console.error('Signup error:', error);
-                alert('Signup failed: ' + error.message);
-            }
-        };
+      onAuthStateChanged(auth, (user) => {
+        if (user) {
+          console.log("User is signed in:", user.uid);
+          checkRetailerAndRedirect(user.uid);
+        } else {
+          console.log("No user is signed in.");
+        }
+      });
 
-        // Toggle between login and signup forms
-        window.toggleAuthForm = function() {
-            document.getElementById('login-form').classList.toggle('hidden');
-            document.getElementById('signup-form').classList.toggle('hidden');
-        };
+      window.loginRetailer = async function(email, password, remember) {
+        try {
+          console.log("Attempting retailer login with email:", email);
+          const userCredential = await signInWithEmailAndPassword(auth, email, password);
+          const user = userCredential.user;
+          console.log("Login successful for user:", user.uid);
+          
+          const userData = {
+              displayName: user.displayName,
+              email: user.email,
+              photoURL: user.photoURL,
+              uid: user.uid
+          };
+          
+          localStorage.setItem('retailerData', JSON.stringify(userData));
+          
+          if (remember) {
+              localStorage.setItem('rememberRetailerEmail', email);
+          } else {
+              localStorage.removeItem('rememberRetailerEmail');
+          }
+          
+          await checkRetailerAndRedirect(user.uid);
+          
+        } catch (error) {
+          console.error('Login error:', error);
+          document.getElementById('authError').textContent = error.message;
+          document.getElementById('authError').classList.remove('hidden');
+        }
+      };
+
+      window.signInRetailerWithGoogle = async function() {
+        try {
+          console.log("Attempting Google sign-in for retailer");
+          googleProvider.addScope('profile');
+          googleProvider.addScope('email');
+          
+          const result = await signInWithPopup(auth, googleProvider);
+          const user = result.user;
+          console.log("Google sign-in successful for user:", user.uid);
+          
+          const userData = {
+            displayName: user.displayName,
+            email: user.email,
+            photoURL: user.photoURL,
+            uid: user.uid
+          };
+          
+          localStorage.setItem('retailerData', JSON.stringify(userData));
+          
+          const retailerDocRef = doc(db, "retailers", user.uid);
+          const docSnap = await getDoc(retailerDocRef);
+          
+          if (docSnap.exists()) {
+            console.log("Retailer exists, redirecting to dashboard");
+            await checkRetailerAndRedirect(user.uid);
+          } else {
+            console.log("No retailer account found for Google user");
+            alert('No retailer account found for this Google account. Please register first.');
+            await auth.signOut();
+          }
+          
+        } catch (error) {
+          console.error('Google sign-in error:', error);
+          document.getElementById('authError').textContent = 'Google sign-in failed: ' + error.message;
+          document.getElementById('authError').classList.remove('hidden');
+        }
+      };
+
+      // Signup function
+      window.signupRetailer = async function() {
+        const email = document.getElementById('signup-email').value;
+        const password = document.getElementById('signup-password').value;
+        const restaurantName = document.getElementById('restaurant-name').value;
+        const phone = document.getElementById('phone').value;
+        const address = document.getElementById('address').value;
+        
+        try {
+          const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+          const user = userCredential.user;
+          
+          // Save retailer info to Firestore
+          await setDoc(doc(db, 'retailers', user.uid), {
+            email: email,
+            restaurantName: restaurantName,
+            phone: phone,
+            address: address,
+            createdAt: new Date(),
+            status: 'active'
+          });
+          
+          const userData = {
+            email: user.email,
+            uid: user.uid
+          };
+          
+          localStorage.setItem('retailerData', JSON.stringify(userData));
+          window.location.href = 'retailer-dashboard.html';
+        } catch (error) {
+          console.error('Signup error:', error);
+          document.getElementById('authError').textContent = 'Signup failed: ' + error.message;
+          document.getElementById('authError').classList.remove('hidden');
+        }
+      };
+
+      // Toggle between login and signup forms
+      window.toggleAuthForm = function() {
+        document.getElementById('login-form').classList.toggle('hidden');
+        document.getElementById('signup-form').classList.toggle('hidden');
+        document.getElementById('authError').classList.add('hidden');
+      };
     </script>
     <script>
         tailwind.config = {
@@ -146,22 +225,39 @@
                 <p class="text-gray-400">Login to your retailer account</p>
             </div>
             
+            <div id="authError" class="hidden bg-red-900 text-red-100 px-4 py-3 rounded relative mb-4"></div>
+            
             <div class="space-y-4">
                 <div>
                     <label for="retailer-email" class="block text-sm font-medium mb-1">Email</label>
                     <input type="email" id="retailer-email" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                    <div id="emailError" class="error-message"></div>
                 </div>
                 <div>
                     <label for="retailer-password" class="block text-sm font-medium mb-1">Password</label>
                     <input type="password" id="retailer-password" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                    <div id="passwordError" class="error-message"></div>
                 </div>
-                <button onclick="loginRetailer()" class="w-full bg-purple-600 hover:bg-purple-700 text-white py-2 rounded-lg font-bold transition transform hover:scale-[1.02]">
+                <div class="flex items-center">
+                    <input type="checkbox" id="remember" class="w-4 h-4 text-purple-600 bg-gray-700 rounded border-gray-600 focus:ring-purple-500">
+                    <label for="remember" class="ml-2 text-sm text-gray-400">Remember me</label>
+                </div>
+                <button onclick="loginRetailer(document.getElementById('retailer-email').value, document.getElementById('retailer-password').value, document.getElementById('remember').checked)" 
+                        class="w-full bg-purple-600 hover:bg-purple-700 text-white py-2 rounded-lg font-bold transition transform hover:scale-[1.02]">
                     Login
                 </button>
             </div>
             
             <div class="text-center mt-6">
                 <p class="text-gray-400">Don't have an account? <button onclick="toggleAuthForm()" class="text-purple-400 hover:underline">Sign up</button></p>
+                <div class="relative flex py-5 items-center">
+                    <div class="flex-grow border-t border-gray-600"></div>
+                    <span class="flex-shrink mx-4 text-gray-400">OR</span>
+                    <div class="flex-grow border-t border-gray-600"></div>
+                </div>
+                <button onclick="signInRetailerWithGoogle()" class="flex items-center justify-center w-full bg-gray-700 border border-gray-600 text-white py-2 px-4 rounded-lg hover:bg-gray-600 transition-all duration-300 transform hover:scale-[1.02]">
+                    <i class="fab fa-google text-red-400 mr-2"></i> Continue with Google
+                </button>
                 <a href="index.html" class="text-sm text-gray-400 hover:text-white mt-4 inline-block">
                     <i class="fas fa-arrow-left mr-1"></i> Back to main site
                 </a>
@@ -178,6 +274,8 @@
                 <h2 class="text-2xl font-bold">Create Account</h2>
                 <p class="text-gray-400">Register your restaurant with us</p>
             </div>
+            
+            <div id="authError" class="hidden bg-red-900 text-red-100 px-4 py-3 rounded relative mb-4"></div>
             
             <div class="space-y-4">
                 <div>
@@ -215,6 +313,15 @@
     </div>
 
     <script>
+        // Check for remembered email
+        document.addEventListener('DOMContentLoaded', function() {
+            const rememberedEmail = localStorage.getItem('rememberRetailerEmail');
+            if (rememberedEmail) {
+                document.getElementById('retailer-email').value = rememberedEmail;
+                document.getElementById('remember').checked = true;
+            }
+        });
+            
         // Add smooth transition to all links
         document.addEventListener('DOMContentLoaded', function() {
             document.querySelectorAll('a').forEach(link => {
