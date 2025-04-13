@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en" class="light">
+<html lang="en" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Restaurants - FoodExpress</title>
+    <title>Restaurants - NutriOrder</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -11,6 +11,7 @@
         body {
             opacity: 0;
             animation: fadeIn 0.5s ease-in forwards;
+            font-family: 'Poppins', sans-serif;
         }
         
         @keyframes fadeIn {
@@ -22,6 +23,45 @@
         a, button {
             transition: all 0.3s ease;
         }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #1a202c;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #4a5568;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #718096;
+        }
+
+        /* Animation for hover effects */
+        .hover\:scale-105:hover {
+            transform: scale(1.05);
+        }
+
+        /* Custom glow effect */
+        .glow {
+            box-shadow: 0 0 15px rgba(139, 92, 246, 0.5);
+        }
+
+        /* Responsive tweaks */
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2.5rem;
+            }
+            
+            .hero-subtitle {
+                font-size: 1.1rem;
+            }
+        }
     </style>
     <script>
         tailwind.config = {
@@ -29,8 +69,8 @@
             theme: {
                 extend: {
                     colors: {
-                        primary: '#ef4444',
-                        secondary: '#f97316',
+                        primary: '#8b5cf6',
+                        secondary: '#7c3aed',
                         dark: '#1f2937',
                         light: '#f3f4f6'
                     },
@@ -48,119 +88,54 @@
         }
     </script>
 </head>
-<body class="bg-gray-50 dark:bg-gray-900">
-    <!-- Header/Navigation -->
-    <header class="sticky top-0 z-50 bg-white dark:bg-gray-800 shadow-md">
-        <div class="container mx-auto flex flex-wrap p-5 flex-col md:flex-row items-center">
-            <a href="index.html" class="flex title-font font-medium items-center text-gray-900 dark:text-white mb-4 md:mb-0">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 text-white p-2 bg-primary rounded-full" viewBox="0 0 20 20" fill="currentColor">
-                    <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
-                </svg>
-                <span class="ml-3 text-xl font-bold">Food<span class="text-primary">Express</span></span>
-            </a>
-            <nav class="md:ml-auto flex flex-wrap items-center text-base justify-center">
-                <a href="homepage.html" class="mr-5 hover:text-primary transition dark:text-gray-300 dark:hover:text-primary">Home</a>
-                <a href="recommended.html" class="mr-5 hover:text-primary transition dark:text-gray-300 dark:hover:text-primary">Recommended</a>
-                <a href="restaurants.html" class="mr-5 font-semibold text-primary transition">Restaurants</a>
-                <a href="index.html#contact" class="mr-5 hover:text-primary transition dark:text-gray-300 dark:hover:text-primary">Contact</a>
-            </nav>
-            <button id="theme-toggle" class="p-2 rounded-lg focus:outline-none text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 mr-2">
-                <i class="fas fa-moon dark:hidden"></i>
-                <i class="fas fa-sun hidden dark:block"></i>
-            </button>
-            <a href="login.html" class="inline-flex items-center bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-white border-0 py-2 px-4 focus:outline-none hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition mr-2">
-                <i class="fas fa-user mr-2"></i> Login
-            </a>
-            <button onclick="toggleCart()" class="inline-flex items-center bg-primary text-white border-0 py-2 px-4 focus:outline-none hover:bg-red-600 rounded-lg transition mt-4 md:mt-0">
-                <i class="fas fa-shopping-cart mr-2"></i> Cart
-                <span id="cart-count" class="ml-2 bg-white text-primary rounded-full w-6 h-6 flex items-center justify-center">0</span>
-            </button>
+<body class="bg-gray-900 text-gray-100">
+    <!-- Navigation -->
+    <nav class="bg-gray-800 py-4 px-6 shadow-lg sticky top-0 z-50">
+        <div class="container mx-auto flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <i class="fas fa-utensils text-purple-500 text-2xl"></i>
+                <span class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-600">NutriOrder</span>
+            </div>
+            <div class="hidden md:flex space-x-6">
+                <a href="homepage.html" class="hover:text-purple-400 transition">Home</a>
+                <a href="recommended.html" class="hover:text-purple-400 transition">Recommended</a>
+                <a href="restaurants.html" class="text-purple-400 font-semibold transition">Restaurants</a>
+                <a href="index.html#contact" class="hover:text-purple-400 transition">Contact</a>
+            </div>
+            <div class="flex items-center space-x-4">
+                <a href="login.html" class="flex items-center space-x-2 bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded-full transition">
+                    <i class="fas fa-sign-in-alt"></i>
+                    <span>Login</span>
+                </a>
+                <button onclick="toggleCart()" class="flex items-center space-x-2 bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded-full transition">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span id="cart-count" class="bg-white text-purple-600 rounded-full w-6 h-6 flex items-center justify-center">0</span>
+                </button>
+            </div>
         </div>
-    </header>
+    </nav>
 
-    <!-- Shopping Cart Sidebar -->
-    <div id="cart-sidebar" class="fixed top-0 right-0 h-full w-80 bg-white dark:bg-gray-800 shadow-lg transform translate-x-full transition-transform duration-300 ease-in-out z-50 overflow-y-auto">
-        <div class="p-4 border-b dark:border-gray-700 flex justify-between items-center">
-            <h3 class="text-lg font-semibold dark:text-white">Your Order</h3>
-            <button onclick="toggleCart()" class="text-gray-500 hover:text-primary dark:text-gray-400 dark:hover:text-primary">
-                <i class="fas fa-times"></i>
-            </button>
+    <!-- Hero Section -->
+    <section class="relative bg-gradient-to-br from-gray-800 to-gray-900 py-20 px-6">
+        <div class="container mx-auto text-center">
+            <h1 class="text-4xl md:text-6xl font-bold mb-6">Our Partner <span class="text-purple-400">Restaurants</span></h1>
+            <p class="text-xl md:text-2xl mb-8 max-w-3xl mx-auto">Discover the best places to eat in your area with healthy options tailored to your needs.</p>
         </div>
-        <div id="cart-items" class="p-4">
-            <!-- Cart items will be added here dynamically -->
-            <p class="text-gray-500 dark:text-gray-400 text-center py-8">Your cart is empty</p>
-        </div>
-        <div class="p-4 border-t dark:border-gray-700">
-            <div class="flex justify-between mb-2 dark:text-white">
-                <span>Subtotal:</span>
-                <span id="cart-subtotal">₹0.00</span>
-            </div>
-            <div class="flex justify-between mb-4 dark:text-white">
-                <span>Delivery:</span>
-                <span>₹30.00</span>
-            </div>
-            <div class="flex justify-between font-bold text-lg dark:text-white">
-                <span>Total:</span>
-                <span id="cart-total">₹30.00</span>
-            </div>
-            <a href="checkout.html" class="w-full bg-primary text-white py-2 rounded-lg mt-4 hover:bg-red-600 transition flex items-center justify-center">
-                Checkout
-            </a>
-        </div>
-    </div>
-    <div id="cart-overlay" class="hidden fixed inset-0 bg-black bg-opacity-50 z-40" onclick="toggleCart()"></div>
-
-    <!-- Menu Modal -->
-    <div id="menu-modal" class="hidden fixed inset-0 z-50 overflow-y-auto">
-        <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            <div class="fixed inset-0 transition-opacity" aria-hidden="true">
-                <div class="absolute inset-0 bg-gray-500 dark:bg-gray-900 opacity-75" onclick="hideRecipe()"></div>
-            </div>
-            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-            <div class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
-                <div class="px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                    <div class="sm:flex sm:items-start">
-                        <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
-                            <div class="flex justify-between items-center">
-                                <h3 id="menu-restaurant-name" class="text-lg leading-6 font-medium text-gray-900 dark:text-white"></h3>
-                                <button onclick="hideRecipe()" class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300">
-                                    <i class="fas fa-times"></i>
-                                </button>
-                            </div>
-                            <p id="menu-restaurant-cuisine" class="text-sm text-gray-500 dark:text-gray-400 mt-1"></p>
-                            
-                            <div id="menu-sections" class="mt-4 space-y-6">
-                                <!-- Menu sections will be loaded here -->
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="bg-gray-50 dark:bg-gray-700 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                    <button type="button" onclick="hideRecipe()" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-primary text-base font-medium text-white hover:bg-red-600 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm transition">
-                        Close
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
+        <div class="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-gray-900 to-transparent"></div>
+    </section>
 
     <!-- Restaurants Section -->
-    <section class="text-gray-600 dark:text-gray-300 body-font py-12">
+    <section class="text-gray-300 body-font py-12 bg-gray-900">
         <div class="container px-5 mx-auto">
-            <div class="flex flex-col text-center w-full mb-12">
-                <h1 class="text-3xl font-bold title-font mb-4 text-dark dark:text-white">Our Partner Restaurants</h1>
-                <p class="lg:w-2/3 mx-auto leading-relaxed">Discover the best places to eat in your area</p>
-            </div>
-            
             <!-- Search and Filters -->
-            <div class="mb-8 bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
+            <div class="mb-8 bg-gray-800 p-6 rounded-lg shadow">
                 <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                     <div class="relative flex-grow">
-                        <input type="text" id="restaurant-search" placeholder="Search restaurants..." class="w-full bg-gray-100 dark:bg-gray-700 rounded border border-gray-300 dark:border-gray-600 focus:border-primary focus:bg-white dark:focus:bg-gray-600 focus:ring-2 focus:ring-red-200 text-base outline-none text-gray-700 dark:text-white py-2 px-4 pl-10 leading-8 transition-colors duration-200 ease-in-out">
+                        <input type="text" id="restaurant-search" placeholder="Search restaurants..." class="w-full bg-gray-700 rounded border border-gray-600 focus:border-purple-500 focus:bg-gray-600 focus:ring-2 focus:ring-purple-900 text-base outline-none text-white py-2 px-4 pl-10 leading-8 transition-colors duration-200 ease-in-out">
                         <i class="fas fa-search absolute left-3 top-3.5 text-gray-400"></i>
                     </div>
                     <div class="flex flex-wrap gap-3">
-                        <select id="cuisine-filter" class="bg-gray-100 dark:bg-gray-700 rounded border border-gray-300 dark:border-gray-600 focus:border-primary focus:bg-white dark:focus:bg-gray-600 focus:ring-2 focus:ring-red-200 text-base outline-none text-gray-700 dark:text-white py-2 px-3 leading-8 transition-colors duration-200 ease-in-out">
+                        <select id="cuisine-filter" class="bg-gray-700 rounded border border-gray-600 focus:border-purple-500 focus:bg-gray-600 focus:ring-2 focus:ring-purple-900 text-base outline-none text-white py-2 px-3 leading-8 transition-colors duration-200 ease-in-out">
                             <option value="">All Cuisines</option>
                             <option value="north indian">North Indian</option>
                             <option value="south indian">South Indian</option>
@@ -171,14 +146,14 @@
                             <option value="vegetarian">Vegetarian</option>
                             <option value="desserts">Desserts</option>
                         </select>
-                        <select id="diet-filter" class="bg-gray-100 dark:bg-gray-700 rounded border border-gray-300 dark:border-gray-600 focus:border-primary focus:bg-white dark:focus:bg-gray-600 focus:ring-2 focus:ring-red-200 text-base outline-none text-gray-700 dark:text-white py-2 px-3 leading-8 transition-colors duration-200 ease-in-out">
+                        <select id="diet-filter" class="bg-gray-700 rounded border border-gray-600 focus:border-purple-500 focus:bg-gray-600 focus:ring-2 focus:ring-purple-900 text-base outline-none text-white py-2 px-3 leading-8 transition-colors duration-200 ease-in-out">
                             <option value="">All Diets</option>
                             <option value="vegetarian">Vegetarian</option>
                             <option value="vegan">Vegan</option>
                             <option value="gluten-free">Gluten-Free</option>
                             <option value="jain">Jain</option>
                         </select>
-                        <button id="reset-filters" class="text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary border border-gray-300 dark:border-gray-600 py-2 px-4 rounded-lg transition">
+                        <button id="reset-filters" class="text-gray-300 hover:text-purple-400 border border-gray-600 py-2 px-4 rounded-lg transition">
                             Reset
                         </button>
                     </div>
@@ -187,8 +162,8 @@
             
             <!-- Recommended Restaurants -->
             <div class="mb-8">
-                <h2 class="text-xl font-bold title-font mb-6 text-dark dark:text-white flex items-center">
-                    <i class="fas fa-heart text-primary mr-2"></i> Recommended For You
+                <h2 class="text-xl font-bold title-font mb-6 text-white flex items-center">
+                    <i class="fas fa-heart text-purple-500 mr-2"></i> Recommended For You
                 </h2>
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" id="recommended-restaurants">
                     <!-- Recommended restaurants will be loaded here -->
@@ -197,7 +172,7 @@
             
             <!-- All Restaurants -->
             <div>
-                <h2 class="text-xl font-bold title-font mb-6 text-dark dark:text-white">All Restaurants</h2>
+                <h2 class="text-xl font-bold title-font mb-6 text-white">All Restaurants</h2>
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" id="all-restaurants">
                     <!-- All restaurants will be loaded here -->
                 </div>
@@ -205,29 +180,118 @@
         </div>
     </section>
 
-    <!-- Footer -->
-    <footer class="text-gray-600 dark:text-gray-300 body-font bg-white dark:bg-gray-800">
-        <div class="container px-5 py-8 mx-auto flex items-center sm:flex-row flex-col">
-            <a href="index.html" class="flex title-font font-medium items-center md:justify-start justify-center text-gray-900 dark:text-white">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 text-white p-2 bg-primary rounded-full" viewBox="0 0 20 20" fill="currentColor">
-                    <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
-                </svg>
-                <span class="ml-3 text-xl font-bold">Food<span class="text-primary">Express</span></span>
+    <!-- Shopping Cart Sidebar -->
+    <div id="cart-sidebar" class="fixed top-0 right-0 h-full w-80 bg-gray-800 shadow-lg transform translate-x-full transition-transform duration-300 ease-in-out z-50 overflow-y-auto">
+        <div class="p-4 border-b border-gray-700 flex justify-between items-center">
+            <h3 class="text-lg font-semibold text-white">Your Order</h3>
+            <button onclick="toggleCart()" class="text-gray-400 hover:text-white">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div id="cart-items" class="p-4">
+            <!-- Cart items will be added here dynamically -->
+            <p class="text-gray-400 text-center py-8">Your cart is empty</p>
+        </div>
+        <div class="p-4 border-t border-gray-700">
+            <div class="flex justify-between mb-2 text-white">
+                <span>Subtotal:</span>
+                <span id="cart-subtotal">₹0.00</span>
+            </div>
+            <div class="flex justify-between mb-4 text-white">
+                <span>Delivery:</span>
+                <span>₹30.00</span>
+            </div>
+            <div class="flex justify-between font-bold text-lg text-white">
+                <span>Total:</span>
+                <span id="cart-total">₹30.00</span>
+            </div>
+            <a href="checkout.html" class="w-full bg-purple-600 text-white py-2 rounded-lg mt-4 hover:bg-purple-700 transition flex items-center justify-center">
+                Checkout
             </a>
-            <p class="text-sm text-gray-500 dark:text-gray-400 sm:ml-4 sm:pl-4 sm:border-l-2 sm:border-gray-200 dark:sm:border-gray-700 sm:py-2 sm:mt-0 mt-4">© 2023 FoodExpress —
-                <a href="#" class="text-gray-600 dark:text-gray-300 ml-1" rel="noopener noreferrer" target="_blank">All Rights Reserved</a>
-            </p>
-            <span class="inline-flex sm:ml-auto sm:mt-0 mt-4 justify-center sm:justify-start">
-                <a href="#" class="text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-primary">
-                    <i class="fab fa-facebook-f"></i>
-                </a>
-                <a href="#" class="ml-3 text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-primary">
-                    <i class="fab fa-twitter"></i>
-                </a>
-                <a href="#" class="ml-3 text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-primary">
-                    <i class="fab fa-instagram"></i>
-                </a>
-            </span>
+        </div>
+    </div>
+    <div id="cart-overlay" class="hidden fixed inset-0 bg-black bg-opacity-50 z-40" onclick="toggleCart()"></div>
+
+    <!-- Menu Modal -->
+    <div id="menu-modal" class="hidden fixed inset-0 z-50 overflow-y-auto">
+        <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 transition-opacity" aria-hidden="true">
+                <div class="absolute inset-0 bg-gray-900 opacity-75" onclick="hideRecipe()"></div>
+            </div>
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+            <div class="inline-block align-bottom bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
+                <div class="px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                    <div class="sm:flex sm:items-start">
+                        <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
+                            <div class="flex justify-between items-center">
+                                <h3 id="menu-restaurant-name" class="text-lg leading-6 font-medium text-white"></h3>
+                                <button onclick="hideRecipe()" class="text-gray-400 hover:text-gray-300">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                            <p id="menu-restaurant-cuisine" class="text-sm text-gray-400 mt-1"></p>
+                            
+                            <div id="menu-sections" class="mt-4 space-y-6">
+                                <!-- Menu sections will be loaded here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gray-700 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                    <button type="button" onclick="hideRecipe()" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-purple-600 text-base font-medium text-white hover:bg-purple-700 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm transition">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 py-12 px-6 border-t border-gray-800">
+        <div class="container mx-auto">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <h3 class="text-xl font-bold mb-4 flex items-center">
+                        <i class="fas fa-utensils text-purple-500 mr-2"></i> NutriOrder
+                    </h3>
+                    <p class="text-gray-400">Where food meets health intelligence.</p>
+                    <div class="flex space-x-4 mt-4">
+                        <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="font-bold text-lg mb-4">Explore</h4>
+                    <ul class="space-y-2">
+                        <li><a href="homepage.html" class="text-gray-400 hover:text-white">Home</a></li>
+                        <li><a href="recommended.html" class="text-gray-400 hover:text-white">Recommended</a></li>
+                        <li><a href="restaurants.html" class="text-gray-400 hover:text-white">Restaurants</a></li>
+                        <li><a href="index.html#contact" class="text-gray-400 hover:text-white">Contact</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold text-lg mb-4">Company</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white">About Us</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Careers</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Blog</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Press</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold text-lg mb-4">Get Help</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white">FAQ</a></li>
+                        <li><a href="index.html#contact" class="text-gray-400 hover:text-white">Contact</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Privacy</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Terms</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-500">
+                <p>© 2023 NutriOrder. All rights reserved.</p>
+            </div>
         </div>
     </footer>
 
@@ -270,23 +334,23 @@
             
             // Update cart items
             if (cart.length === 0) {
-                cartItemsContainer.innerHTML = '<p class="text-gray-500 dark:text-gray-400 text-center py-8">Your cart is empty</p>';
+                cartItemsContainer.innerHTML = '<p class="text-gray-400 text-center py-8">Your cart is empty</p>';
             } else {
                 cartItemsContainer.innerHTML = '';
                 cart.forEach(item => {
                     const cartItem = document.createElement('div');
-                    cartItem.className = 'flex justify-between items-center mb-4 pb-4 border-b dark:border-gray-700';
+                    cartItem.className = 'flex justify-between items-center mb-4 pb-4 border-b border-gray-700';
                     cartItem.innerHTML = `
                         <div class="flex items-center">
                             <img src="${item.image}" alt="${item.name}" class="w-12 h-12 object-cover rounded">
                             <div class="ml-3">
-                                <h3 class="text-sm font-medium dark:text-white">${item.name}</h3>
-                                <p class="text-xs text-gray-500 dark:text-gray-400">₹${item.price.toFixed(2)} x ${item.quantity}</p>
+                                <h3 class="text-sm font-medium text-white">${item.name}</h3>
+                                <p class="text-xs text-gray-400">₹${item.price.toFixed(2)} x ${item.quantity}</p>
                             </div>
                         </div>
                         <div class="flex items-center">
-                            <span class="text-sm font-medium dark:text-white">₹${(item.price * item.quantity).toFixed(2)}</span>
-                            <button onclick="removeFromCart(${item.id})" class="ml-2 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300">
+                            <span class="text-sm font-medium text-white">₹${(item.price * item.quantity).toFixed(2)}</span>
+                            <button onclick="removeFromCart(${item.id})" class="ml-2 text-red-400 hover:text-red-300">
                                 <i class="fas fa-times"></i>
                             </button>
                         </div>
@@ -495,25 +559,25 @@
             
             restaurants.forEach(restaurant => {
                 const restaurantCard = document.createElement('div');
-                restaurantCard.className = 'bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden hover:shadow-lg transition';
+                restaurantCard.className = 'bg-gray-800 rounded-lg shadow overflow-hidden hover:shadow-lg transition transform hover:-translate-y-1';
                 restaurantCard.innerHTML = `
                     <img class="w-full h-48 object-cover" src="${restaurant.image}" alt="${restaurant.name}">
                     <div class="p-4">
-                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">${restaurant.name}</h3>
+                        <h3 class="text-lg font-semibold text-white">${restaurant.name}</h3>
                         <div class="flex items-center mt-2">
                             <div class="flex text-yellow-400">
                                 ${'<i class="fas fa-star"></i>'.repeat(Math.floor(restaurant.rating))}
                                 ${restaurant.rating % 1 >= 0.5 ? '<i class="fas fa-star-half-alt"></i>' : ''}
                             </div>
-                            <span class="ml-2 text-sm text-gray-600 dark:text-gray-300">${restaurant.rating} (${restaurant.reviewCount} reviews)</span>
+                            <span class="ml-2 text-sm text-gray-400">${restaurant.rating} (${restaurant.reviewCount} reviews)</span>
                         </div>
                         <div class="mt-2 flex flex-wrap gap-2">
                             ${restaurant.cuisine.map(cuisine => 
-                                `<span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded dark:bg-blue-900 dark:text-blue-200">${cuisine.charAt(0).toUpperCase() + cuisine.slice(1)}</span>`
+                                `<span class="text-xs bg-blue-900 text-blue-200 px-2 py-1 rounded">${cuisine.charAt(0).toUpperCase() + cuisine.slice(1)}</span>`
                             ).join('')}
                         </div>
-                        <p class="mt-2 text-sm text-gray-600 dark:text-gray-300">${restaurant.description}</p>
-                        <button onclick="viewRestaurantMenu(${restaurant.id})" class="mt-4 w-full bg-primary text-white py-2 rounded-lg hover:bg-red-600 transition">
+                        <p class="mt-2 text-sm text-gray-400">${restaurant.description}</p>
+                        <button onclick="viewRestaurantMenu(${restaurant.id})" class="mt-4 w-full bg-purple-600 text-white py-2 rounded-lg hover:bg-purple-700 transition">
                             View Menu
                         </button>
                     </div>
@@ -541,25 +605,25 @@
                 const section = document.createElement('div');
                 section.className = 'menu-section';
                 section.innerHTML = `
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">${sectionName}</h3>
+                    <h3 class="text-lg font-semibold text-white mb-4">${sectionName}</h3>
                     <div class="space-y-4">
                         ${items.map(item => `
                             <div class="flex items-start">
-                                <div class="w-20 h-20 bg-gray-100 dark:bg-gray-700 rounded-md overflow-hidden flex-shrink-0">
+                                <div class="w-20 h-20 bg-gray-700 rounded-md overflow-hidden flex-shrink-0">
                                     <img src="${item.image}" alt="${item.name}" class="w-full h-full object-cover">
                                 </div>
                                 <div class="ml-4 flex-grow">
-                                    <h4 class="font-medium text-gray-900 dark:text-white">${item.name}</h4>
-                                    <p class="text-sm text-gray-600 dark:text-gray-300 mt-1">${item.description}</p>
+                                    <h4 class="font-medium text-white">${item.name}</h4>
+                                    <p class="text-sm text-gray-300 mt-1">${item.description}</p>
                                     <div class="flex items-center justify-between mt-2">
-                                        <span class="font-medium text-primary">₹${item.price.toFixed(2)}</span>
+                                        <span class="font-medium text-purple-400">₹${item.price.toFixed(2)}</span>
                                         <button onclick="addToCart(${JSON.stringify({
                                             id: item.id,
                                             name: item.name,
                                             price: item.price,
                                             image: item.image,
                                             restaurant: restaurant.name
-                                        }).replace(/"/g, '&quot;')})" class="text-sm bg-primary text-white py-1 px-3 rounded hover:bg-red-600 transition">
+                                        }).replace(/"/g, '&quot;')})" class="text-sm bg-purple-600 text-white py-1 px-3 rounded hover:bg-purple-700 transition">
                                             Add to Cart
                                         </button>
                                     </div>
@@ -578,32 +642,31 @@
         document.addEventListener('DOMContentLoaded', function() {
             loadRestaurants();
             updateCart(); // Initialize cart count on page load
-        });
-           // Add smooth transition to all links
-    document.addEventListener('DOMContentLoaded', function() {
-        document.querySelectorAll('a').forEach(link => {
-            link.addEventListener('click', function(e) {
-                // Don't apply to:
-                // 1. External links
-                // 2. Anchor links (#)
-                // 3. Links to the current page
-                if (!this.href || 
-                    this.href.startsWith('http') || 
-                    this.href.includes('#') || 
-                    this.href === window.location.href) {
-                    return;
-                }
-                
-                e.preventDefault();
-                document.body.style.opacity = '0';
-                document.body.style.transition = 'opacity 0.3s ease';
-                
-                setTimeout(() => {
-                    window.location.href = this.href;
-                }, 300);
+            
+            // Add smooth transition to all links
+            document.querySelectorAll('a').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    // Don't apply to:
+                    // 1. External links
+                    // 2. Anchor links (#)
+                    // 3. Links to the current page
+                    if (!this.href || 
+                        this.href.startsWith('http') || 
+                        this.href.includes('#') || 
+                        this.href === window.location.href) {
+                        return;
+                    }
+                    
+                    e.preventDefault();
+                    document.body.style.opacity = '0';
+                    document.body.style.transition = 'opacity 0.3s ease';
+                    
+                    setTimeout(() => {
+                        window.location.href = this.href;
+                    }, 300);
+                });
             });
         });
-    });
     </script>
 </body>
 </html>

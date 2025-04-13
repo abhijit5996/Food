@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en" class="light">
+<html lang="en" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Settings - FoodExpress</title>
+    <title>Settings - NutriOrder</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -11,6 +11,7 @@
         body {
             opacity: 0;
             animation: fadeIn 0.5s ease-in forwards;
+            font-family: 'Poppins', sans-serif;
         }
         
         @keyframes fadeIn {
@@ -21,6 +22,24 @@
         /* Link transitions */
         a, button {
             transition: all 0.3s ease;
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #1a202c;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #4a5568;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #718096;
         }
     </style>
     <script type="module">
@@ -196,12 +215,11 @@
     </script>
     <script>
         tailwind.config = {
-            darkMode: 'class',
             theme: {
                 extend: {
                     colors: {
-                        primary: '#ef4444',
-                        secondary: '#f97316',
+                        primary: '#8b5cf6', // Purple color from previous theme
+                        secondary: '#7c3aed',
                         dark: '#1f2937',
                         light: '#f3f4f6'
                     },
@@ -219,203 +237,230 @@
         }
     </script>
 </head>
-<body class="bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
-    <!-- Header/Navigation -->
-    <header class="sticky top-0 z-50 bg-white dark:bg-gray-800 shadow-md">
-        <div class="container mx-auto flex flex-wrap p-5 flex-col md:flex-row items-center">
-            <a href="index.html" class="flex title-font font-medium items-center text-gray-900 dark:text-white mb-4 md:mb-0">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 text-white p-2 bg-primary rounded-full" viewBox="0 0 20 20" fill="currentColor">
-                    <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
-                </svg>
-                <span class="ml-3 text-xl font-bold">Food<span class="text-primary">Express</span></span>
-            </a>
-            <nav class="md:ml-auto flex flex-wrap items-center text-base justify-center">
-            </nav>
-            <button id="theme-toggle" class="p-2 rounded-lg focus:outline-none text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 mr-4">
-                <i class="fas fa-moon dark:hidden"></i>
-                <i class="fas fa-sun hidden dark:block"></i>
-            </button>
-            <div class="relative group">
-                <button id="user-menu-button" class="inline-flex items-center bg-gray-100 dark:bg-gray-700 text-dark dark:text-white border-0 py-2 px-4 focus:outline-none hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition mt-4 md:mt-0">
-                    <i class="fas fa-user-circle mr-2"></i> User
+<body class="bg-gray-900 text-gray-100 min-h-screen">
+    <!-- Navigation -->
+    <nav class="bg-gray-800 py-4 px-6 shadow-lg sticky top-0 z-50">
+        <div class="container mx-auto flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <i class="fas fa-utensils text-purple-500 text-2xl"></i>
+                <span class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-600">NutriOrder</span>
+            </div>
+            <div class="hidden md:flex space-x-6">
+                <a href="homepage.html" class="hover:text-purple-400 transition">Home</a>
+                <a href="recommended.html" class="hover:text-purple-400 transition">Recommended</a>
+                <a href="restaurants.html" class="hover:text-purple-400 transition">Restaurants</a>
+                <a href="index.html#contact" class="hover:text-purple-400 transition">Contact</a>
+            </div>
+            <div class="flex items-center space-x-4">
+                <button id="theme-toggle" class="p-2 rounded-lg focus:outline-none text-gray-300 hover:bg-gray-700">
+                    <i class="fas fa-moon"></i>
                 </button>
-                <div class="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg py-1 z-50 hidden group-hover:block">
-                    <a href="dashboard.html" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">Dashboard</a>
-                    <a href="settings.html" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">Settings</a>
-                    <a href="preferences.html" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">Preferences</a>
-                    <a href="orders.html" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">My Orders</a>
-                    <div class="border-t border-gray-200 dark:border-gray-700"></div>
-                    <a id="sign-out-btn" href="#" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">Sign out</a>
+                <div class="relative group">
+                    <button id="user-menu-button" class="flex items-center space-x-2 bg-gray-700 px-4 py-2 rounded-full hover:bg-gray-600 transition">
+                        <i class="fas fa-user-circle"></i>
+                        <span>User</span>
+                    </button>
+                    <div class="absolute right-0 mt-2 w-48 bg-gray-800 rounded-md shadow-lg py-1 z-50 hidden group-hover:block border border-gray-700">
+                        <a href="dashboard.html" class="block px-4 py-2 text-sm hover:bg-gray-700">Dashboard</a>
+                        <a href="settings.html" class="block px-4 py-2 text-sm hover:bg-gray-700">Settings</a>
+                        <a href="preferences.html" class="block px-4 py-2 text-sm hover:bg-gray-700">Preferences</a>
+                        <a href="orders.html" class="block px-4 py-2 text-sm hover:bg-gray-700">My Orders</a>
+                        <div class="border-t border-gray-700"></div>
+                        <a id="sign-out-btn" href="#" class="block px-4 py-2 text-sm hover:bg-gray-700">Sign out</a>
+                    </div>
                 </div>
             </div>
         </div>
-    </header>
+    </nav>
 
     <!-- Settings Content -->
-    <section class="text-gray-600 dark:text-gray-300 body-font py-12">
+    <section class="text-gray-300 body-font py-12">
         <div class="container px-5 mx-auto max-w-4xl">
             <div class="flex flex-col text-center w-full mb-12">
-                <h1 class="text-3xl font-bold title-font mb-4 text-dark dark:text-white">Settings</h1>
-                <p class="lg:w-2/3 mx-auto leading-relaxed">Customize your FoodExpress experience</p>
+                <h1 class="text-3xl font-bold title-font mb-4 text-white">Settings</h1>
+                <p class="lg:w-2/3 mx-auto leading-relaxed">Customize your NutriOrder experience</p>
             </div>
             
             <!-- Profile Settings -->
-            <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-6 mb-8">
-                <h2 class="text-xl font-semibold mb-6 text-dark dark:text-white">Profile Settings</h2>
+            <div class="bg-gray-800 shadow rounded-lg p-6 mb-8">
+                <h2 class="text-xl font-semibold mb-6 text-white">Profile Settings</h2>
                 
                 <div class="mb-6">
-                    <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Full Name</label>
-                    <input type="text" id="name" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-primary focus:border-primary bg-white dark:bg-gray-700">
+                    <label for="name" class="block text-sm font-medium text-gray-300 mb-2">Full Name</label>
+                    <input type="text" id="name" class="w-full px-3 py-2 border border-gray-600 rounded-lg focus:ring-purple-500 focus:border-purple-500 bg-gray-700 text-white">
                 </div>
                 
                 <div class="mb-6">
-                    <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Email Address</label>
-                    <input type="email" id="email" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-primary focus:border-primary bg-white dark:bg-gray-700">
+                    <label for="email" class="block text-sm font-medium text-gray-300 mb-2">Email Address</label>
+                    <input type="email" id="email" class="w-full px-3 py-2 border border-gray-600 rounded-lg focus:ring-purple-500 focus:border-purple-500 bg-gray-700 text-white">
                 </div>
                 
                 <div class="mb-6">
-                    <label for="phone" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Phone Number</label>
-                    <input type="tel" id="phone" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-primary focus:border-primary bg-white dark:bg-gray-700">
+                    <label for="phone" class="block text-sm font-medium text-gray-300 mb-2">Phone Number</label>
+                    <input type="tel" id="phone" class="w-full px-3 py-2 border border-gray-600 rounded-lg focus:ring-purple-500 focus:border-purple-500 bg-gray-700 text-white">
                 </div>
                 
                 <div class="flex justify-end">
-                    <button id="update-profile-btn" class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-red-600 transition">Update Profile</button>
+                    <button id="update-profile-btn" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition">Update Profile</button>
                 </div>
-                <div id="profile-success" class="hidden mt-4 p-3 bg-green-100 dark:bg-green-800 text-green-800 dark:text-green-100 rounded-lg text-sm"></div>
+                <div id="profile-success" class="hidden mt-4 p-3 bg-green-800 text-green-100 rounded-lg text-sm"></div>
             </div>
             
             <!-- Notification Settings -->
-            <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-6 mb-8">
-                <h2 class="text-xl font-semibold mb-6 text-dark dark:text-white">Notification Settings</h2>
+            <div class="bg-gray-800 shadow rounded-lg p-6 mb-8">
+                <h2 class="text-xl font-semibold mb-6 text-white">Notification Settings</h2>
                 
                 <div class="space-y-4">
                     <div class="flex items-center justify-between">
                         <div>
-                            <h3 class="text-md font-medium text-gray-900 dark:text-white">Order Updates</h3>
-                            <p class="text-sm text-gray-500 dark:text-gray-400">Get notified about your order status</p>
+                            <h3 class="text-md font-medium text-white">Order Updates</h3>
+                            <p class="text-sm text-gray-400">Get notified about your order status</p>
                         </div>
                         <label class="relative inline-flex items-center cursor-pointer">
                             <input type="checkbox" id="order-updates" class="sr-only peer">
-                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary"></div>
+                            <div class="w-11 h-6 bg-gray-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-600 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
                         </label>
                     </div>
                     
                     <div class="flex items-center justify-between">
                         <div>
-                            <h3 class="text-md font-medium text-gray-900 dark:text-white">Promotions & Offers</h3>
-                            <p class="text-sm text-gray-500 dark:text-gray-400">Receive special offers and discounts</p>
+                            <h3 class="text-md font-medium text-white">Promotions & Offers</h3>
+                            <p class="text-sm text-gray-400">Receive special offers and discounts</p>
                         </div>
                         <label class="relative inline-flex items-center cursor-pointer">
                             <input type="checkbox" id="promo-offers" class="sr-only peer">
-                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary"></div>
+                            <div class="w-11 h-6 bg-gray-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-600 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
                         </label>
                     </div>
                     
                     <div class="flex items-center justify-between">
                         <div>
-                            <h3 class="text-md font-medium text-gray-900 dark:text-white">New Restaurants</h3>
-                            <p class="text-sm text-gray-500 dark:text-gray-400">Be notified when new restaurants join</p>
+                            <h3 class="text-md font-medium text-white">New Restaurants</h3>
+                            <p class="text-sm text-gray-400">Be notified when new restaurants join</p>
                         </div>
                         <label class="relative inline-flex items-center cursor-pointer">
                             <input type="checkbox" id="new-restaurants" class="sr-only peer">
-                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary"></div>
+                            <div class="w-11 h-6 bg-gray-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-600 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
                         </label>
                     </div>
                 </div>
-                <div id="notification-success" class="hidden mt-4 p-3 bg-green-100 dark:bg-green-800 text-green-800 dark:text-green-100 rounded-lg text-sm"></div>
+                <div id="notification-success" class="hidden mt-4 p-3 bg-green-800 text-green-100 rounded-lg text-sm"></div>
             </div>
             
             <!-- Appearance Settings -->
-            <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-6 mb-8">
-                <h2 class="text-xl font-semibold mb-6 text-dark dark:text-white">Appearance Settings</h2>
+            <div class="bg-gray-800 shadow rounded-lg p-6 mb-8">
+                <h2 class="text-xl font-semibold mb-6 text-white">Appearance Settings</h2>
                 
                 <div class="mb-6">
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Theme</label>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Theme</label>
                     <div class="flex items-center space-x-4">
                         <label class="inline-flex items-center">
-                            <input type="radio" name="theme" value="light" class="form-radio h-4 w-4 text-primary focus:ring-primary border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700">
-                            <span class="ml-2 text-gray-700 dark:text-gray-300">Light</span>
+                            <input type="radio" name="theme" value="light" class="form-radio h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-600 bg-gray-700">
+                            <span class="ml-2 text-gray-300">Light</span>
                         </label>
                         <label class="inline-flex items-center">
-                            <input type="radio" name="theme" value="dark" class="form-radio h-4 w-4 text-primary focus:ring-primary border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700">
-                            <span class="ml-2 text-gray-700 dark:text-gray-300">Dark</span>
+                            <input type="radio" name="theme" value="dark" class="form-radio h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-600 bg-gray-700">
+                            <span class="ml-2 text-gray-300">Dark</span>
                         </label>
                         <label class="inline-flex items-center">
-                            <input type="radio" name="theme" value="system" checked class="form-radio h-4 w-4 text-primary focus:ring-primary border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700">
-                            <span class="ml-2 text-gray-700 dark:text-gray-300">System Default</span>
+                            <input type="radio" name="theme" value="system" checked class="form-radio h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-600 bg-gray-700">
+                            <span class="ml-2 text-gray-300">System Default</span>
                         </label>
                     </div>
                 </div>
                 
                 <div class="flex justify-end">
-                    <button id="save-appearance-btn" class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-red-600 transition">Save Appearance Settings</button>
+                    <button id="save-appearance-btn" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition">Save Appearance Settings</button>
                 </div>
-                <div id="appearance-success" class="hidden mt-4 p-3 bg-green-100 dark:bg-green-800 text-green-800 dark:text-green-100 rounded-lg text-sm"></div>
+                <div id="appearance-success" class="hidden mt-4 p-3 bg-green-800 text-green-100 rounded-lg text-sm"></div>
             </div>
             
             <!-- Delivery Settings -->
-            <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
-                <h2 class="text-xl font-semibold mb-6 text-dark dark:text-white">Delivery Settings</h2>
+            <div class="bg-gray-800 shadow rounded-lg p-6">
+                <h2 class="text-xl font-semibold mb-6 text-white">Delivery Settings</h2>
                 
                 <div class="mb-6">
-                    <label for="address" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Default Delivery Address</label>
-                    <textarea id="address" rows="3" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-primary focus:border-primary bg-white dark:bg-gray-700"></textarea>
+                    <label for="address" class="block text-sm font-medium text-gray-300 mb-2">Default Delivery Address</label>
+                    <textarea id="address" rows="3" class="w-full px-3 py-2 border border-gray-600 rounded-lg focus:ring-purple-500 focus:border-purple-500 bg-gray-700 text-white"></textarea>
                 </div>
                 
                 <div class="mb-6">
-                    <label for="instructions" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Delivery Instructions</label>
-                    <textarea id="instructions" rows="2" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-primary focus:border-primary bg-white dark:bg-gray-700"></textarea>
+                    <label for="instructions" class="block text-sm font-medium text-gray-300 mb-2">Delivery Instructions</label>
+                    <textarea id="instructions" rows="2" class="w-full px-3 py-2 border border-gray-600 rounded-lg focus:ring-purple-500 focus:border-purple-500 bg-gray-700 text-white"></textarea>
                 </div>
                 
                 <div class="mb-6">
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Delivery Speed Preference</label>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Delivery Speed Preference</label>
                     <div class="flex items-center space-x-4">
                         <label class="inline-flex items-center">
-                            <input type="radio" name="delivery_speed" value="fastest" class="form-radio h-4 w-4 text-primary focus:ring-primary border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700" checked>
-                            <span class="ml-2 text-gray-700 dark:text-gray-300">Fastest</span>
+                            <input type="radio" name="delivery_speed" value="fastest" class="form-radio h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-600 bg-gray-700" checked>
+                            <span class="ml-2 text-gray-300">Fastest</span>
                         </label>
                         <label class="inline-flex items-center">
-                            <input type="radio" name="delivery_speed" value="standard" class="form-radio h-4 w-4 text-primary focus:ring-primary border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700">
-                            <span class="ml-2 text-gray-700 dark:text-gray-300">Standard</span>
+                            <input type="radio" name="delivery_speed" value="standard" class="form-radio h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-600 bg-gray-700">
+                            <span class="ml-2 text-gray-300">Standard</span>
                         </label>
                         <label class="inline-flex items-center">
-                            <input type="radio" name="delivery_speed" value="scheduled" class="form-radio h-4 w-4 text-primary focus:ring-primary border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700">
-                            <span class="ml-2 text-gray-700 dark:text-gray-300">Scheduled</span>
+                            <input type="radio" name="delivery_speed" value="scheduled" class="form-radio h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-600 bg-gray-700">
+                            <span class="ml-2 text-gray-300">Scheduled</span>
                         </label>
                     </div>
                 </div>
                 
                 <div class="flex justify-end">
-                    <button id="save-delivery-btn" class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-red-600 transition">Save Delivery Settings</button>
+                    <button id="save-delivery-btn" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition">Save Delivery Settings</button>
                 </div>
-                <div id="delivery-success" class="hidden mt-4 p-3 bg-green-100 dark:bg-green-800 text-green-800 dark:text-green-100 rounded-lg text-sm"></div>
+                <div id="delivery-success" class="hidden mt-4 p-3 bg-green-800 text-green-100 rounded-lg text-sm"></div>
             </div>
         </div>
     </section>
 
     <!-- Footer -->
-    <footer class="text-gray-600 dark:text-gray-300 body-font bg-white dark:bg-gray-800">
-        <div class="container px-5 py-8 mx-auto flex items-center sm:flex-row flex-col">
-            <a href="index.html" class="flex title-font font-medium items-center md:justify-start justify-center text-gray-900 dark:text-white">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 text-white p-2 bg-primary rounded-full" viewBox="0 0 20 20" fill="currentColor">
-                    <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
-                </svg>
-                <span class="ml-3 text-xl font-bold">Food<span class="text-primary">Express</span></span>
-            </a>
-            <p class="text-sm text-gray-500 dark:text-gray-400 sm:ml-4 sm:pl-4 sm:border-l-2 sm:border-gray-200 dark:sm:border-gray-700 sm:py-2 sm:mt-0 mt-4">© 2023 FoodExpress —
-                <a href="#" class="text-gray-600 dark:text-gray-300 ml-1" rel="noopener noreferrer" target="_blank">All Rights Reserved</a>
-            </p>
-            <span class="inline-flex sm:ml-auto sm:mt-0 mt-4 justify-center sm:justify-start">
-                <a href="#" class="text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-primary">
-                    <i class="fab fa-facebook-f"></i>
-                </a>
-                <a href="#" class="ml-3 text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-primary">
-                    <i class="fab fa-twitter"></i>
-                </a>
-                <a href="#" class="ml-3 text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-primary">
-                    <i class="fab fa-instagram"></i>
-                </a>
-            </span>
+    <footer class="bg-gray-900 py-12 px-6 border-t border-gray-800">
+        <div class="container mx-auto">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <h3 class="text-xl font-bold mb-4 flex items-center">
+                        <i class="fas fa-utensils text-purple-500 mr-2"></i> NutriOrder
+                    </h3>
+                    <p class="text-gray-400">Where food meets health intelligence.</p>
+                    <div class="flex space-x-4 mt-4">
+                        <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="font-bold text-lg mb-4">Explore</h4>
+                    <ul class="space-y-2">
+                        <li><a href="homepage.html" class="text-gray-400 hover:text-white">Home</a></li>
+                        <li><a href="recommended.html" class="text-gray-400 hover:text-white">Recommended</a></li>
+                        <li><a href="restaurants.html" class="text-gray-400 hover:text-white">Restaurants</a></li>
+                        <li><a href="index.html#contact" class="text-gray-400 hover:text-white">Contact</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold text-lg mb-4">Company</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white">About Us</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Careers</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Blog</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Press</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold text-lg mb-4">Get Help</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white">FAQ</a></li>
+                        <li><a href="index.html#contact" class="text-gray-400 hover:text-white">Contact</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Privacy</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Terms</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-500">
+                <p>© 2023 NutriOrder. All rights reserved.</p>
+            </div>
         </div>
     </footer>
 
@@ -445,31 +490,31 @@
             }
         });
 
-           // Add smooth transition to all links
-    document.addEventListener('DOMContentLoaded', function() {
-        document.querySelectorAll('a').forEach(link => {
-            link.addEventListener('click', function(e) {
-                // Don't apply to:
-                // 1. External links
-                // 2. Anchor links (#)
-                // 3. Links to the current page
-                if (!this.href || 
-                    this.href.startsWith('http') || 
-                    this.href.includes('#') || 
-                    this.href === window.location.href) {
-                    return;
-                }
-                
-                e.preventDefault();
-                document.body.style.opacity = '0';
-                document.body.style.transition = 'opacity 0.3s ease';
-                
-                setTimeout(() => {
-                    window.location.href = this.href;
-                }, 300);
+        // Add smooth transition to all links
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('a').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    // Don't apply to:
+                    // 1. External links
+                    // 2. Anchor links (#)
+                    // 3. Links to the current page
+                    if (!this.href || 
+                        this.href.startsWith('http') || 
+                        this.href.includes('#') || 
+                        this.href === window.location.href) {
+                        return;
+                    }
+                    
+                    e.preventDefault();
+                    document.body.style.opacity = '0';
+                    document.body.style.transition = 'opacity 0.3s ease';
+                    
+                    setTimeout(() => {
+                        window.location.href = this.href;
+                    }, 300);
+                });
             });
         });
-    });
     </script>
 </body>
 </html>
