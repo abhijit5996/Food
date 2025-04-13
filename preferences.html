@@ -481,9 +481,49 @@
                     }
                 }
 
+                function validateStep(stepNumber) {
+                    switch(stepNumber) {
+                        case 1:
+                            // Check if at least one dietary preference is selected
+                            const dietCheckboxes = document.querySelectorAll('input[name="diet"]:checked');
+                            if (dietCheckboxes.length === 0) {
+                                alert('Please select at least one dietary preference.');
+                                return false;
+                            }
+                            break;
+
+                        case 2:
+                            // Check if fitness goal is selected
+                            const fitnessGoal = document.querySelector('input[name="fitness_goal"]:checked');
+                            const currentWeight = document.querySelector('input[name="current_weight"]').value;
+                            const activityLevel = document.querySelector('select[name="activity_level"]').value;
+
+                            if (!fitnessGoal) {
+                                alert('Please select your fitness goal.');
+                                return false;
+                            }
+                            if (!currentWeight) {
+                                alert('Please enter your current weight.');
+                                return false;
+                            }
+                            if (!activityLevel) {
+                                alert('Please select your activity level.');
+                                return false;
+                            }
+                            break;
+
+                        case 3:
+                            // Nothing to validate on the last step as it's optional
+                            return true;
+                    }
+                    return true;
+                }
+
                 function nextStep() {
                     if (currentStep < totalSteps) {
-                        goToStep(currentStep + 1);
+                        if (validateStep(currentStep)) {
+                            goToStep(currentStep + 1);
+                        }
                     }
                 }
 
