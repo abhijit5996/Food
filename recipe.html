@@ -7,12 +7,11 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* Modern aesthetics and animations */
+        /* Page transition animations */
         body {
             opacity: 0;
             animation: fadeIn 0.5s ease-in forwards;
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(to bottom, #1a1a1a, #2d2d2d);
+            font-family: 'Poppins', sans-serif;
         }
         
         @keyframes fadeIn {
@@ -20,214 +19,337 @@
             to { opacity: 1; }
         }
         
-        /* Glass morphism effect */
-        .glass {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        /* Gradient text */
-        .gradient-text {
-            background: linear-gradient(to right, #a855f7, #ec4899);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-        }
-
-        /* Card hover effects */
-        .hover-card {
+        /* Link transitions */
+        a, button {
             transition: all 0.3s ease;
         }
 
-        .hover-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-        }
-
-        /* Modern scrollbar */
+        /* Custom scrollbar */
         ::-webkit-scrollbar {
             width: 8px;
         }
 
         ::-webkit-scrollbar-track {
-            background: #1a1a1a;
+            background: #1a202c;
         }
 
         ::-webkit-scrollbar-thumb {
-            background: #4a4a4a;
+            background: #4a5568;
             border-radius: 4px;
         }
 
-        /* Recipe step styling with modern numbering */
-        .recipe-step {
-            counter-increment: step-counter;
-            position: relative;
-            padding-left: 3rem;
-            margin-bottom: 1.5rem;
+        ::-webkit-scrollbar-thumb:hover {
+            background: #718096;
         }
 
+        /* Animation for hover effects */
+        .hover\:scale-105:hover {
+            transform: scale(1.05);
+        }
+
+        /* Custom glow effect */
+        .glow {
+            box-shadow: 0 0 15px rgba(139, 92, 246, 0.5);
+        }
+
+        /* Recipe step styling */
+        .recipe-step {
+            counter-increment: step-counter;
+            margin-bottom: 1rem;
+            position: relative;
+            padding-left: 2.5rem;
+        }
         .recipe-step::before {
             content: counter(step-counter);
             position: absolute;
             left: 0;
             top: 0;
-            width: 2rem;
-            height: 2rem;
-            background: linear-gradient(135deg, #a855f7, #ec4899);
+            background-color: #8b5cf6;
             color: white;
+            font-weight: bold;
+            width: 1.75rem;
+            height: 1.75rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.875rem;
+        }
+
+        /* Food card animation */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .food-card {
+            animation: fadeInUp 0.5s ease-out forwards;
+            animation-delay: calc(var(--order) * 0.1s);
+            opacity: 0;
+        }
+
+        /* Match score indicator */
+        .match-score {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+            color: white;
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: bold;
+            box-shadow: 0 0 10px rgba(139, 92, 246, 0.5);
+        }
+
+        .match-score-text {
+            font-size: 12px;
+            margin-top: 2px;
+        }
+
+        /* Responsive tweaks */
+        @media (max-width: 768px) {
+            .recipe-step {
+                padding-left: 2rem;
+            }
+            .recipe-step::before {
+                width: 1.5rem;
+                height: 1.5rem;
+            }
         }
     </style>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#8b5cf6',
+                        secondary: '#7c3aed',
+                        dark: '#1f2937',
+                        light: '#f3f4f6',
+                        success: '#10b981',
+                        warning: '#f59e0b',
+                        danger: '#ef4444'
+                    },
+                    animation: {
+                        'click': 'click 300ms ease-out',
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    },
+                    keyframes: {
+                        click: {
+                            '0%, 100%': { transform: 'scale(1)' },
+                            '50%': { transform: 'scale(0.95)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
 </head>
-<body class="min-h-screen text-gray-100">
-    <!-- Modern Header with Glass Effect -->
-    <header class="sticky top-0 z-50 glass">
-        <div class="container mx-auto px-4 py-4">
-            <nav class="flex items-center justify-between">
-                <a href="index.html" class="flex items-center space-x-2">
-                    <i class="fas fa-utensils text-purple-500 text-2xl"></i>
-                    <span class="text-2xl font-bold gradient-text">NutriOrder</span>
-                </a>
-                <div class="hidden md:flex items-center space-x-8">
-                    <a href="homepage.html" class="hover:text-purple-400 transition">Home</a>
-                    <a href="recommended.html" class="hover:text-purple-400 transition">Recommended</a>
-                    <a href="restaurants.html" class="hover:text-purple-400 transition">Restaurants</a>
-                    <a href="index.html#contact" class="hover:text-purple-400 transition">Contact</a>
-                </div>
-                <div class="flex items-center space-x-4">
-                    <button id="theme-toggle" class="p-2 rounded-full glass hover:bg-gray-700">
-                        <i class="fas fa-moon"></i>
-                    </button>
-                    <button onclick="window.history.back()" class="px-6 py-2 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 hover:opacity-90 transition">
-                        <i class="fas fa-arrow-left mr-2"></i>Back
-                    </button>
-                </div>
+<body class="bg-gray-900 text-gray-100 min-h-screen">
+    <!-- Header/Navigation -->
+    <header class="sticky top-0 z-50 bg-gray-800 shadow-md">
+        <div class="container mx-auto flex flex-wrap p-5 flex-col md:flex-row items-center">
+            <a href="index.html" class="flex title-font font-medium items-center text-white mb-4 md:mb-0">
+                <i class="fas fa-utensils text-purple-500 text-2xl mr-2"></i>
+                <span class="ml-3 text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-600">NutriOrder</span>
+            </a>
+            <nav class="md:ml-auto flex flex-wrap items-center text-base justify-center">
+                <a href="homepage.html" class="mr-5 hover:text-purple-400 transition">Home</a>
+                <a href="recommended.html" class="mr-5 hover:text-purple-400 transition">Recommended</a>
+                <a href="restaurants.html" class="mr-5 hover:text-purple-400 transition">Restaurants</a>
             </nav>
+            <button id="theme-toggle" class="p-2 rounded-lg focus:outline-none text-gray-300 hover:bg-gray-700 mr-4">
+                <i class="fas fa-moon dark:hidden"></i>
+                <i class="fas fa-sun hidden dark:block"></i>
+            </button>
+            <button onclick="toggleCart()" class="inline-flex items-center bg-purple-600 text-white border-0 py-2 px-4 focus:outline-none hover:bg-purple-700 rounded-lg transition mr-4">
+                <i class="fas fa-shopping-cart mr-2"></i> Cart
+                <span id="cart-count" class="ml-2 bg-white text-purple-600 rounded-full w-6 h-6 flex items-center justify-center">0</span>
+            </button>
+            <div class="relative">
+                <button id="profile-button" class="inline-flex items-center bg-gray-700 text-white border-0 py-2 px-4 focus:outline-none hover:bg-gray-600 rounded-lg transition">
+                    <i class="fas fa-user-circle mr-2"></i> <span id="profile-name"></span>
+                </button>
+                <div id="profile-dropdown" class="absolute right-0 mt-2 w-48 bg-gray-800 rounded-md shadow-lg py-1 z-50 hidden border border-gray-700">
+                    <a href="dashboard.html" class="block px-4 py-2 text-sm hover:bg-gray-700">Dashboard</a>
+                    <a href="orders.html" class="block px-4 py-2 text-sm hover:bg-gray-700">My Orders</a>
+                    <a href="settings.html" class="block px-4 py-2 text-sm hover:bg-gray-700">Settings</a>
+                    <a href="#" onclick="logout()" class="block px-4 py-2 text-sm hover:bg-gray-700">Sign out</a>
+                </div>
+            </div>
         </div>
     </header>
 
-    <!-- Modern Recipe Section -->
-    <main class="container mx-auto px-4 py-12">
-        <div class="grid lg:grid-cols-2 gap-12">
-            <!-- Recipe Image and Basic Info -->
-            <div class="space-y-8">
-                <div class="rounded-2xl overflow-hidden hover-card glass">
-                    <img id="recipe-main-image" class="w-full h-96 object-cover" src="" alt="">
-                </div>
-                
-                <div class="glass rounded-2xl p-8 space-y-6">
-                    <h1 id="recipe-title" class="text-4xl font-bold gradient-text"></h1>
-                    <div class="flex items-center space-x-4">
-                        <div class="flex text-yellow-400">
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star-half-alt"></i>
-                        </div>
-                        <span class="text-gray-400">4.7 (120 reviews)</span>
-                    </div>
-                    <p id="recipe-description" class="text-gray-300"></p>
-                    
-                    <div class="grid grid-cols-3 gap-6">
-                        <div class="glass rounded-xl p-4 text-center">
-                            <div class="text-lg font-bold gradient-text" id="recipe-prep-time">15 min</div>
-                            <div class="text-sm text-gray-400">Prep Time</div>
-                        </div>
-                        <div class="glass rounded-xl p-4 text-center">
-                            <div class="text-lg font-bold gradient-text" id="recipe-cook-time">30 min</div>
-                            <div class="text-sm text-gray-400">Cook Time</div>
-                        </div>
-                        <div class="glass rounded-xl p-4 text-center">
-                            <div class="text-lg font-bold gradient-text" id="recipe-servings">4</div>
-                            <div class="text-sm text-gray-400">Servings</div>
-                        </div>
-                    </div>
-                    
-                    <div class="flex space-x-4">
-                        <button onclick="addToCartFromRecipe()" class="flex-1 py-3 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 hover:opacity-90 transition flex items-center justify-center">
-                            <i class="fas fa-shopping-cart mr-2"></i> Add to Cart
-                        </button>
-                        <button class="w-12 h-12 rounded-full glass hover:bg-gray-700 transition flex items-center justify-center">
-                            <i class="fas fa-heart text-pink-500"></i>
-                        </button>
-                    </div>
-                </div>
+    <!-- Shopping Cart Sidebar -->
+    <div id="cart-sidebar" class="fixed top-0 right-0 h-full w-80 bg-gray-800 shadow-lg transform translate-x-full transition-transform duration-300 ease-in-out z-50 overflow-y-auto border-l border-gray-700">
+        <div class="p-4 border-b border-gray-700 flex justify-between items-center">
+            <h3 class="text-lg font-semibold text-white">Your Order</h3>
+            <button onclick="toggleCart()" class="text-gray-400 hover:text-white">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div id="cart-items" class="p-4">
+            <!-- Cart items will be added here dynamically -->
+            <p class="text-gray-400 text-center py-8">Your cart is empty</p>
+        </div>
+        <div class="p-4 border-t border-gray-700">
+            <div class="flex justify-between mb-2 text-white">
+                <span>Subtotal:</span>
+                <span id="cart-subtotal">₹0.00</span>
             </div>
+            <div class="flex justify-between mb-4 text-white">
+                <span>Delivery:</span>
+                <span>₹30.00</span>
+            </div>
+            <div class="flex justify-between font-bold text-lg text-white">
+                <span>Total:</span>
+                <span id="cart-total">₹30.00</span>
+            </div>
+            <a href="checkout.html" class="w-full bg-purple-600 text-white py-2 rounded-lg mt-4 hover:bg-purple-700 transition flex items-center justify-center">
+                Checkout
+            </a>
+        </div>
+    </div>
+    <div id="cart-overlay" class="hidden fixed inset-0 bg-black bg-opacity-50 z-40" onclick="toggleCart()"></div>
+
+    <!-- Recipe Details Section -->
+    <section class="py-8 px-4 bg-gray-900">
+        <div class="max-w-7xl mx-auto">
+            <!-- Back Button -->
+            <button onclick="window.history.back()" class="mb-6 flex items-center text-purple-400 hover:text-purple-300 transition">
+                <i class="fas fa-arrow-left mr-2"></i> Back to Results
+            </button>
             
             <!-- Recipe Content -->
-            <div class="space-y-8">
-                <div class="glass rounded-2xl p-8">
-                    <h2 class="text-2xl font-bold gradient-text mb-6">
-                        <i class="fas fa-list-ul mr-2"></i> Ingredients
-                    </h2>
-                    <ul id="recipe-ingredients" class="space-y-4">
-                        <!-- Ingredients will be added here dynamically -->
-                    </ul>
-                </div>
-                
-                <div class="glass rounded-2xl p-8">
-                    <h2 class="text-2xl font-bold gradient-text mb-6">
-                        <i class="fas fa-list-ol mr-2"></i> Instructions
-                    </h2>
-                    <div id="recipe-instructions" class="space-y-6">
-                        <!-- Instructions will be added here dynamically -->
+            <div class="flex flex-col lg:flex-row gap-8">
+                <!-- Recipe Image and Basic Info -->
+                <div class="lg:w-1/2">
+                    <div class="relative rounded-xl overflow-hidden shadow-lg">
+                        <img id="recipe-main-image" class="w-full h-96 object-cover" src="" alt="">
+                        <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-6">
+                            <h1 id="recipe-title" class="text-3xl font-bold text-white mb-2"></h1>
+                            <div class="flex items-center">
+                                <div class="flex text-yellow-400 mr-4">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star-half-alt"></i>
+                                </div>
+                                <span class="text-gray-300">4.7 (120 reviews)</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-6 bg-gray-800 p-6 rounded-xl shadow-lg">
+                        <p id="recipe-description" class="text-gray-300 mb-6"></p>
+                        
+                        <div class="grid grid-cols-3 gap-4 mb-6">
+                            <div class="bg-gray-700 p-3 rounded-lg text-center hover:bg-gray-600 transition">
+                                <div class="text-lg font-bold text-white" id="recipe-prep-time">15 min</div>
+                                <div class="text-sm text-gray-400">Prep Time</div>
+                            </div>
+                            <div class="bg-gray-700 p-3 rounded-lg text-center hover:bg-gray-600 transition">
+                                <div class="text-lg font-bold text-white" id="recipe-cook-time">30 min</div>
+                                <div class="text-sm text-gray-400">Cook Time</div>
+                            </div>
+                            <div class="bg-gray-700 p-3 rounded-lg text-center hover:bg-gray-600 transition">
+                                <div class="text-lg font-bold text-white" id="recipe-servings">4</div>
+                                <div class="text-sm text-gray-400">Servings</div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex space-x-4">
+                            <button onclick="addToCartFromRecipe()" class="flex-1 bg-purple-600 text-white py-3 rounded-lg hover:bg-purple-700 transition flex items-center justify-center">
+                                <i class="fas fa-shopping-cart mr-2"></i> Add to Cart
+                            </button>
+                            <button class="w-12 h-12 bg-gray-700 text-purple-400 rounded-lg hover:bg-gray-600 transition flex items-center justify-center">
+                                <i class="fas fa-heart"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>
                 
-                <div class="glass rounded-2xl p-8">
-                    <h2 class="text-2xl font-bold gradient-text mb-6">
-                        <i class="fas fa-chart-pie mr-2"></i> Nutrition Information
-                    </h2>
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
-                        <div class="glass rounded-xl p-4 text-center">
-                            <div class="text-lg font-bold gradient-text" id="recipe-calories">350</div>
-                            <div class="text-sm text-gray-400">Calories</div>
+                <!-- Recipe Content -->
+                <div class="lg:w-1/2">
+                    <div class="bg-gray-800 p-6 rounded-xl shadow-lg mb-6">
+                        <h2 class="text-xl font-bold text-white mb-4 flex items-center">
+                            <i class="fas fa-list-ul text-purple-400 mr-2"></i> Ingredients
+                        </h2>
+                        <ul id="recipe-ingredients" class="space-y-3">
+                            <!-- Ingredients will be added here dynamically -->
+                        </ul>
+                    </div>
+                    
+                    <div class="bg-gray-800 p-6 rounded-xl shadow-lg mb-6">
+                        <h2 class="text-xl font-bold text-white mb-4 flex items-center">
+                            <i class="fas fa-list-ol text-purple-400 mr-2"></i> Instructions
+                        </h2>
+                        <div id="recipe-instructions" class="space-y-4">
+                            <!-- Instructions will be added here dynamically -->
                         </div>
-                        <div class="glass rounded-xl p-4 text-center">
-                            <div class="text-lg font-bold gradient-text" id="recipe-protein">22g</div>
-                            <div class="text-sm text-gray-400">Protein</div>
-                        </div>
-                        <div class="glass rounded-xl p-4 text-center">
-                            <div class="text-lg font-bold gradient-text" id="recipe-carbs">45g</div>
-                            <div class="text-sm text-gray-400">Carbs</div>
-                        </div>
-                        <div class="glass rounded-xl p-4 text-center">
-                            <div class="text-lg font-bold gradient-text" id="recipe-fat">15g</div>
-                            <div class="text-sm text-gray-400">Fat</div>
+                    </div>
+                    
+                    <div class="bg-gray-800 p-6 rounded-xl shadow-lg">
+                        <h2 class="text-xl font-bold text-white mb-4 flex items-center">
+                            <i class="fas fa-utensils text-purple-400 mr-2"></i> Nutrition Information
+                        </h2>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <div class="bg-gray-700 p-3 rounded-lg text-center hover:bg-gray-600 transition">
+                                <div class="text-lg font-bold text-white" id="recipe-calories">350</div>
+                                <div class="text-sm text-gray-400">Calories</div>
+                            </div>
+                            <div class="bg-gray-700 p-3 rounded-lg text-center hover:bg-gray-600 transition">
+                                <div class="text-lg font-bold text-white" id="recipe-protein">22g</div>
+                                <div class="text-sm text-gray-400">Protein</div>
+                            </div>
+                            <div class="bg-gray-700 p-3 rounded-lg text-center hover:bg-gray-600 transition">
+                                <div class="text-lg font-bold text-white" id="recipe-carbs">45g</div>
+                                <div class="text-sm text-gray-400">Carbs</div>
+                            </div>
+                            <div class="bg-gray-700 p-3 rounded-lg text-center hover:bg-gray-600 transition">
+                                <div class="text-lg font-bold text-white" id="recipe-fat">15g</div>
+                                <div class="text-sm text-gray-400">Fat</div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </main>
+    </section>
 
-    <!-- Modern Footer -->
-    <footer class="glass mt-12">
-        <div class="container mx-auto px-4 py-8">
-            <div class="flex flex-col md:flex-row items-center justify-between">
-                <a href="index.html" class="flex items-center space-x-2 mb-4 md:mb-0">
-                    <i class="fas fa-utensils text-purple-500 text-2xl"></i>
-                    <span class="text-2xl font-bold gradient-text">NutriOrder</span>
+    <!-- Footer -->
+    <footer class="text-gray-300 body-font bg-gray-800">
+        <div class="container px-5 py-8 mx-auto flex items-center sm:flex-row flex-col">
+            <a href="index.html" class="flex title-font font-medium items-center md:justify-start justify-center text-white">
+                <i class="fas fa-utensils text-purple-500 text-2xl mr-2"></i>
+                <span class="ml-3 text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-600">NutriOrder</span>
+            </a>
+            <p class="text-sm text-gray-400 sm:ml-4 sm:pl-4 sm:border-l-2 sm:border-gray-700 sm:py-2 sm:mt-0 mt-4">© 2023 NutriOrder —
+                <a href="#" class="text-gray-300 ml-1" rel="noopener noreferrer" target="_blank">All Rights Reserved</a>
+            </p>
+            <span class="inline-flex sm:ml-auto sm:mt-0 mt-4 justify-center sm:justify-start">
+                <a href="#" class="text-gray-400 hover:text-purple-400">
+                    <i class="fab fa-facebook-f"></i>
                 </a>
-                <p class="text-sm text-gray-400">© 2023 NutriOrder — All Rights Reserved</p>
-                <div class="flex space-x-6 mt-4 md:mt-0">
-                    <a href="#" class="text-gray-400 hover:text-purple-400 transition">
-                        <i class="fab fa-facebook-f"></i>
-                    </a>
-                    <a href="#" class="text-gray-400 hover:text-purple-400 transition">
-                        <i class="fab fa-twitter"></i>
-                    </a>
-                    <a href="#" class="text-gray-400 hover:text-purple-400 transition">
-                        <i class="fab fa-instagram"></i>
-                    </a>
-                </div>
-            </div>
+                <a href="#" class="ml-3 text-gray-400 hover:text-purple-400">
+                    <i class="fab fa-twitter"></i>
+                </a>
+                <a href="#" class="ml-3 text-gray-400 hover:text-purple-400">
+                    <i class="fab fa-instagram"></i>
+                </a>
+            </span>
         </div>
     </footer>
 

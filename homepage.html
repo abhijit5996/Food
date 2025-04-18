@@ -115,7 +115,7 @@
             apiKey: "AIzaSyBx0Kt9o04ye0XrtA8ecp84wD8Q9OCDjlA",
             authDomain: "foodorder-4380c.firebaseapp.com",
             projectId: "foodorder-4380c",
-            storageBucket: "foodorder-4380c.firebasestorage.app",
+            storageBucket: "foodorder-4380c.appspot.com",
             messagingSenderId: "735023580381",
             appId: "1:735023580381:web:c6740bef2fc9bdee1b4734"
         };
@@ -447,7 +447,7 @@
             </div>
 
             <!-- Loading State -->
-            <div id="loading-state" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div id="loading-state" class="hidden grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 <!-- Loading skeletons -->
                 <div class="bg-gray-800 rounded-lg overflow-hidden shadow animate-pulse">
                     <div class="h-48 bg-gray-700"></div>
@@ -567,6 +567,31 @@
             </span>
         </div>
     </footer>
+
+    <!-- Restaurant Menu Modal -->
+    <div id="restaurant-menu-modal" class="hidden fixed inset-0 bg-black bg-opacity-75 z-50 overflow-y-auto">
+        <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div class="inline-block align-bottom bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
+                <div class="px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 id="restaurant-menu-title" class="text-lg leading-6 font-medium text-white"></h3>
+                        <button onclick="hideRestaurantMenu()" class="text-gray-400 hover:text-white">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <p id="restaurant-menu-description" class="text-sm text-gray-300 mb-4"></p>
+                    <div id="restaurant-menu-items" class="grid gap-4">
+                        <!-- Menu items will be loaded here -->
+                    </div>
+                </div>
+                <div class="px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                    <button onclick="hideRestaurantMenu()" type="button" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-purple-600 text-base font-medium text-white hover:bg-purple-700 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script>
         // Theme toggle functionality
@@ -1394,6 +1419,7 @@
                            item.description.toLowerCase().includes(allergen);
                 });
             });
+        };
             
             // Score each food based on how well it matches user preferences
             filteredFoods = filteredFoods.map(food => {
@@ -1487,9 +1513,9 @@
                 }
                 return b.rating - a.rating;
             });
-            
             return filteredFoods;
-        }
+        
+        
 
         // Enhanced restaurant recommendation algorithm
         function recommendRestaurants() {
@@ -1632,8 +1658,16 @@
                 // Generate badges for dietary tags that match user preferences
                 const matchingDietTags = food.diet.filter(diet => 
                     (defaultUserPreferences.diet.includes(diet) || 
-                    (defaultUserPreferences.meal_pref.includes(diet))
-                ));
+                    (defaultUserPreferences.meal_pref.includes(diet)
+                )));
+                const dietTags = matchingDietTags.length > 0 ? 
+                    `<div class="absolute top-2 left-2 flex flex-wrap gap-1">
+                        ${matchingDietTags.map(tag => `
+                            <span class="bg-green-900 text-green-200 text-xs font-semibold px-2 py-0.5 rounded">
+                                ${tag.toUpperCase()}
+                            </span>
+                        `).join('')}
+                    </div>` : '';
                 
                 foodCard.innerHTML = `
                     <div class="relative">
