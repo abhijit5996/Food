@@ -62,6 +62,101 @@
                 font-size: 1.1rem;
             }
         }
+
+        /* Match score indicator */
+        .match-score {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
+            z-index: 10;
+        }
+
+        .match-score.high {
+            background: rgba(74, 222, 128, 0.9);
+        }
+
+        .match-score.medium {
+            background: rgba(250, 204, 21, 0.9);
+        }
+
+        .match-score.low {
+            background: rgba(248, 113, 113, 0.9);
+        }
+
+        /* Badge styles */
+        .diet-badge {
+            font-size: 0.7rem;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-right: 4px;
+            margin-bottom: 4px;
+            display: inline-block;
+        }
+
+        .vegetarian {
+            background-color: #4ade80;
+            color: #052e16;
+        }
+
+        .vegan {
+            background-color: #86efac;
+            color: #052e16;
+        }
+
+        .gluten-free {
+            background-color: #a5b4fc;
+            color: #1e1b4b;
+        }
+
+        .high-protein {
+            background-color: #fca5a5;
+            color: #450a0a;
+        }
+
+        .low-carb {
+            background-color: #bae6fd;
+            color: #083344;
+        }
+
+        .keto {
+            background-color: #c7d2fe;
+            color: #312e81;
+        }
+
+        .balanced {
+            background-color: #ddd6fe;
+            color: #4c1d95;
+        }
+
+        .diabetes-friendly {
+            background-color: #bbf7d0;
+            color: #14532d;
+        }
+
+        .heart-healthy {
+            background-color: #bfdbfe;
+            color: #1e3a8a;
+        }
+
+        .weight-loss {
+            background-color: #fecaca;
+            color: #7f1d1d;
+        }
+
+        .muscle-gain {
+            background-color: #fed7aa;
+            color: #7c2d12;
+        }
     </style>
     <script>
         tailwind.config = {
@@ -124,6 +219,25 @@
         <div class="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-gray-900 to-transparent"></div>
     </section>
 
+    <!-- User Preferences Info -->
+    <section id="user-prefs" class="bg-gray-800 py-6 px-6 shadow-lg hidden">
+        <div class="container mx-auto">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h3 class="text-lg font-semibold text-white">Showing recommendations based on your profile</h3>
+                    <div id="preferences-summary" class="flex flex-wrap gap-2 mt-2"></div>
+                </div>
+                <a href="preferences.html" class="text-purple-400 hover:text-purple-300 text-sm flex items-center">
+                    <i class="fas fa-edit mr-1"></i> Update preferences
+                </a>
+            </div>
+            <div id="health-tips" class="mt-4 p-4 bg-gray-700 rounded-lg hidden">
+                <h4 class="font-semibold text-purple-300 mb-2"><i class="fas fa-lightbulb mr-2"></i>Health Tips</h4>
+                <div id="tips-content" class="text-sm text-gray-300"></div>
+            </div>
+        </div>
+    </section>
+
     <!-- Restaurants Section -->
     <section class="text-gray-300 body-font py-12 bg-gray-900">
         <div class="container px-5 mx-auto">
@@ -170,6 +284,14 @@
                 <h2 class="text-xl font-bold title-font mb-6 text-white flex items-center">
                     <i class="fas fa-heart text-purple-500 mr-2"></i> Recommended For You
                 </h2>
+                <div id="no-recommendations" class="bg-gray-800 p-8 rounded-lg text-center hidden">
+                    <i class="fas fa-utensils text-4xl text-purple-500 mb-4"></i>
+                    <h3 class="text-xl font-semibold text-white mb-2">No perfect matches found</h3>
+                    <p class="text-gray-400 mb-4">We couldn't find restaurants that match all your preferences. Try adjusting your filters or preferences.</p>
+                    <a href="preferences.html" class="inline-block bg-purple-600 hover:bg-purple-700 text-white py-2 px-6 rounded-lg transition">
+                        Update Preferences
+                    </a>
+                </div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" id="recommended-restaurants">
                     <!-- Recommended restaurants will be loaded here -->
                 </div>
@@ -300,21 +422,156 @@
         </div>
     </footer>
 
-    <script>
-        // Theme toggle functionality
-        const themeToggle = document.getElementById('theme-toggle');
-        if (themeToggle) {
-            themeToggle.addEventListener('click', () => {
-                document.documentElement.classList.toggle('dark');
-                localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
-            });
+    <script type="module">
+        // Import Firebase modules
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBx0Kt9o04ye0XrtA8ecp84wD8Q9OCDjlA",
+            authDomain: "foodorder-4380c.firebaseapp.com",
+            projectId: "foodorder-4380c",
+            storageBucket: "foodorder-4380c.appspot.com",
+            messagingSenderId: "735023580381",
+            appId: "1:735023580381:web:c6740bef2fc9bdee1b4734"
+        };
+    
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+    
+        // User preferences object
+        let userPreferences = {};
+    
+        // Check auth state and load preferences
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                // User is signed in, get their preferences
+                const userDocRef = doc(db, 'users', user.uid);
+                const userDoc = await getDoc(userDocRef);
+                
+                if (userDoc.exists() && userDoc.data().preferences) {
+                    userPreferences = userDoc.data().preferences;
+                    localStorage.setItem('userPreferences', JSON.stringify(userPreferences));
+                    showUserPreferences();
+                    loadRestaurants();
+                } else {
+                    // Try to load from localStorage if not in Firestore
+                    const localPrefs = localStorage.getItem('userPreferences');
+                    if (localPrefs) {
+                        userPreferences = JSON.parse(localPrefs);
+                        showUserPreferences();
+                        loadRestaurants();
+                    }
+                }
+            } else {
+                // User is not signed in, try to load from localStorage
+                const localPrefs = localStorage.getItem('userPreferences');
+                if (localPrefs) {
+                    userPreferences = JSON.parse(localPrefs);
+                    showUserPreferences();
+                    loadRestaurants();
+                }
+            }
+        });
+    
+        // Display user preferences at the top
+        function showUserPreferences() {
+            const prefsSection = document.getElementById('user-prefs');
+            const prefsSummary = document.getElementById('preferences-summary');
+            const healthTips = document.getElementById('health-tips');
+            const tipsContent = document.getElementById('tips-content');
+            
+            if (!userPreferences || Object.keys(userPreferences).length === 0) {
+                prefsSection.classList.add('hidden');
+                return;
+            }
+            
+            prefsSection.classList.remove('hidden');
+            prefsSummary.innerHTML = '';
+            
+            // Show dietary preferences
+            if (userPreferences.diet && userPreferences.diet.length > 0) {
+                userPreferences.diet.forEach(diet => {
+                    const badge = document.createElement('span');
+                    badge.className = 'text-xs bg-purple-900 text-purple-200 px-2 py-1 rounded';
+                    badge.textContent = diet.charAt(0).toUpperCase() + diet.slice(1);
+                    prefsSummary.appendChild(badge);
+                });
+            }
+            
+            // Show fitness goals
+            if (userPreferences.fitness_goal) {
+                const badge = document.createElement('span');
+                badge.className = 'text-xs bg-blue-900 text-blue-200 px-2 py-1 rounded';
+                badge.textContent = 'Goal: ' + userPreferences.fitness_goal.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                prefsSummary.appendChild(badge);
+            }
+            
+            // Show health conditions
+            if (userPreferences.health_condition && userPreferences.health_condition.length > 0) {
+                userPreferences.health_condition.forEach(condition => {
+                    const badge = document.createElement('span');
+                    badge.className = 'text-xs bg-green-900 text-green-200 px-2 py-1 rounded';
+                    badge.textContent = condition.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                    prefsSummary.appendChild(badge);
+                });
+            }
+            
+            // Generate health tips based on preferences
+            const tips = generateHealthTips();
+            if (tips.length > 0) {
+                healthTips.classList.remove('hidden');
+                tipsContent.innerHTML = tips.map(tip => `<p class="mb-2">• ${tip}</p>`).join('');
+            } else {
+                healthTips.classList.add('hidden');
+            }
         }
-
-        // Check for saved theme preference
-        if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-            document.documentElement.classList.add('dark');
+    
+        // Generate personalized health tips
+        function generateHealthTips() {
+            const tips = [];
+            
+            // Tips based on health conditions
+            if (userPreferences.health_condition) {
+                if (userPreferences.health_condition.includes('diabetes')) {
+                    tips.push("For diabetes management, focus on foods with low glycemic index like whole grains, lentils and fiber-rich vegetables.");
+                }
+                if (userPreferences.health_condition.includes('hypertension')) {
+                    tips.push("To manage hypertension, choose foods low in sodium and rich in potassium like bananas, coconut water and leafy greens.");
+                }
+                if (userPreferences.health_condition.includes('heart-disease')) {
+                    tips.push("For heart health, select foods low in saturated fats like grilled fish, sprouts and use healthy oils like mustard or olive oil.");
+                }
+                if (userPreferences.health_condition.includes('cholesterol')) {
+                    tips.push("To lower cholesterol, opt for foods high in soluble fiber like oats, flaxseeds and legumes.");
+                }
+            }
+            
+            // Tips based on fitness goals
+            if (userPreferences.fitness_goal) {
+                if (userPreferences.fitness_goal === 'weight-loss') {
+                    tips.push("For weight loss, focus on high-protein, high-fiber Indian foods like dal, sprouts and vegetable curries with minimal oil.");
+                }
+                if (userPreferences.fitness_goal === 'muscle-gain') {
+                    tips.push("For muscle gain, ensure adequate protein intake (1.6-2.2g per kg of body weight daily) from paneer, eggs, chicken and lentils.");
+                }
+                if (userPreferences.fitness_goal === 'endurance') {
+                    tips.push("For endurance training, include complex carbohydrates like whole wheat roti, brown rice and oats for sustained energy.");
+                }
+            }
+            
+            // General healthy eating tips
+            if (tips.length === 0) {
+                tips.push("Aim for a balanced Indian diet with plenty of vegetables, dal, roti/rice in moderation and healthy fats like ghee in small quantities.");
+            }
+            
+            return tips;
         }
-        
+    
         // Shopping cart - load from localStorage or initialize empty
         let cart = JSON.parse(localStorage.getItem('cart')) || [];
         
@@ -327,7 +584,7 @@
             cartOverlay.classList.toggle('hidden');
             updateCart();
         }
-
+    
         // Update cart UI
         function updateCart() {
             const cartItemsContainer = document.getElementById('cart-items');
@@ -374,7 +631,7 @@
             cartSubtotal.textContent = `₹${subtotal.toFixed(2)}`;
             cartTotal.textContent = `₹${total.toFixed(2)}`;
         }
-
+    
         // Add item to cart
         function addToCart(item) {
             const existingItem = cart.find(i => i.id === item.id);
@@ -391,7 +648,7 @@
             updateCart();
             showAddedToCartMessage(item.name);
         }
-
+    
         // Show notification when item is added to cart
         function showAddedToCartMessage(itemName) {
             const notification = document.createElement('div');
@@ -407,7 +664,7 @@
                 setTimeout(() => notification.remove(), 300);
             }, 2000);
         }
-
+    
         // Remove item from cart
         function removeFromCart(itemId) {
             const itemIndex = cart.findIndex(i => i.id === itemId);
@@ -425,12 +682,12 @@
                 updateCart();
             }
         }
-
+    
         // Close menu modal
         function hideRecipe() {
             document.getElementById('menu-modal').classList.add('hidden');
         }
-
+    
         // View restaurant menu
         function viewRestaurantMenu(restaurantId) {
             const restaurant = restaurants.find(r => r.id === restaurantId);
@@ -445,17 +702,42 @@
             for (const [sectionName, items] of Object.entries(restaurant.menu)) {
                 const section = document.createElement('div');
                 section.className = 'menu-section';
+                
+                // Filter and sort items based on user preferences
+                const filteredItems = items
+                    .map(item => {
+                        // Calculate match score for each item
+                        const matchInfo = calculateFoodMatchScore(item, restaurant);
+                        return {
+                            ...item,
+                            matchScore: matchInfo.score,
+                            matchReasons: matchInfo.reasons
+                        };
+                    })
+                    .filter(item => item.matchScore > 0) // Only show items with some match
+                    .sort((a, b) => b.matchScore - a.matchScore); // Sort by best match first
+                
+                if (filteredItems.length === 0) continue;
+                
                 section.innerHTML = `
                     <h3 class="text-lg font-semibold text-white mb-4">${sectionName}</h3>
                     <div class="space-y-4">
-                        ${items.map(item => `
-                            <div class="flex items-start">
+                        ${filteredItems.map(item => `
+                            <div class="flex items-start relative">
                                 <div class="w-20 h-20 bg-gray-700 rounded-md overflow-hidden flex-shrink-0">
                                     <img src="${item.image}" alt="${item.name}" class="w-full h-full object-cover">
+                                    <div class="match-score ${getMatchScoreClass(item.matchScore)}">
+                                        ${item.matchScore}
+                                    </div>
                                 </div>
                                 <div class="ml-4 flex-grow">
                                     <h4 class="font-medium text-white">${item.name}</h4>
                                     <p class="text-sm text-gray-300 mt-1">${item.description}</p>
+                                    <div class="mt-2 flex flex-wrap">
+                                        ${item.matchReasons.map(reason => 
+                                            `<span class="diet-badge ${reason.class}">${reason.text}</span>`
+                                        ).join('')}
+                                    </div>
                                     <div class="flex items-center justify-between mt-2">
                                         <span class="font-medium text-purple-400">₹${item.price.toFixed(2)}</span>
                                         <button onclick="addToCart(${JSON.stringify({
@@ -478,245 +760,843 @@
             
             document.getElementById('menu-modal').classList.remove('hidden');
         }
-
-        // Sample restaurant data with healthy food options
+    
+        // Get CSS class for match score display
+        function getMatchScoreClass(score) {
+            if (score >= 8) return 'high';
+            if (score >= 5) return 'medium';
+            return 'low';
+        }
+    
+        // Calculate how well a food item matches user preferences
+        function calculateFoodMatchScore(foodItem, restaurant) {
+            if (!userPreferences || Object.keys(userPreferences).length === 0) {
+                return { score: 5, reasons: [] }; // Neutral score if no preferences
+            }
+            
+            let score = 5; // Base score
+            const reasons = [];
+            
+            // 1. Check dietary restrictions (strict filters - if these don't match, score should be 0)
+            if (userPreferences.diet) {
+                if (userPreferences.diet.includes('vegetarian') && !isVegetarian(foodItem, restaurant)) {
+                    return { score: 0, reasons: [] };
+                }
+                if (userPreferences.diet.includes('vegan') && !isVegan(foodItem, restaurant)) {
+                    return { score: 0, reasons: [] };
+                }
+                if (userPreferences.diet.includes('gluten-free') && !isGlutenFree(foodItem, restaurant)) {
+                    return { score: 0, reasons: [] };
+                }
+                if (userPreferences.diet.includes('halal') && !isHalal(foodItem, restaurant)) {
+                    return { score: 0, reasons: [] };
+                }
+                if (userPreferences.diet.includes('jain') && !isJain(foodItem, restaurant)) {
+                    return { score: 0, reasons: [] };
+                }
+            }
+            
+            // 2. Check allergies (strict filter)
+            if (userPreferences.allergy) {
+                if (hasAllergens(foodItem, userPreferences.allergy)) {
+                    return { score: 0, reasons: [] };
+                }
+            }
+            
+            // 3. Add points for matching dietary preferences
+            if (userPreferences.diet) {
+                if (userPreferences.diet.includes('vegetarian') && isVegetarian(foodItem, restaurant)) {
+                    score += 1;
+                    reasons.push({ text: 'Vegetarian', class: 'vegetarian' });
+                }
+                if (userPreferences.diet.includes('vegan') && isVegan(foodItem, restaurant)) {
+                    score += 1.5;
+                    reasons.push({ text: 'Vegan', class: 'vegan' });
+                }
+                if (userPreferences.diet.includes('gluten-free') && isGlutenFree(foodItem, restaurant)) {
+                    score += 1;
+                    reasons.push({ text: 'Gluten-Free', class: 'gluten-free' });
+                }
+                if (userPreferences.diet.includes('jain') && isJain(foodItem, restaurant)) {
+                    score += 1;
+                    reasons.push({ text: 'Jain', class: 'vegetarian' });
+                }
+            }
+            
+            // 4. Add points for matching meal preferences
+            if (userPreferences.meal_pref) {
+                if (userPreferences.meal_pref.includes('high-protein') && isHighProtein(foodItem)) {
+                    score += 1.5;
+                    reasons.push({ text: 'High Protein', class: 'high-protein' });
+                }
+                if (userPreferences.meal_pref.includes('low-carb') && isLowCarb(foodItem)) {
+                    score += 1.5;
+                    reasons.push({ text: 'Low Carb', class: 'low-carb' });
+                }
+                if (userPreferences.meal_pref.includes('keto') && isKeto(foodItem)) {
+                    score += 1;
+                    reasons.push({ text: 'Keto', class: 'keto' });
+                }
+                if (userPreferences.meal_pref.includes('balanced') && isBalanced(foodItem)) {
+                    score += 1;
+                    reasons.push({ text: 'Balanced', class: 'balanced' });
+                }
+            }
+            
+            // 5. Adjust for health conditions
+            if (userPreferences.health_condition) {
+                if (userPreferences.health_condition.includes('diabetes') && isDiabetesFriendly(foodItem)) {
+                    score += 1.5;
+                    reasons.push({ text: 'Diabetes-Friendly', class: 'diabetes-friendly' });
+                }
+                if (userPreferences.health_condition.includes('hypertension') && isLowSodium(foodItem)) {
+                    score += 1;
+                    reasons.push({ text: 'Low Sodium', class: 'heart-healthy' });
+                }
+                if (userPreferences.health_condition.includes('heart-disease') && isHeartHealthy(foodItem)) {
+                    score += 1;
+                    reasons.push({ text: 'Heart Healthy', class: 'heart-healthy' });
+                }
+                if (userPreferences.health_condition.includes('cholesterol') && isCholesterolFriendly(foodItem)) {
+                    score += 1;
+                    reasons.push({ text: 'Cholesterol-Friendly', class: 'heart-healthy' });
+                }
+            }
+            
+            // 6. Adjust for fitness goals
+            if (userPreferences.fitness_goal) {
+                if (userPreferences.fitness_goal === 'weight-loss' && isWeightLossFriendly(foodItem)) {
+                    score += 1.5;
+                    reasons.push({ text: 'Weight Loss', class: 'weight-loss' });
+                }
+                if (userPreferences.fitness_goal === 'muscle-gain' && isMuscleGainFriendly(foodItem)) {
+                    score += 1.5;
+                    reasons.push({ text: 'Muscle Gain', class: 'muscle-gain' });
+                }
+                if (userPreferences.fitness_goal === 'endurance' && isEnduranceFriendly(foodItem)) {
+                    score += 1;
+                    reasons.push({ text: 'Endurance', class: 'balanced' });
+                }
+            }
+            
+            // Cap score at 10
+            score = Math.min(10, Math.round(score * 10) / 10);
+            
+            return { score, reasons };
+        }
+    
+        // Food classification functions
+        function isVegetarian(foodItem, restaurant) {
+            const nonVegKeywords = ['chicken', 'meat', 'beef', 'pork', 'fish', 'seafood', 'shrimp', 'lamb', 'mutton', 'egg'];
+            return !nonVegKeywords.some(keyword => 
+                foodItem.name.toLowerCase().includes(keyword) || 
+                foodItem.description.toLowerCase().includes(keyword)
+            );
+        }
+    
+        function isVegan(foodItem, restaurant) {
+            const nonVeganKeywords = ['cheese', 'milk', 'butter', 'cream', 'yogurt', 'honey', 'egg', 'paneer', 'ghee', 'dahi'];
+            return isVegetarian(foodItem, restaurant) && 
+                   !nonVeganKeywords.some(keyword => 
+                       foodItem.name.toLowerCase().includes(keyword) || 
+                       foodItem.description.toLowerCase().includes(keyword)
+                   );
+        }
+    
+        function isGlutenFree(foodItem, restaurant) {
+            const glutenKeywords = ['wheat', 'bread', 'pasta', 'flour', 'barley', 'rye', 'soy sauce', 'maida', 'atta', 'besan'];
+            return !glutenKeywords.some(keyword => 
+                foodItem.name.toLowerCase().includes(keyword) || 
+                foodItem.description.toLowerCase().includes(keyword)
+            );
+        }
+    
+        function isHalal(foodItem, restaurant) {
+            return restaurant.cuisine.includes('halal') || 
+                   restaurant.name.toLowerCase().includes('halal');
+        }
+    
+        function isJain(foodItem, restaurant) {
+            const jainRestricted = ['onion', 'garlic', 'potato', 'carrot', 'radish', 'beetroot'];
+            return isVegetarian(foodItem, restaurant) && 
+                   !jainRestricted.some(keyword => 
+                       foodItem.name.toLowerCase().includes(keyword) || 
+                       foodItem.description.toLowerCase().includes(keyword)
+                   );
+        }
+    
+        function hasAllergens(foodItem, userAllergies) {
+            const allergenMap = {
+                'nuts': ['nut', 'almond', 'peanut', 'cashew', 'pistachio', 'walnut', 'kaju', 'badam'],
+                'dairy': ['milk', 'cheese', 'butter', 'cream', 'yogurt', 'paneer', 'ghee', 'dahi'],
+                'gluten': ['wheat', 'bread', 'pasta', 'flour', 'barley', 'rye', 'maida', 'atta'],
+                'shellfish': ['shrimp', 'prawn', 'crab', 'lobster', 'shellfish', 'jhinga'],
+                'soy': ['soy', 'tofu', 'soya', 'edamame'],
+                'eggs': ['egg', 'mayo', 'mayonnaise', 'anda']
+            };
+            
+            return userAllergies.some(allergy => {
+                const keywords = allergenMap[allergy] || [];
+                return keywords.some(keyword => 
+                    foodItem.name.toLowerCase().includes(keyword) || 
+                    foodItem.description.toLowerCase().includes(keyword)
+                );
+            });
+        }
+    
+        function isHighProtein(foodItem) {
+            const proteinKeywords = ['chicken', 'fish', 'tofu', 'beans', 'lentils', 'protein', 'steak', 'egg', 'paneer', 'dal', 'chana', 'rajma', 'sprouts'];
+            return proteinKeywords.some(keyword => 
+                foodItem.name.toLowerCase().includes(keyword) || 
+                foodItem.description.toLowerCase().includes(keyword)
+            );
+        }
+    
+        function isLowCarb(foodItem) {
+            const carbKeywords = ['rice', 'pasta', 'bread', 'potato', 'noodle', 'sugar', 'roti', 'naan', 'paratha', 'poori'];
+            return !carbKeywords.some(keyword => 
+                foodItem.name.toLowerCase().includes(keyword) || 
+                foodItem.description.toLowerCase().includes(keyword)
+            );
+        }
+    
+        function isKeto(foodItem) {
+            const ketoKeywords = ['keto', 'high-fat', 'avocado', 'cheese', 'butter', 'ghee', 'paneer'];
+            const nonKetoKeywords = ['sugar', 'bread', 'pasta', 'rice', 'potato', 'roti', 'naan'];
+            
+            return (ketoKeywords.some(keyword => 
+                    foodItem.name.toLowerCase().includes(keyword) || 
+                    foodItem.description.toLowerCase().includes(keyword)) &&
+                   !nonKetoKeywords.some(keyword => 
+                    foodItem.name.toLowerCase().includes(keyword) || 
+                    foodItem.description.toLowerCase().includes(keyword))
+            );
+        }
+    
+        function isBalanced(foodItem) {
+            const hasProtein = isHighProtein(foodItem);
+            const hasVeggies = ['vegetable', 'salad', 'greens', 'spinach', 'kale', 'sabzi', 'bhaji'].some(keyword => 
+                foodItem.description.toLowerCase().includes(keyword)
+            );
+            const hasHealthyCarbs = ['quinoa', 'brown rice', 'whole grain', 'bajra', 'jowar'].some(keyword => 
+                foodItem.description.toLowerCase().includes(keyword)
+            );
+            
+            return hasProtein && (hasVeggies || hasHealthyCarbs);
+        }
+    
+        function isDiabetesFriendly(foodItem) {
+            const badKeywords = ['sugar', 'syrup', 'juice', 'white rice', 'white bread', 'maida', 'fried', 'ghee'];
+            const goodKeywords = ['high-fiber', 'whole grain', 'vegetable', 'protein', 'multigrain', 'bajra'];
+            
+            return !badKeywords.some(keyword => 
+                    foodItem.name.toLowerCase().includes(keyword) || 
+                    foodItem.description.toLowerCase().includes(keyword)) &&
+                   goodKeywords.some(keyword => 
+                    foodItem.description.toLowerCase().includes(keyword)
+                );
+        }
+    
+        function isLowSodium(foodItem) {
+            const highSodiumKeywords = ['soy sauce', 'processed', 'canned', 'pickle', 'bacon', 'sausage', 'papad', 'chutney'];
+            return !highSodiumKeywords.some(keyword => 
+                foodItem.name.toLowerCase().includes(keyword) || 
+                foodItem.description.toLowerCase().includes(keyword)
+            );
+        }
+    
+        function isHeartHealthy(foodItem) {
+            const badKeywords = ['fried', 'cream', 'butter', 'fatty', 'ghee', 'malai'];
+            const goodKeywords = ['omega-3', 'salmon', 'avocado', 'olive oil', 'nuts', 'flaxseed'];
+            
+            return !badKeywords.some(keyword => 
+                    foodItem.name.toLowerCase().includes(keyword) || 
+                    foodItem.description.toLowerCase().includes(keyword)) &&
+                   goodKeywords.some(keyword => 
+                    foodItem.description.toLowerCase().includes(keyword)
+                );
+            
+        }
+    
+        function isCholesterolFriendly(foodItem) {
+            const badKeywords = ['fried', 'fatty', 'cream', 'butter', 'cheese', 'ghee'];
+            const goodKeywords = ['fiber', 'oat', 'beans', 'lentil', 'vegetable', 'whole grain'];
+            
+            return !badKeywords.some(keyword => 
+                    foodItem.name.toLowerCase().includes(keyword) || 
+                    foodItem.description.toLowerCase().includes(keyword)) &&
+                   goodKeywords.some(keyword => 
+                    foodItem.description.toLowerCase().includes(keyword)
+                );
+            
+        }
+    
+        function isWeightLossFriendly(foodItem) {
+            const badKeywords = ['fried', 'cream', 'cheese', 'sugar', 'syrup', 'ghee', 'malai'];
+            const goodKeywords = ['lean', 'grilled', 'steamed', 'vegetable', 'salad', 'sprouts'];
+            
+            return !badKeywords.some(keyword => 
+                    foodItem.name.toLowerCase().includes(keyword) || 
+                    foodItem.description.toLowerCase().includes(keyword)) &&
+                   goodKeywords.some(keyword => 
+                    foodItem.description.toLowerCase().includes(keyword)
+                );
+            
+        }
+    
+        function isMuscleGainFriendly(foodItem) {
+            return isHighProtein(foodItem);
+        }
+    
+        function isEnduranceFriendly(foodItem) {
+            const carbKeywords = ['whole grain', 'brown rice', 'quinoa', 'potato', 'oat', 'bajra', 'jowar'];
+            return carbKeywords.some(keyword => 
+                foodItem.description.toLowerCase().includes(keyword)
+            );
+        }
+    
+        // Sample restaurant data with healthy Indian food options
         const restaurants = [
             {
                 id: 1,
-                name: "Green Leaf Cafe",
-                cuisine: ["vegetarian", "healthy", "salads"],
-                rating: 4.5,
-                reviewCount: 120,
-                description: "Specializing in fresh, organic meals with plenty of vegetarian and vegan options.",
+                name: "Green Bites - Healthy Indian Cuisine",
+                cuisine: ["vegetarian", "healthy", "indian", "halal"],
+                rating: 4.6,
+                reviewCount: 320,
+                description: "Specializing in fresh, organic Indian meals with plenty of vegetarian and vegan options.",
                 image: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
                 recommended: true,
                 menu: {
-                    "Healthy Starters": [
-                        { id: 101, name: "Quinoa Salad", description: "Organic quinoa with fresh vegetables and lemon dressing", price: 220, image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=880&q=80" },
-                        { id: 102, name: "Avocado Toast", description: "Whole grain bread with smashed avocado and seeds", price: 180, image: "https://images.unsplash.com/photo-1558030006-450675393462?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1331&q=80" }
+                    "Healthy Breakfast": [
+                        { id: 101, name: "Moong Dal Chilla", description: "Protein-rich pancakes made from moong dal with minimal oil. Served with mint chutney.", price: 120, image: "https://www.whiskaffair.com/wp-content/uploads/2021/03/Moong-Dal-Chilla-2-3.jpg" },
+                        { id: 102, name: "Bajra Roti with Lauki Sabzi", description: "Nutritious pearl millet roti with bottle gourd vegetable curry.", price: 150, image: "https://www.whiskaffair.com/wp-content/uploads/2020/04/Bajra-Roti-2-3.jpg" },
+                        { id: 103, name: "Sprouts Chaat", description: "Healthy sprouted moong beans with onions, tomatoes and spices.", price: 110, image: "https://www.whiskaffair.com/wp-content/uploads/2020/12/Sprouts-Chaat-2-3.jpg" },
+                        { id: 104, name: "Oats Poha", description: "Light breakfast made with oats, peanuts and vegetables.", price: 130, image: "https://www.whiskaffair.com/wp-content/uploads/2020/04/Oats-Poha-2-3.jpg" },
+                        { id: 105, name: "Besan Chilla", description: "Gram flour pancakes stuffed with vegetables and spices.", price: 140, image: "https://www.whiskaffair.com/wp-content/uploads/2020/04/Besan-Chilla-2-3.jpg" }
+                    ],
+                    "Soups & Salads": [
+                        { id: 201, name: "Dal Shorba", description: "Light lentil soup with Indian spices, rich in protein and fiber.", price: 90, image: "https://www.whiskaffair.com/wp-content/uploads/2020/04/Dal-Shorba-2-3.jpg" },
+                        { id: 202, name: "Quinoa Salad", description: "Organic quinoa with fresh vegetables and lemon dressing. High in fiber and protein.", price: 220, image: "https://www.whiskaffair.com/wp-content/uploads/2020/04/Quinoa-Salad-2-3.jpg" },
+                        { id: 203, name: "Sprouts Salad", description: "Healthy sprouted beans with cucumbers, tomatoes and lemon.", price: 150, image: "https://www.whiskaffair.com/wp-content/uploads/2020/04/Sprouts-Salad-2-3.jpg" }
                     ],
                     "Main Course": [
-                        { id: 201, name: "Grilled Salmon", description: "Fresh salmon with steamed vegetables and quinoa", price: 350, image: "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80" },
-                        { id: 202, name: "Buddha Bowl", description: "Brown rice with roasted vegetables, chickpeas and tahini", price: 250, image: "https://images.unsplash.com/photo-1543351611-58f69d7c1781?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1074&q=80" }
+                        { id: 301, name: "Jowar Roti with Dal", description: "Sorghum flour roti with protein-rich lentil curry.", price: 180, image: "https://www.whiskaffair.com/wp-content/uploads/2020/04/Jowar-Roti-2-3.jpg" },
+                        { id: 302, name: "Brown Rice with Rajma", description: "Whole grain brown rice with kidney bean curry.", price: 200, image: "https://www.whiskaffair.com/wp-content/uploads/2020/04/Rajma-2-3.jpg" },
+                        { id: 303, name: "Palak Paneer with Multigrain Roti", description: "Spinach curry with cottage cheese and multigrain flatbread.", price: 240, image: "https://www.whiskaffair.com/wp-content/uploads/2020/04/Palak-Paneer-2-3.jpg" }
                     ],
                     "Healthy Desserts": [
-                        { id: 301, name: "Chia Pudding", description: "Chia seeds with almond milk and fresh berries", price: 120, image: "https://images.unsplash.com/photo-1505252585461-04db1eff8466?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=687&q=80" }
+                        { id: 401, name: "Dates Ladoo", description: "Sweet balls made from dates and nuts without added sugar.", price: 80, image: "https://www.whiskaffair.com/wp-content/uploads/2020/04/Dates-Ladoo-2-3.jpg" },
+                        { id: 402, name: "Makhana Kheer", description: "Light pudding made from fox nuts and low-fat milk.", price: 100, image: "https://www.whiskaffair.com/wp-content/uploads/2020/04/Makhana-Kheer-2-3.jpg" }
                     ]
                 }
             },
             {
                 id: 2,
-                name: "Organic Bistro",
-                cuisine: ["organic", "gluten-free", "vegan"],
+                name: "Organic Indian Delights",
+                cuisine: ["organic", "gluten-free", "vegan", "indian"],
                 rating: 4.7,
-                reviewCount: 210,
-                description: "100% organic ingredients with gluten-free and vegan options.",
+                reviewCount: 280,
+                description: "100% organic Indian ingredients with gluten-free and vegan options.",
                 image: "https://images.unsplash.com/photo-1631515243349-e0cb75fb8d3a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1188&q=80",
                 recommended: true,
                 menu: {
+                    "Organic Breakfast": [
+                        { id: 501, name: "Ragi Dosa", description: "Dosa made with finger millet flour, rich in calcium.", price: 150, image: "https://www.whiskaffair.com/wp-content/uploads/2020/04/Ragi-Dosa-2-3.jpg" },
+                        { id: 502, name: "Jowar Upma", description: "Healthy upma made with sorghum instead of semolina.", price: 140, image: "https://www.whiskaffair.com/wp-content/uploads/2020/04/Jowar-Upma-2-3.jpg" }
+                    ],
                     "Organic Bowls": [
-                        { id: 401, name: "Acai Bowl", description: "Acai berries with granola and seasonal fruits", price: 280, image: "https://images.unsplash.com/photo-1604329760661-e71dc83f8f26?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=687&q=80" },
-                        { id: 402, name: "Superfood Salad", description: "Kale, quinoa, avocado and pomegranate seeds", price: 240, image: "https://images.unsplash.com/photo-1546793665-c74683f339c1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=687&q=80" }
+                        { id: 601, name: "Bajra Khichdi", description: "Pearl millet and moong dal porridge with vegetables.", price: 180, image: "https://www.whiskaffair.com/wp-content/uploads/2020/04/Bajra-Khichdi-2-3.jpg" },
+                        { id: 602, name: "Quinoa Pulao", description: "Protein-rich quinoa cooked with Indian spices and vegetables.", price: 220, image: "https://www.whiskaffair.com/wp-content/uploads/2020/04/Quinoa-Pulao-2-3.jpg" }
                     ],
-                    "Healthy Wraps": [
-                        { id: 501, name: "Veggie Wrap", description: "Whole wheat wrap with hummus and fresh vegetables", price: 200, image: "https://images.unsplash.com/photo-1601050690597-df0568f70950?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80" }
-                    ],
-                    "Detox Drinks": [
-                        { id: 601, name: "Green Detox Juice", description: "Kale, cucumber, apple and lemon", price: 150, image: "https://images.unsplash.com/photo-1603569283847-aa295f0d016a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=764&q=80" }
+                    "Organic Main Course": [
+                        { id: 701, name: "Kuttu Roti with Lauki Sabzi", description: "Buckwheat flatbread with bottle gourd curry.", price: 200, image: "https://www.whiskaffair.com/wp-content/uploads/2020/04/Kuttu-Roti-2-3.jpg" },
+                        { id: 702, name: "Samak Rice with Kadhi", description: "Barnyard millet with yogurt-based curry.", price: 190, image: "https://www.whiskaffair.com/wp-content/uploads/2020/04/Samak-Rice-2-3.jpg" }
                     ]
                 }
             },
             {
                 id: 3,
-                name: "Fresh & Fit",
-                cuisine: ["healthy", "protein", "balanced"],
-                rating: 4.3,
-                reviewCount: 95,
-                description: "Nutritionist-designed meals for fitness enthusiasts.",
+                name: "Fit & Fresh - Indian Protein Kitchen",
+                cuisine: ["healthy", "protein", "balanced", "indian"],
+                rating: 4.5,
+                reviewCount: 210,
+                description: "Nutritionist-designed Indian meals for fitness enthusiasts.",
                 image: "https://images.unsplash.com/photo-1565557623262-b51c2513a641?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1071&q=80",
                 menu: {
-                    "Protein Meals": [
-                        { id: 701, name: "Grilled Chicken Bowl", description: "Lean chicken with brown rice and steamed veggies", price: 280, image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=880&q=80" },
-                        { id: 702, name: "Tofu Stir Fry", description: "Organic tofu with mixed vegetables in light sauce", price: 240, image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=880&q=80" }
+                    "Protein Breakfast": [
+                        { id: 801, name: "Paneer Bhurji with Multigrain Roti", description: "Scrambled cottage cheese with whole grain flatbread.", price: 180, image: "https://www.whiskaffair.com/wp-content/uploads/2020/04/Paneer-Bhurji-2-3.jpg" },
+                        { id: 802, name: "Egg Bhurji with Jowar Roti", description: "Scrambled eggs with sorghum flatbread.", price: 170, image: "https://www.whiskaffair.com/wp-content/uploads/2020/04/Egg-Bhurji-2-3.jpg" }
                     ],
-                    "Healthy Snacks": [
-                        { id: 801, name: "Protein Smoothie", description: "Whey protein with almond milk and banana", price: 160, image: "https://images.unsplash.com/photo-1505576399279-565b52d4ac71?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=687&q=80" },
-                        { id: 802, name: "Energy Balls", description: "Dates, nuts and seeds protein balls", price: 120, image: "https://images.unsplash.com/photo-1505576399279-565b52d4ac71?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=687&q=80" }
+                    "Protein Meals": [
+                        { id: 901, name: "Grilled Chicken with Quinoa", description: "Lean chicken with protein-rich quinoa and vegetables.", price: 280, image: "https://www.whiskaffair.com/wp-content/uploads/2020/04/Grilled-Chicken-2-3.jpg" },
+                        { id: 902, name: "Soya Chunks Curry with Brown Rice", description: "High-protein soy chunks in gravy with whole grain rice.", price: 240, image: "https://www.whiskaffair.com/wp-content/uploads/2020/04/Soya-Chunks-Curry-2-3.jpg" }
+                    ],
+                    "Protein Shakes": [
+                        { id: 1001, name: "Muscle Builder Shake", description: "Whey protein with banana, peanut butter and almond milk.", price: 180, image: "https://www.whiskaffair.com/wp-content/uploads/2020/04/Protein-Shake-2-3.jpg" },
+                        { id: 1002, name: "Vegan Protein Shake", description: "Plant-based protein with almond milk and berries.", price: 170, image: "https://www.whiskaffair.com/wp-content/uploads/2020/04/Vegan-Protein-Shake-2-3.jpg" }
                     ]
                 }
             },
             {
                 id: 4,
-                name: "Vegan Delight",
-                cuisine: ["vegan", "plant-based", "organic"],
+                name: "Vegan Indian Kitchen",
+                cuisine: ["vegan", "plant-based", "organic", "indian"],
                 rating: 4.6,
-                reviewCount: 180,
-                description: "100% plant-based meals made with organic ingredients.",
+                reviewCount: 190,
+                description: "100% plant-based Indian meals made with organic ingredients.",
                 image: "https://images.unsplash.com/photo-1601050690597-df0568f70950?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
                 menu: {
+                    "Vegan Breakfast": [
+                        { id: 1101, name: "Sabudana Khichdi", description: "Tapioca pearls cooked with peanuts and spices.", price: 130, image: "https://www.whiskaffair.com/wp-content/uploads/2020/04/Sabudana-Khichdi-2-3.jpg" },
+                        { id: 1102, name: "Ragi Dosa with Coconut Chutney", description: "Finger millet crepes with coconut dip.", price: 150, image: "https://www.whiskaffair.com/wp-content/uploads/2020/04/Ragi-Dosa-2-3.jpg" }
+                    ],
                     "Plant-Based Mains": [
-                        { id: 1001, name: "Vegan Buddha Bowl", description: "Quinoa, roasted veggies, avocado and tahini", price: 250, image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=880&q=80" },
-                        { id: 1002, name: "Lentil Curry", description: "Organic lentils with coconut milk and spices", price: 220, image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=880&q=80" }
+                        { id: 1201, name: "Vegan Thali", description: "Complete meal with dal, sabzi, roti, rice and salad.", price: 250, image: "https://www.whiskaffair.com/wp-content/uploads/2020/04/Vegan-Thali-2-3.jpg" },
+                        { id: 1202, name: "Lentil Curry with Brown Rice", description: "Organic lentils with whole grain rice.", price: 220, image: "https://www.whiskaffair.com/wp-content/uploads/2020/04/Lentil-Curry-2-3.jpg" }
                     ],
                     "Healthy Sides": [
-                        { id: 1101, name: "Sweet Potato Fries", description: "Baked sweet potato fries with herbs", price: 150, image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=880&q=80" },
-                        { id: 1102, name: "Kale Chips", description: "Crispy baked kale with sea salt", price: 120, image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=880&q=80" }
+                        { id: 1301, name: "Sweet Potato Fries", description: "Baked sweet potato fries with herbs.", price: 150, image: "https://www.whiskaffair.com/wp-content/uploads/2020/04/Sweet-Potato-Fries-2-3.jpg" },
+                        { id: 1302, name: "Kale Chips", description: "Crispy baked kale with sea salt.", price: 120, image: "https://www.whiskaffair.com/wp-content/uploads/2020/04/Kale-Chips-2-3.jpg" }
                     ]
                 }
             },
             {
                 id: 5,
-                name: "Mediterranean Kitchen",
-                cuisine: ["mediterranean", "healthy", "olive oil"],
-                rating: 4.2,
-                reviewCount: 75,
-                description: "Authentic Mediterranean cuisine with healthy fats.",
-                image: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1074&q=80",
+                name: "South Indian Healthy Kitchen",
+                cuisine: ["south indian", "vegetarian", "healthy"],
+                rating: 4.4,
+                reviewCount: 175,
+                description: "Authentic South Indian cuisine with healthy options.",
+                image: "https://images.unsplash.com/photo-1631515243349-e0cb75fb8d3a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1188&q=80",
+                recommended: true,
                 menu: {
-                    "Mediterranean Specials": [
-                        { id: 1201, name: "Greek Salad", description: "Fresh veggies with feta and olives", price: 220, image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=880&q=80" },
-                        { id: 1202, name: "Hummus Plate", description: "Homemade hummus with whole wheat pita", price: 180, image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=880&q=80" }
+                    "Healthy Dosas": [
+                        { id: 1401, name: "Ragi Dosa", description: "Dosa made with ragi flour, rich in calcium and fiber.", price: 180, image: "https://www.whiskaffair.com/wp-content/uploads/2020/04/Ragi-Dosa-2-3.jpg" },
+                        { id: 1402, name: "Multigrain Dosa", description: "Dosa made with a blend of healthy grains.", price: 190, image: "https://www.whiskaffair.com/wp-content/uploads/2020/04/Multigrain-Dosa-2-3.jpg" }
                     ],
-                    "Main Courses": [
-                        { id: 1301, name: "Grilled Fish", description: "Fresh fish with lemon and herbs", price: 350, image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=880&q=80" },
-                        { id: 1302, name: "Vegetable Tagine", description: "Moroccan style vegetable stew", price: 280, image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=880&q=80" }
+                    "Healthy Idlis": [
+                        { id: 1501, name: "Oats Idli", description: "Steamed cakes made with oats and lentils.", price: 120, image: "https://www.whiskaffair.com/wp-content/uploads/2020/04/Oats-Idli-2-3.jpg" },
+                        { id: 1502, name: "Ragi Idli", description: "Nutritious idlis made with finger millet.", price: 130, image: "https://www.whiskaffair.com/wp-content/uploads/2020/04/Ragi-Idli-2-3.jpg" }
+                    ],
+                    "Healthy Sides": [
+                        { id: 1601, name: "Sambar", description: "Lentil-based vegetable stew with minimal oil.", price: 60, image: "https://www.whiskaffair.com/wp-content/uploads/2020/04/Sambar-2-3.jpg" },
+                        { id: 1602, name: "Coconut Chutney", description: "Fresh coconut chutney with minimal oil.", price: 50, image: "https://www.whiskaffair.com/wp-content/uploads/2020/04/Coconut-Chutney-2-3.jpg" }
                     ]
                 }
             },
             {
                 id: 6,
-                name: "Smoothie Bar",
-                cuisine: ["smoothies", "juices", "healthy"],
-                rating: 4.4,
-                reviewCount: 150,
-                description: "Fresh smoothies and juices packed with nutrients.",
+                name: "North Indian Healthy Bites",
+                cuisine: ["north indian", "vegetarian", "healthy"],
+                rating: 4.3,
+                reviewCount: 195,
+                description: "Traditional North Indian cuisine with a healthy twist.",
                 image: "https://images.unsplash.com/photo-1601050690597-df0568f70950?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
                 menu: {
-                    "Smoothies": [
-                        { id: 1401, name: "Green Detox", description: "Spinach, kale, apple and lemon", price: 180, image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=880&q=80" },
-                        { id: 1402, name: "Berry Blast", description: "Mixed berries with almond milk", price: 200, image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=880&q=80" }
+                    "Healthy Starters": [
+                        { id: 1701, name: "Baked Samosa", description: "Whole wheat samosas with healthy fillings. Lower fat than traditional.", price: 150, image: "https://www.whiskaffair.com/wp-content/uploads/2020/04/Baked-Samosa-2-3.jpg" },
+                        { id: 1702, name: "Sprouts Chaat", description: "Healthy sprouts with Indian spices. High in protein and fiber.", price: 120, image: "https://www.whiskaffair.com/wp-content/uploads/2020/04/Sprouts-Chaat-2-3.jpg" }
                     ],
-                    "Cold Pressed Juices": [
-                        { id: 1501, name: "Carrot Ginger", description: "Fresh carrot juice with ginger", price: 160, image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=880&q=80" },
-                        { id: 1502, name: "Beetroot Boost", description: "Beetroot, apple and lemon juice", price: 180, image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=880&q=80" }
+                    "Main Course": [
+                        { id: 1801, name: "Dal Tadka", description: "Protein-rich lentils with minimal oil. Comfort food made healthy.", price: 180, image: "https://www.whiskaffair.com/wp-content/uploads/2020/04/Dal-Tadka-2-3.jpg" },
+                        { id: 1802, name: "Paneer Tikka", description: "Grilled cottage cheese with veggies. High protein vegetarian option.", price: 220, image: "https://www.whiskaffair.com/wp-content/uploads/2020/04/Paneer-Tikka-2-3.jpg" }
+                    ],
+                    "Healthy Breads": [
+                        { id: 1901, name: "Bajra Roti", description: "Pearl millet flatbread rich in fiber.", price: 60, image: "https://www.whiskaffair.com/wp-content/uploads/2020/04/Bajra-Roti-2-3.jpg" },
+                        { id: 1902, name: "Jowar Roti", description: "Sorghum flatbread packed with nutrients.", price: 60, image: "https://www.whiskaffair.com/wp-content/uploads/2020/04/Jowar-Roti-2-3.jpg" }
                     ]
                 }
             },
             {
                 id: 7,
-                name: "Spice & Herb",
-                cuisine: ["north indian", "vegetarian", "healthy"],
-                rating: 4.1,
-                reviewCount: 135,
-                description: "Traditional Indian cuisine with a healthy twist.",
+                name: "Keto Indian Kitchen",
+                cuisine: ["keto", "low-carb", "healthy", "indian"],
+                rating: 4.5,
+                reviewCount: 160,
+                description: "Delicious keto-friendly Indian meals that keep you in ketosis.",
                 image: "https://images.unsplash.com/photo-1601050690597-df0568f70950?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
-                recommended: true,
                 menu: {
-                    "Healthy Indian Starters": [
-                        { id: 1601, name: "Baked Samosa", description: "Whole wheat samosas with healthy fillings", price: 150, image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=880&q=80" },
-                        { id: 1602, name: "Sprouts Chaat", description: "Healthy sprouts with Indian spices", price: 120, image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=880&q=80" }
+                    "Keto Breakfast": [
+                        { id: 2001, name: "Keto Poha", description: "Low-carb poha made with cauliflower and nuts.", price: 180, image: "https://www.whiskaffair.com/wp-content/uploads/2020/04/Keto-Poha-2-3.jpg" },
+                        { id: 2002, name: "Keto Dosa", description: "Dosa made with almond flour and coconut flour.", price: 200, image: "https://www.whiskaffair.com/wp-content/uploads/2020/04/Keto-Dosa-2-3.jpg" }
                     ],
-                    "Main Course": [
-                        { id: 1701, name: "Dal Tadka", description: "Protein-rich lentils with minimal oil", price: 180, image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=880&q=80" },
-                        { id: 1702, name: "Paneer Tikka", description: "Grilled cottage cheese with veggies", price: 220, image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=880&q=80" }
+                    "Keto Specials": [
+                        { id: 2101, name: "Keto Butter Chicken", description: "Chicken in creamy tomato gravy without sugar.", price: 280, image: "https://www.whiskaffair.com/wp-content/uploads/2020/04/Keto-Butter-Chicken-2-3.jpg" },
+                        { id: 2102, name: "Cauliflower Rice Biryani", description: "Biryani made with cauliflower rice instead of regular rice.", price: 240, image: "https://www.whiskaffair.com/wp-content/uploads/2020/04/Cauliflower-Rice-Biryani-2-3.jpg" }
                     ]
                 }
             },
             {
                 id: 8,
-                name: "Zen Sushi",
-                cuisine: ["japanese", "sushi", "healthy"],
-                rating: 4.8,
-                reviewCount: 240,
-                description: "Authentic Japanese sushi with fresh ingredients.",
-                image: "https://images.unsplash.com/photo-1553621042-f6e147245754?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1025&q=80",
-                recommended: true,
+                name: "Diabetic Friendly Kitchen",
+                cuisine: ["diabetes-friendly", "low-sugar", "healthy", "indian"],
+                rating: 4.4,
+                reviewCount: 140,
+                description: "Indian meals specially designed for diabetics with low glycemic index.",
+                image: "https://images.unsplash.com/photo-1601050690597-df0568f70950?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
                 menu: {
-                    "Sushi Selection": [
-                        { id: 1801, name: "Salmon Avocado Roll", description: "Fresh salmon and avocado sushi roll", price: 320, image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=880&q=80" },
-                        { id: 1802, name: "Vegetable Tempura Roll", description: "Crispy vegetable tempura sushi", price: 280, image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=880&q=80" }
+                    "Diabetic Breakfast": [
+                        { id: 2201, name: "Besan Chilla", description: "Gram flour pancakes with vegetables, no sugar added.", price: 150, image: "https://www.whiskaffair.com/wp-content/uploads/2020/04/Besan-Chilla-2-3.jpg" },
+                        { id: 2202, name: "Moong Dal Cheela", description: "Protein-rich pancakes made from split green gram.", price: 160, image: "https://www.whiskaffair.com/wp-content/uploads/2020/04/Moong-Dal-Cheela-2-3.jpg" }
                     ],
-                    "Healthy Bowls": [
-                        { id: 1901, name: "Poke Bowl", description: "Fresh fish with rice and vegetables", price: 350, image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=880&q=80" }
+                    "Main Course": [
+                        { id: 2301, name: "Multigrain Roti with Lauki Sabzi", description: "Fiber-rich roti with bottle gourd curry.", price: 200, image: "https://www.whiskaffair.com/wp-content/uploads/2020/04/Multigrain-Roti-2-3.jpg" },
+                        { id: 2302, name: "Brown Rice with Dal", description: "Whole grain rice with lentil curry.", price: 190, image: "https://www.whiskaffair.com/wp-content/uploads/2020/04/Brown-Rice-2-3.jpg" }
                     ]
                 }
             },
             {
                 id: 9,
-                name: "Thai Fresh",
-                cuisine: ["thai", "healthy", "asian"],
-                rating: 4.4,
-                reviewCount: 110,
-                description: "Authentic Thai cuisine with fresh ingredients.",
+                name: "Heart Healthy Indian Meals",
+                cuisine: ["heart-healthy", "low-fat", "healthy", "indian"],
+                rating: 4.3,
+                reviewCount: 125,
+                description: "Indian meals low in saturated fats and cholesterol for heart health.",
                 image: "https://images.unsplash.com/photo-1601050690597-df0568f70950?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
                 menu: {
-                    "Thai Specialties": [
-                        { id: 2001, name: "Pad Thai", description: "Stir-fried rice noodles with tofu", price: 280, image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=880&q=80" },
-                        { id: 2002, name: "Tom Yum Soup", description: "Spicy and sour Thai soup", price: 220, image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=880&q=80" }
+                    "Heart Healthy Breakfast": [
+                        { id: 2401, name: "Oats Upma", description: "Healthy upma made with oats and vegetables.", price: 140, image: "https://www.whiskaffair.com/wp-content/uploads/2020/04/Oats-Upma-2-3.jpg" },
+                        { id: 2402, name: "Poha with Peanuts", description: "Flattened rice with peanuts and minimal oil.", price: 130, image: "https://www.whiskaffair.com/wp-content/uploads/2020/04/Poha-2-3.jpg" }
+                    ],
+                    "Main Course": [
+                        { id: 2501, name: "Grilled Fish with Steamed Vegetables", description: "Omega-3 rich fish with fiber-rich vegetables.", price: 280, image: "https://www.whiskaffair.com/wp-content/uploads/2020/04/Grilled-Fish-2-3.jpg" },
+                        { id: 2502, name: "Dal with Brown Rice", description: "Protein-rich lentils with whole grain rice.", price: 200, image: "https://www.whiskaffair.com/wp-content/uploads/2020/04/Dal-2-3.jpg" }
                     ]
                 }
             },
             {
                 id: 10,
-                name: "The Keto Kitchen",
-                cuisine: ["keto", "low-carb", "healthy"],
-                rating: 4.3,
-                reviewCount: 95,
-                description: "Delicious keto-friendly meals that keep you in ketosis.",
+                name: "Weight Loss Indian Meals",
+                cuisine: ["weight-loss", "low-calorie", "healthy", "indian"],
+                rating: 4.4,
+                reviewCount: 180,
+                description: "Delicious Indian meals under 500 calories for weight management.",
                 image: "https://images.unsplash.com/photo-1601050690597-df0568f70950?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
                 menu: {
-                    "Keto Specials": [
-                        { id: 2101, name: "Keto Burger", description: "Bunless burger with cheese and avocado", price: 250, image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=880&q=80" },
-                        { id: 2102, name: "Cauliflower Rice Bowl", description: "Cauliflower rice with vegetables and protein", price: 230, image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=880&q=80" }
+                    "Low-Calorie Breakfast": [
+                        { id: 2601, name: "Vegetable Daliya", description: "Broken wheat porridge with vegetables.", price: 150, image: "https://www.whiskaffair.com/wp-content/uploads/2020/04/Vegetable-Daliya-2-3.jpg" },
+                        { id: 2602, name: "Ragi Porridge", description: "Finger millet porridge with nuts.", price: 140, image: "https://www.whiskaffair.com/wp-content/uploads/2020/04/Ragi-Porridge-2-3.jpg" }
+                    ],
+                    "Low-Calorie Meals": [
+                        { id: 2701, name: "Vegetable Khichdi", description: "Light rice and lentil dish with vegetables.", price: 180, image: "https://www.whiskaffair.com/wp-content/uploads/2020/04/Vegetable-Khichdi-2-3.jpg" },
+                        { id: 2702, name: "Grilled Chicken with Salad", description: "Lean protein with fresh vegetables.", price: 220, image: "https://www.whiskaffair.com/wp-content/uploads/2020/04/Grilled-Chicken-Salad-2-3.jpg" }
+                    ]
+                }
+            },
+            {
+                id: 11,
+                name: "Muscle Gain Indian Kitchen",
+                cuisine: ["high-protein", "healthy", "balanced", "indian"],
+                rating: 4.6,
+                reviewCount: 210,
+                description: "High-protein Indian meals for muscle building and recovery.",
+                image: "https://images.unsplash.com/photo-1601050690597-df0568f70950?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+                menu: {
+                    "Protein Plates": [
+                        { id: 2801, name: "Egg Curry with Brown Rice", description: "Protein-rich eggs in gravy with whole grain rice.", price: 220, image: "https://www.whiskaffair.com/wp-content/uploads/2020/04/Egg-Curry-2-3.jpg" },
+                        { id: 2802, name: "Paneer Bhurji with Multigrain Roti", description: "Scrambled cottage cheese with fiber-rich flatbread.", price: 240, image: "https://www.whiskaffair.com/wp-content/uploads/2020/04/Paneer-Bhurji-2-3.jpg" }
+                    ],
+                    "Protein Shakes": [
+                        { id: 2901, name: "Mass Gainer Shake", description: "Whey protein with banana, oats and milk.", price: 200, image: "https://www.whiskaffair.com/wp-content/uploads/2020/04/Protein-Shake-2-3.jpg" },
+                        { id: 2902, name: "Vegan Mass Gainer", description: "Plant-based protein with almond milk and dates.", price: 190, image: "https://www.whiskaffair.com/wp-content/uploads/2020/04/Vegan-Protein-Shake-2-3.jpg" }
+                    ]
+                }
+            },
+            {
+                id: 12,
+                name: "Jain Healthy Kitchen",
+                cuisine: ["jain", "vegetarian", "healthy", "indian"],
+                rating: 4.5,
+                reviewCount: 170,
+                description: "Traditional Jain cuisine with healthy options without onion and garlic.",
+                image: "https://images.unsplash.com/photo-1601050690597-df0568f70950?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+                menu: {
+                    "Jain Breakfast": [
+                        { id: 3001, name: "Jain Poha", description: "Flattened rice without onion and garlic.", price: 140, image: "https://www.whiskaffair.com/wp-content/uploads/2020/04/Jain-Poha-2-3.jpg" },
+                        { id: 3002, name: "Jain Dosa", description: "Lentil and rice crepes without onion and garlic.", price: 160, image: "https://www.whiskaffair.com/wp-content/uploads/2020/04/Jain-Dosa-2-3.jpg" }
+                    ],
+                    "Main Course": [
+                        { id: 3101, name: "Jain Dal Fry with Rice", description: "Lentil curry without onion and garlic.", price: 190, image: "https://www.whiskaffair.com/wp-content/uploads/2020/04/Jain-Dal-Fry-2-3.jpg" },
+                        { id: 3102, name: "Jain Sabzi with Roti", description: "Vegetable curry without root vegetables.", price: 180, image: "https://www.whiskaffair.com/wp-content/uploads/2020/04/Jain-Sabzi-2-3.jpg" }
+                    ]
+                }
+            },
+            {
+                id: 13,
+                name: "Ayurvedic Indian Kitchen",
+                cuisine: ["ayurvedic", "healthy", "balanced", "indian"],
+                rating: 4.4,
+                reviewCount: 150,
+                description: "Traditional Indian meals prepared according to Ayurvedic principles.",
+                image: "https://images.unsplash.com/photo-1601050690597-df0568f70950?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+                menu: {
+                    "Ayurvedic Breakfast": [
+                        { id: 3201, name: "Kitchari", description: "Balancing meal of rice and mung beans with spices.", price: 170, image: "https://www.whiskaffair.com/wp-content/uploads/2020/04/Kitchari-2-3.jpg" },
+                        { id: 3202, name: "Herbal Tea with Millets", description: "Detoxifying tea with nutritious millets.", price: 120, image: "https://www.whiskaffair.com/wp-content/uploads/2020/04/Herbal-Tea-2-3.jpg" }
+                    ],
+                    "Main Course": [
+                        { id: 3301, name: "Tridoshic Thali", description: "Balanced meal for all body types according to Ayurveda.", price: 250, image: "https://www.whiskaffair.com/wp-content/uploads/2020/04/Tridoshic-Thali-2-3.jpg" },
+                        { id: 3302, name: "Ayurvedic Kadha", description: "Immunity-boosting herbal drink.", price: 80, image: "https://www.whiskaffair.com/wp-content/uploads/2020/04/Ayurvedic-Kadha-2-3.jpg" }
+                    ]
+                }
+            },
+            {
+                id: 14,
+                name: "Healthy Indian Street Food",
+                cuisine: ["street food", "healthy", "indian"],
+                rating: 4.3,
+                reviewCount: 230,
+                description: "Your favorite Indian street food made healthy with less oil and fresh ingredients.",
+                image: "https://images.unsplash.com/photo-1601050690597-df0568f70950?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+                menu: {
+                    "Healthy Street Snacks": [
+                        { id: 3401, name: "Baked Vada Pav", description: "Mumbai's favorite snack made healthy by baking instead of frying.", price: 90, image: "https://www.whiskaffair.com/wp-content/uploads/2020/04/Baked-Vada-Pav-2-3.jpg" },
+                        { id: 3402, name: "Grilled Paneer Tikka", description: "Cottage cheese marinated and grilled instead of fried.", price: 150, image: "https://www.whiskaffair.com/wp-content/uploads/2020/04/Grilled-Paneer-Tikka-2-3.jpg" }
+                    ],
+                    "Healthy Chats": [
+                        { id: 3501, name: "Baked Samosa Chaat", description: "Baked samosas topped with healthy chutneys and yogurt.", price: 130, image: "https://www.whiskaffair.com/wp-content/uploads/2020/04/Baked-Samosa-Chaat-2-3.jpg" },
+                        { id: 3502, name: "Sprouts Bhel", description: "Healthy bhel made with sprouts instead of puffed rice.", price: 120, image: "https://www.whiskaffair.com/wp-content/uploads/2020/04/Sprouts-Bhel-2-3.jpg" }
+                    ]
+                }
+            },
+            {
+                id: 15,
+                name: "Healthy Indian Desserts",
+                cuisine: ["desserts", "healthy", "indian"],
+                rating: 4.5,
+                reviewCount: 180,
+                description: "Traditional Indian desserts made healthy with less sugar and healthy ingredients.",
+                image: "https://images.unsplash.com/photo-1601050690597-df0568f70950?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+                menu: {
+                    "Healthy Sweets": [
+                        { id: 3601, name: "Dates and Nuts Ladoo", description: "Sweet balls made from dates and nuts without added sugar.", price: 100, image: "https://www.whiskaffair.com/wp-content/uploads/2020/04/Dates-Ladoo-2-3.jpg" },
+                        { id: 3602, name: "Sugar-free Gajar Halwa", description: "Carrot pudding sweetened with dates.", price: 120, image: "https://www.whiskaffair.com/wp-content/uploads/2020/04/Sugar-free-Gajar-Halwa-2-3.jpg" }
+                    ],
+                    "Healthy Drinks": [
+                        { id: 3701, name: "Sugar-free Thandai", description: "Traditional drink made with nuts and spices, no sugar added.", price: 90, image: "https://www.whiskaffair.com/wp-content/uploads/2020/04/Sugar-free-Thandai-2-3.jpg" },
+                        { id: 3702, name: "Low-fat Lassi", description: "Yogurt drink made with low-fat yogurt.", price: 80, image: "https://www.whiskaffair.com/wp-content/uploads/2020/04/Low-fat-Lassi-2-3.jpg" }
                     ]
                 }
             }
         ];
-
-        // Load restaurants
+    
+        // Load restaurants with personalized recommendations
         function loadRestaurants() {
             const recommendedContainer = document.getElementById('recommended-restaurants');
             const allContainer = document.getElementById('all-restaurants');
+            const noRecsMessage = document.getElementById('no-recommendations');
             
             recommendedContainer.innerHTML = '';
             allContainer.innerHTML = '';
             
+            // Filter and sort restaurants based on user preferences
+            let recommendedRestaurants = [];
+            let otherRestaurants = [];
+            
             restaurants.forEach(restaurant => {
-                const restaurantCard = document.createElement('div');
-                restaurantCard.className = 'bg-gray-800 rounded-lg shadow overflow-hidden hover:shadow-lg transition transform hover:-translate-y-1';
-                restaurantCard.innerHTML = `
-                    <img class="w-full h-48 object-cover" src="${restaurant.image}" alt="${restaurant.name}">
-                    <div class="p-4">
-                        <h3 class="text-lg font-semibold text-white">${restaurant.name}</h3>
-                        <div class="flex items-center mt-2">
-                            <div class="flex text-yellow-400">
-                                ${'<i class="fas fa-star"></i>'.repeat(Math.floor(restaurant.rating))}
-                                ${restaurant.rating % 1 >= 0.5 ? '<i class="fas fa-star-half-alt"></i>' : ''}
-                            </div>
-                            <span class="ml-2 text-sm text-gray-400">${restaurant.rating} (${restaurant.reviewCount} reviews)</span>
-                        </div>
-                        <div class="mt-2 flex flex-wrap gap-2">
-                            ${restaurant.cuisine.map(cuisine => 
-                                `<span class="text-xs bg-blue-900 text-blue-200 px-2 py-1 rounded">${cuisine.charAt(0).toUpperCase() + cuisine.slice(1)}</span>`
-                            ).join('')}
-                        </div>
-                        <p class="mt-2 text-sm text-gray-400">${restaurant.description}</p>
-                        <button onclick="viewRestaurantMenu(${restaurant.id})" class="mt-4 w-full bg-purple-600 text-white py-2 rounded-lg hover:bg-purple-700 transition">
-                            View Menu
-                        </button>
-                    </div>
-                `;
+                // Calculate match score for each restaurant
+                const matchInfo = calculateRestaurantMatchScore(restaurant);
                 
-                if (restaurant.recommended) {
-                    recommendedContainer.appendChild(restaurantCard.cloneNode(true));
+                if (matchInfo.score >= 7) { // Threshold for "recommended"
+                    recommendedRestaurants.push({
+                        ...restaurant,
+                        matchScore: matchInfo.score,
+                        matchReasons: matchInfo.reasons
+                    });
+                } else {
+                    otherRestaurants.push(restaurant);
                 }
+            });
+            
+            // Sort recommended restaurants by match score
+            recommendedRestaurants.sort((a, b) => b.matchScore - a.matchScore);
+            
+            // Display recommended restaurants
+            if (recommendedRestaurants.length > 0) {
+                noRecsMessage.classList.add('hidden');
+                recommendedRestaurants.forEach(restaurant => {
+                    const restaurantCard = createRestaurantCard(restaurant, true);
+                    recommendedContainer.appendChild(restaurantCard);
+                });
+            } else {
+                noRecsMessage.classList.remove('hidden');
+            }
+            
+            // Display all other restaurants
+            otherRestaurants.forEach(restaurant => {
+                const restaurantCard = createRestaurantCard(restaurant, false);
                 allContainer.appendChild(restaurantCard);
             });
         }
-
+    
+        // Calculate how well a restaurant matches user preferences
+        function calculateRestaurantMatchScore(restaurant) {
+            if (!userPreferences || Object.keys(userPreferences).length === 0) {
+                return { score: 0, reasons: [] }; // No score if no preferences
+            }
+            
+            let score = 0;
+            const reasons = [];
+            
+            // 1. Check dietary restrictions (strict filters)
+            if (userPreferences.diet) {
+                if (userPreferences.diet.includes('vegetarian') && !restaurant.cuisine.includes('vegetarian')) {
+                    return { score: 0, reasons: [] };
+                }
+                if (userPreferences.diet.includes('vegan') && !restaurant.cuisine.includes('vegan')) {
+                    return { score: 0, reasons: [] };
+                }
+                if (userPreferences.diet.includes('gluten-free') && !restaurant.cuisine.includes('gluten-free')) {
+                    return { score: 0, reasons: [] };
+                }
+                if (userPreferences.diet.includes('halal') && !restaurant.cuisine.includes('halal')) {
+                    return { score: 0, reasons: [] };
+                }
+                if (userPreferences.diet.includes('jain') && !restaurant.cuisine.includes('jain')) {
+                    return { score: 0, reasons: [] };
+                }
+            }
+            
+            // 2. Add points for matching dietary preferences
+            if (userPreferences.diet) {
+                if (userPreferences.diet.includes('vegetarian') && restaurant.cuisine.includes('vegetarian')) {
+                    score += 2;
+                    reasons.push('Vegetarian options');
+                }
+                if (userPreferences.diet.includes('vegan') && restaurant.cuisine.includes('vegan')) {
+                    score += 3;
+                    reasons.push('Vegan options');
+                }
+                if (userPreferences.diet.includes('gluten-free') && restaurant.cuisine.includes('gluten-free')) {
+                    score += 2;
+                    reasons.push('Gluten-free options');
+                }
+                if (userPreferences.diet.includes('jain') && restaurant.cuisine.includes('jain')) {
+                    score += 2;
+                    reasons.push('Jain options');
+                }
+            }
+            
+            // 3. Add points for matching meal preferences
+            if (userPreferences.meal_pref) {
+                if (userPreferences.meal_pref.includes('high-protein') && restaurant.cuisine.includes('protein')) {
+                    score += 2;
+                    reasons.push('High-protein options');
+                }
+                if (userPreferences.meal_pref.includes('low-carb') && restaurant.cuisine.includes('low-carb')) {
+                    score += 2;
+                    reasons.push('Low-carb options');
+                }
+                if (userPreferences.meal_pref.includes('keto') && restaurant.cuisine.includes('keto')) {
+                    score += 1;
+                    reasons.push('Keto options');
+                }
+                if (userPreferences.meal_pref.includes('balanced') && restaurant.cuisine.includes('balanced')) {
+                    score += 1;
+                    reasons.push('Balanced meals');
+                }
+            }
+            
+            // 4. Adjust for health conditions
+            if (userPreferences.health_condition) {
+                if (userPreferences.health_condition.includes('diabetes') && restaurant.cuisine.includes('diabetes-friendly')) {
+                    score += 1.5;
+                    reasons.push('Diabetes-friendly');
+                }
+                if (userPreferences.health_condition.includes('hypertension') && restaurant.cuisine.includes('low-sodium')) {
+                    score += 1;
+                    reasons.push('Low-sodium options');
+                }
+                if (userPreferences.health_condition.includes('heart-disease') && restaurant.cuisine.includes('heart-healthy')) {
+                    score += 1;
+                    reasons.push('Heart-healthy');
+                }
+            }
+            
+            // 5. Adjust for fitness goals
+            if (userPreferences.fitness_goal) {
+                if (userPreferences.fitness_goal === 'weight-loss' && restaurant.cuisine.includes('weight-loss')) {
+                    score += 2;
+                    reasons.push('Weight-loss friendly');
+                }
+                if (userPreferences.fitness_goal === 'muscle-gain' && restaurant.cuisine.includes('high-protein')) {
+                    score += 2;
+                    reasons.push('Muscle-gain friendly');
+                }
+            }
+            
+            // Cap score at 10
+            score = Math.min(10, Math.round(score * 10) / 10);
+            
+            return { score, reasons };
+        }
+    
+        // Create restaurant card HTML
+        function createRestaurantCard(restaurant, isRecommended) {
+            const restaurantCard = document.createElement('div');
+            restaurantCard.className = 'bg-gray-800 rounded-lg shadow overflow-hidden hover:shadow-lg transition transform hover:-translate-y-1';
+            
+            let matchScoreHTML = '';
+            let reasonsHTML = '';
+            
+            if (isRecommended && restaurant.matchScore) {
+                matchScoreHTML = `
+                    <div class="match-score ${getMatchScoreClass(restaurant.matchScore)}">
+                        ${restaurant.matchScore}
+                    </div>
+                `;
+                
+                if (restaurant.matchReasons && restaurant.matchReasons.length > 0) {
+                    reasonsHTML = `
+                        <div class="mt-2 flex flex-wrap">
+                            ${restaurant.matchReasons.map(reason => 
+                                `<span class="text-xs bg-purple-900 text-purple-200 px-2 py-1 rounded mr-2 mb-2">${reason}</span>`
+                            ).join('')}
+                        </div>
+                    `;
+                }
+            }
+            
+            restaurantCard.innerHTML = `
+                <div class="relative">
+                    <img class="w-full h-48 object-cover" src="${restaurant.image}" alt="${restaurant.name}">
+                    ${matchScoreHTML}
+                </div>
+                <div class="p-4">
+                    <h3 class="text-lg font-semibold text-white">${restaurant.name}</h3>
+                    <div class="flex items-center mt-2">
+                        <div class="flex text-yellow-400">
+                            ${'<i class="fas fa-star"></i>'.repeat(Math.floor(restaurant.rating))}
+                            ${restaurant.rating % 1 >= 0.5 ? '<i class="fas fa-star-half-alt"></i>' : ''}
+                        </div>
+                        <span class="ml-2 text-sm text-gray-400">${restaurant.rating} (${restaurant.reviewCount} reviews)</span>
+                    </div>
+                    <div class="mt-2 flex flex-wrap gap-2">
+                        ${restaurant.cuisine.map(cuisine => 
+                            `<span class="text-xs bg-blue-900 text-blue-200 px-2 py-1 rounded">${cuisine.charAt(0).toUpperCase() + cuisine.slice(1)}</span>`
+                        ).join('')}
+                    </div>
+                    <p class="mt-2 text-sm text-gray-400">${restaurant.description}</p>
+                    ${reasonsHTML}
+                    <button onclick="viewRestaurantMenu(${restaurant.id})" class="mt-4 w-full bg-purple-600 text-white py-2 rounded-lg hover:bg-purple-700 transition">
+                        View Menu
+                    </button>
+                </div>
+            `;
+            
+            return restaurantCard;
+        }
+    
         // Initialize page
         document.addEventListener('DOMContentLoaded', function() {
-            loadRestaurants();
+            // Try to load preferences from localStorage if Firebase hasn't loaded them yet
+            const localPrefs = localStorage.getItem('userPreferences');
+            if (localPrefs && (!userPreferences || Object.keys(userPreferences).length === 0)) {
+                userPreferences = JSON.parse(localPrefs);
+                showUserPreferences();
+                loadRestaurants();
+            }
+            
             updateCart(); // Initialize cart count on page load
             
             // Add smooth transition to all links
@@ -742,7 +1622,56 @@
                     }, 300);
                 });
             });
+            
+            // Search functionality
+            document.getElementById('restaurant-search').addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase();
+                filterRestaurants();
+            });
+            
+            // Filter functionality
+            document.getElementById('cuisine-filter').addEventListener('change', filterRestaurants);
+            document.getElementById('diet-filter').addEventListener('change', filterRestaurants);
+            
+            // Reset filters
+            document.getElementById('reset-filters').addEventListener('click', function() {
+                document.getElementById('restaurant-search').value = '';
+                document.getElementById('cuisine-filter').value = '';
+                document.getElementById('diet-filter').value = '';
+                filterRestaurants();
+            });
         });
+    
+        // Filter restaurants based on search and filters
+        function filterRestaurants() {
+            const searchTerm = document.getElementById('restaurant-search').value.toLowerCase();
+            const cuisineFilter = document.getElementById('cuisine-filter').value;
+            const dietFilter = document.getElementById('diet-filter').value;
+            
+            const allCards = document.querySelectorAll('#recommended-restaurants > div, #all-restaurants > div');
+            
+            allCards.forEach(card => {
+                const name = card.querySelector('h3').textContent.toLowerCase();
+                const description = card.querySelector('p').textContent.toLowerCase();
+                const cuisineBadges = Array.from(card.querySelectorAll('.flex-wrap span')).map(span => span.textContent.toLowerCase());
+                
+                const matchesSearch = searchTerm === '' || 
+                    name.includes(searchTerm) || 
+                    description.includes(searchTerm);
+                
+                const matchesCuisine = cuisineFilter === '' || 
+                    cuisineBadges.some(badge => badge.includes(cuisineFilter));
+                
+                const matchesDiet = dietFilter === '' || 
+                    cuisineBadges.some(badge => badge.includes(dietFilter));
+                
+                if (matchesSearch && matchesCuisine && matchesDiet) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
     </script>
 </body>
 </html>

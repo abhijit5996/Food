@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Health & Dietary Preferences - NutriOrder</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         /* Page transition animations */
         body {
@@ -30,16 +31,16 @@
         }
 
         ::-webkit-scrollbar-track {
-            background: #1a202c;
+            background: #f1f1f1;
         }
 
         ::-webkit-scrollbar-thumb {
-            background: #4a5568;
+            background: #e11d48;
             border-radius: 4px;
         }
 
         ::-webkit-scrollbar-thumb:hover {
-            background: #718096;
+            background: #be123c;
         }
 
         /* Animation for hover effects */
@@ -49,9 +50,140 @@
 
         /* Custom glow effect */
         .glow {
-            box-shadow: 0 0 15px rgba(139, 92, 246, 0.5);
+            box-shadow: 0 0 15px rgba(225, 29, 72, 0.3);
         }
 
+        /* Pulse animation for CTA */
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        /* Gradient text */
+        .gradient-text {
+            background: linear-gradient(90deg, #e11d48, #f59e0b);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        /* Floating animation */
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .floating {
+            animation: float 6s ease-in-out infinite;
+        }
+
+        /* Responsive tweaks */
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2.5rem;
+            }
+            
+            .hero-subtitle {
+                font-size: 1.1rem;
+            }
+        }
+
+        /* Custom card hover effect */
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(225, 29, 72, 0.15);
+        }
+
+        /* Custom border animation */
+        .border-animate {
+            position: relative;
+        }
+
+        .border-animate::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 0.5rem;
+            padding: 2px;
+            background: linear-gradient(45deg, #e11d48, #f59e0b);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .border-animate:hover::before {
+            opacity: 1;
+        }
+
+        /* Custom underline animation */
+        .underline-animate {
+            position: relative;
+        }
+
+        .underline-animate::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -2px;
+            left: 0;
+            background: linear-gradient(90deg, #e11d48, #f59e0b);
+            transition: width 0.3s ease;
+        }
+
+        .underline-animate:hover::after {
+            width: 100%;
+        }
+
+        /* Indian pattern overlay */
+        .indian-pattern {
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23e11d48' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            opacity: 0.1;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        /* Special heading font */
+        .heading-font {
+            font-family: 'Playfair Display', serif;
+        }
+
+        /* Custom button shine effect */
+        .btn-shine:hover {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-shine:hover::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -60%;
+            width: 40%;
+            height: 200%;
+            background: rgba(255, 255, 255, 0.2);
+            transform: rotate(30deg);
+            animation: shine 1.5s ease;
+        }
+
+        @keyframes shine {
+            100% {
+                left: 120%;
+            }
+        }
+
+        /* Form steps */
         .step {
             display: none;
         }
@@ -60,90 +192,91 @@
         }
     </style>
     <script type="module">
-      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-      import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-      import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
 
-      const firebaseConfig = {
-        apiKey: "AIzaSyBx0Kt9o04ye0XrtA8ecp84wD8Q9OCDjlA",
-        authDomain: "foodorder-4380c.firebaseapp.com",
-        projectId: "foodorder-4380c",
-        storageBucket: "foodorder-4380c.appspot.com",
-        messagingSenderId: "735023580381",
-        appId: "1:735023580381:web:c6740bef2fc9bdee1b4734"
-      };
+        const firebaseConfig = {
+            apiKey: "AIzaSyBx0Kt9o04ye0XrtA8ecp84wD8Q9OCDjlA",
+            authDomain: "foodorder-4380c.firebaseapp.com",
+            projectId: "foodorder-4380c",
+            storageBucket: "foodorder-4380c.appspot.com",
+            messagingSenderId: "735023580381",
+            appId: "1:735023580381:web:c6740bef2fc9bdee1b4734"
+        };
 
-      const app = initializeApp(firebaseConfig);
-      const auth = getAuth(app);
-      const db = getFirestore(app);
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
 
-      // Check auth state
-      onAuthStateChanged(auth, (user) => {
-        if (!user) {
-          window.location.href = 'login.html';
-        } else {
-          // Check if user already has preferences
-          const userDocRef = doc(db, 'users', user.uid);
-          getDoc(userDocRef).then((doc) => {
-            if (doc.exists() && doc.data().preferences && Object.keys(doc.data().preferences).length > 0) {
-              // User already has preferences, redirect to homepage
-              window.location.href = 'homepage.html';
-            }
-          });
-        }
-      });
-
-      // Form submission
-      document.getElementById('preferenceForm').addEventListener('submit', async function(e) {
-        e.preventDefault();
-        
-        // Collect form data
-        const formData = new FormData(this);
-        const preferences = {};
-        
-        for (let [key, value] of formData.entries()) {
-            if (key === 'diet' || key === 'health_condition' || key === 'allergy' || key === 'meal_pref') {
-                if (!preferences[key]) {
-                    preferences[key] = [];
-                }
-                preferences[key].push(value);
-            } else {
-                preferences[key] = value;
-            }
-        }
-        
-        try {
-            const user = auth.currentUser;
+        // Check auth state
+        onAuthStateChanged(auth, (user) => {
             if (!user) {
-                throw new Error('User not authenticated');
+                window.location.href = 'login.html';
+            } else {
+                // Check if user already has preferences
+                const userDocRef = doc(db, 'users', user.uid);
+                getDoc(userDocRef).then((doc) => {
+                    if (doc.exists() && doc.data().preferences && Object.keys(doc.data().preferences).length > 0) {
+                        // User already has preferences, redirect to homepage
+                        window.location.href = 'homepage.html';
+                    }
+                });
+            }
+        });
+
+        // Form submission
+        document.getElementById('preferenceForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            // Collect form data
+            const formData = new FormData(this);
+            const preferences = {};
+            
+            for (let [key, value] of formData.entries()) {
+                if (key === 'diet' || key === 'health_condition' || key === 'allergy' || key === 'meal_pref' || key === 'cuisine_pref') {
+                    if (!preferences[key]) {
+                        preferences[key] = [];
+                    }
+                    preferences[key].push(value);
+                } else {
+                    preferences[key] = value;
+                }
             }
             
-            // Save preferences to Firestore
-            await setDoc(doc(db, 'users/' + user.uid), {
-                preferences: preferences
-            }, { merge: true });
-            
-            // Redirect to homepage after preferences are saved
-            window.location.href = 'homepage.html';
-        } catch (error) {
-            console.error('Error saving preferences:', error);
-            alert('Failed to save preferences: ' + error.message);
-        }
-      });
+            try {
+                const user = auth.currentUser;
+                if (!user) {
+                    throw new Error('User not authenticated');
+                }
+                
+                // Save preferences to Firestore
+                await setDoc(doc(db, 'users/' + user.uid), {
+                    preferences: preferences
+                }, { merge: true });
+                
+                // Redirect to homepage after preferences are saved
+                window.location.href = 'homepage.html';
+            } catch (error) {
+                console.error('Error saving preferences:', error);
+                alert('Failed to save preferences: ' + error.message);
+            }
+        });
     </script>
     <script>
         tailwind.config = {
-            darkMode: 'class',
             theme: {
                 extend: {
                     colors: {
-                        primary: '#8b5cf6',
-                        secondary: '#7c3aed',
-                        dark: '#1f2937',
-                        light: '#f3f4f6'
+                        primary: '#e11d48',
+                        secondary: '#be123c',
+                        accent: '#f59e0b',
+                        light: '#fff7ed',
+                        dark: '#1f2937'
                     },
                     animation: {
                         'click': 'click 300ms ease-out',
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
                     },
                     keyframes: {
                         click: {
@@ -156,412 +289,471 @@
         }
     </script>
 </head>
-<body class="bg-gray-900 text-gray-100 min-h-screen">
-    <body class="bg-gray-900 text-gray-100 min-h-screen">
-        <!-- Navigation -->
-        <nav class="bg-gray-800 py-4 px-6 shadow-lg sticky top-0 z-50">
-            <div class="container mx-auto flex justify-between items-center">
-                <div class="flex items-center space-x-2">
-                    <i class="fas fa-utensils text-purple-500 text-2xl"></i>
-                    <span class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-600">NutriOrder</span>
-                </div>
-                <div class="flex items-center space-x-4">
-                    <span id="step-indicator" class="text-gray-300">Step 1 of 3</span>
-                
-                </div>
+<body class="bg-amber-50 text-gray-800 min-h-screen">
+    <!-- Navigation -->
+    <nav class="bg-white/90 backdrop-blur-md py-4 px-6 shadow-sm sticky top-0 z-50 border-b border-amber-200">
+        <div class="container mx-auto flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <i class="fas fa-utensils text-red-600 text-2xl"></i>
+                <span class="text-xl font-bold gradient-text heading-font">NutriOrder</span>
             </div>
-        </nav>
-    
-        <!-- Preference Form Section -->
-        <section class="text-gray-300 body-font py-12">
-            <div class="container px-5 mx-auto max-w-3xl">
-                <div class="bg-gray-800 rounded-lg shadow-lg p-8 mb-8">
-                    <div class="flex flex-col text-center w-full mb-8">
-                        <h1 class="text-2xl font-bold title-font mb-2 text-white">Personalized Food Recommendations</h1>
-                        <p class="lg:w-2/3 mx-auto leading-relaxed text-base">Tell us about your health, fitness goals, and dietary needs for better recommendations</p>
+            <div class="flex items-center space-x-4">
+                <span id="step-indicator" class="text-gray-600">Step 1 of 3</span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="relative bg-gradient-to-br from-amber-50 to-red-50 py-16 px-6 overflow-hidden">
+        <div class="indian-pattern"></div>
+        <div class="container mx-auto text-center relative z-10">
+            <h1 class="text-3xl md:text-4xl font-bold mb-4 leading-tight heading-font">
+                <span class="gradient-text">Personalize Your Experience</span>
+            </h1>
+            <p class="text-lg md:text-xl mb-8 max-w-3xl mx-auto text-gray-600">
+                Tell us about your health goals and dietary preferences for better recommendations
+            </p>
+        </div>
+    </section>
+
+    <!-- Preferences Form Section -->
+    <section class="py-12 px-6">
+        <div class="container mx-auto max-w-4xl">
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden border-animate">
+                <form id="preferenceForm">
+                    <!-- Step 1: Basic Dietary Preferences -->
+                    <div id="step1" class="step active p-8">
+                        <h2 class="text-2xl font-bold mb-6 heading-font text-gray-800">1. Basic Dietary Preferences</h2>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+                            <label class="flex items-center p-4 border border-amber-200 rounded-lg hover:border-red-500 cursor-pointer bg-amber-50">
+                                <input type="checkbox" name="diet" value="vegetarian" class="h-5 w-5 text-red-600 focus:ring-red-500 border-gray-300 rounded">
+                                <span class="ml-3 text-gray-700">Vegetarian</span>
+                            </label>
+                            <label class="flex items-center p-4 border border-amber-200 rounded-lg hover:border-red-500 cursor-pointer bg-amber-50">
+                                <input type="checkbox" name="diet" value="vegan" class="h-5 w-5 text-red-600 focus:ring-red-500 border-gray-300 rounded">
+                                <span class="ml-3 text-gray-700">Vegan</span>
+                            </label>
+                            <label class="flex items-center p-4 border border-amber-200 rounded-lg hover:border-red-500 cursor-pointer bg-amber-50">
+                                <input type="checkbox" name="diet" value="gluten-free" class="h-5 w-5 text-red-600 focus:ring-red-500 border-gray-300 rounded">
+                                <span class="ml-3 text-gray-700">Gluten-Free</span>
+                            </label>
+                            <label class="flex items-center p-4 border border-amber-200 rounded-lg hover:border-red-500 cursor-pointer bg-amber-50">
+                                <input type="checkbox" name="diet" value="jain" class="h-5 w-5 text-red-600 focus:ring-red-500 border-gray-300 rounded">
+                                <span class="ml-3 text-gray-700">Jain</span>
+                            </label>
+                        </div>
+                        
+                        <div class="flex justify-end">
+                            <button type="button" class="next-step text-white bg-gradient-to-r from-red-600 to-amber-600 hover:from-red-700 hover:to-amber-700 px-6 py-3 rounded-lg font-medium transition shadow-lg btn-shine">
+                                Next <i class="fas fa-arrow-right ml-2"></i>
+                            </button>
+                        </div>
                     </div>
                     
-                    <form id="preferenceForm">
-                        <!-- Step 1: Basic Dietary Preferences -->
-                        <div id="step1" class="step active">
-                            <div class="mb-8">
-                                <h2 class="text-lg font-medium text-white mb-4">1. Basic Dietary Preferences</h2>
-                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                    <label class="flex items-center p-4 border border-gray-700 rounded-lg hover:border-purple-500 cursor-pointer">
-                                        <input type="checkbox" name="diet" value="vegetarian" class="h-5 w-5 text-purple-500 focus:ring-purple-500 border-gray-700 rounded">
-                                        <span class="ml-3">Vegetarian</span>
-                                    </label>
-                                    <label class="flex items-center p-4 border border-gray-700 rounded-lg hover:border-purple-500 cursor-pointer">
-                                        <input type="checkbox" name="diet" value="vegan" class="h-5 w-5 text-purple-500 focus:ring-purple-500 border-gray-700 rounded">
-                                        <span class="ml-3">Vegan</span>
-                                    </label>
-                                    <label class="flex items-center p-4 border border-gray-700 rounded-lg hover:border-purple-500 cursor-pointer">
-                                        <input type="checkbox" name="diet" value="gluten-free" class="h-5 w-5 text-purple-500 focus:ring-purple-500 border-gray-700 rounded">
-                                        <span class="ml-3">Gluten-Free</span>
-                                    </label>
-                                    <label class="flex items-center p-4 border border-gray-700 rounded-lg hover:border-purple-500 cursor-pointer">
-                                        <input type="checkbox" name="diet" value="halal" class="h-5 w-5 text-purple-500 focus:ring-purple-500 border-gray-700 rounded">
-                                        <span class="ml-3">Halal</span>
-                                    </label>
-                                </div>
+                    <!-- Step 2: Health and Fitness -->
+                    <div id="step2" class="step hidden p-8">
+                        <!-- Health Conditions -->
+                        <div class="mb-8">
+                            <h2 class="text-2xl font-bold mb-6 heading-font text-gray-800">2. Health Conditions</h2>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+                                <label class="flex items-center p-4 border border-amber-200 rounded-lg hover:border-red-500 cursor-pointer bg-amber-50">
+                                    <input type="checkbox" name="health_condition" value="diabetes" class="h-5 w-5 text-red-600 focus:ring-red-500 border-gray-300 rounded">
+                                    <span class="ml-3 text-gray-700">Diabetes</span>
+                                </label>
+                                <label class="flex items-center p-4 border border-amber-200 rounded-lg hover:border-red-500 cursor-pointer bg-amber-50">
+                                    <input type="checkbox" name="health_condition" value="hypertension" class="h-5 w-5 text-red-600 focus:ring-red-500 border-gray-300 rounded">
+                                    <span class="ml-3 text-gray-700">High Blood Pressure</span>
+                                </label>
+                                <label class="flex items-center p-4 border border-amber-200 rounded-lg hover:border-red-500 cursor-pointer bg-amber-50">
+                                    <input type="checkbox" name="health_condition" value="heart-disease" class="h-5 w-5 text-red-600 focus:ring-red-500 border-gray-300 rounded">
+                                    <span class="ml-3 text-gray-700">Heart Disease</span>
+                                </label>
+                                <label class="flex items-center p-4 border border-amber-200 rounded-lg hover:border-red-500 cursor-pointer bg-amber-50">
+                                    <input type="checkbox" name="health_condition" value="cholesterol" class="h-5 w-5 text-red-600 focus:ring-red-500 border-gray-300 rounded">
+                                    <span class="ml-3 text-gray-700">High Cholesterol</span>
+                                </label>
+                                <label class="flex items-center p-4 border border-amber-200 rounded-lg hover:border-red-500 cursor-pointer bg-amber-50">
+                                    <input type="checkbox" name="health_condition" value="kidney" class="h-5 w-5 text-red-600 focus:ring-red-500 border-gray-300 rounded">
+                                    <span class="ml-3 text-gray-700">Kidney Disease</span>
+                                </label>
+                                <label class="flex items-center p-4 border border-amber-200 rounded-lg hover:border-red-500 cursor-pointer bg-amber-50">
+                                    <input type="checkbox" name="health_condition" value="pcos" class="h-5 w-5 text-red-600 focus:ring-red-500 border-gray-300 rounded">
+                                    <span class="ml-3 text-gray-700">PCOS</span>
+                                </label>
                             </div>
-                            
-                            <div class="flex justify-end">
-                                <button type="button" class="next-step text-white bg-purple-600 border-0 py-2 px-6 focus:outline-none hover:bg-purple-700 rounded-lg text-lg transition">Next</button>
+                            <textarea name="health_condition_details" rows="2" class="w-full bg-amber-50 rounded border border-amber-200 focus:border-red-500 focus:bg-white focus:ring-2 focus:ring-red-200 text-base outline-none text-gray-700 py-2 px-4 leading-8 transition-colors duration-200 ease-in-out" placeholder="Other health conditions (please specify)"></textarea>
+                        </div>
+                        
+                        <!-- Fitness Goals -->
+                        <div class="mb-8">
+                            <h2 class="text-2xl font-bold mb-6 heading-font text-gray-800">3. Fitness Goals</h2>
+                            <div class="space-y-4 mb-6">
+                                <label class="flex items-center p-4 border border-amber-200 rounded-lg hover:border-red-500 cursor-pointer bg-amber-50">
+                                    <input type="radio" name="fitness_goal" value="weight-loss" class="h-5 w-5 text-red-600 focus:ring-red-500 border-gray-300">
+                                    <span class="ml-3 text-gray-700">Weight Loss</span>
+                                </label>
+                                <label class="flex items-center p-4 border border-amber-200 rounded-lg hover:border-red-500 cursor-pointer bg-amber-50">
+                                    <input type="radio" name="fitness_goal" value="muscle-gain" class="h-5 w-5 text-red-600 focus:ring-red-500 border-gray-300">
+                                    <span class="ml-3 text-gray-700">Muscle Gain</span>
+                                </label>
+                                <label class="flex items-center p-4 border border-amber-200 rounded-lg hover:border-red-500 cursor-pointer bg-amber-50">
+                                    <input type="radio" name="fitness_goal" value="maintenance" class="h-5 w-5 text-red-600 focus:ring-red-500 border-gray-300">
+                                    <span class="ml-3 text-gray-700">Maintain Current Weight</span>
+                                </label>
+                                <label class="flex items-center p-4 border border-amber-200 rounded-lg hover:border-red-500 cursor-pointer bg-amber-50">
+                                    <input type="radio" name="fitness_goal" value="endurance" class="h-5 w-5 text-red-600 focus:ring-red-500 border-gray-300">
+                                    <span class="ml-3 text-gray-700">Improve Athletic Performance</span>
+                                </label>
+                                <label class="flex items-center p-4 border border-amber-200 rounded-lg hover:border-red-500 cursor-pointer bg-amber-50">
+                                    <input type="radio" name="fitness_goal" value="none" class="h-5 w-5 text-red-600 focus:ring-red-500 border-gray-300">
+                                    <span class="ml-3 text-gray-700">No Specific Goals</span>
+                                </label>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Current Weight (kg)</label>
+                                    <input type="number" name="current_weight" class="w-full bg-amber-50 rounded border border-amber-200 focus:border-red-500 focus:bg-white focus:ring-2 focus:ring-red-200 text-base outline-none text-gray-700 py-2 px-4 leading-8 transition-colors duration-200 ease-in-out">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Target Weight (kg)</label>
+                                    <input type="number" name="target_weight" class="w-full bg-amber-50 rounded border border-amber-200 focus:border-red-500 focus:bg-white focus:ring-2 focus:ring-red-200 text-base outline-none text-gray-700 py-2 px-4 leading-8 transition-colors duration-200 ease-in-out">
+                                </div>
                             </div>
                         </div>
                         
-                        <!-- Step 2: Health and Fitness -->
-                        <div id="step2" class="step hidden">
-                            <!-- Health Conditions -->
-                            <div class="mb-8">
-                                <h2 class="text-lg font-medium text-white mb-4">2. Do you have any health conditions that affect your diet?</h2>
-                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-                                    <label class="flex items-center p-3 border border-gray-700 rounded-lg hover:border-purple-500 cursor-pointer">
-                                        <input type="checkbox" name="health_condition" value="diabetes" class="h-5 w-5 text-purple-500 focus:ring-purple-500 border-gray-700 rounded">
-                                        <span class="ml-3">Diabetes</span>
-                                    </label>
-                                    <label class="flex items-center p-3 border border-gray-700 rounded-lg hover:border-purple-500 cursor-pointer">
-                                        <input type="checkbox" name="health_condition" value="hypertension" class="h-5 w-5 text-purple-500 focus:ring-purple-500 border-gray-700 rounded">
-                                        <span class="ml-3">High Blood Pressure</span>
-                                    </label>
-                                    <label class="flex items-center p-3 border border-gray-700 rounded-lg hover:border-purple-500 cursor-pointer">
-                                        <input type="checkbox" name="health_condition" value="heart-disease" class="h-5 w-5 text-purple-500 focus:ring-purple-500 border-gray-700 rounded">
-                                        <span class="ml-3">Heart Disease</span>
-                                    </label>
-                                    <label class="flex items-center p-3 border border-gray-700 rounded-lg hover:border-purple-500 cursor-pointer">
-                                        <input type="checkbox" name="health_condition" value="cholesterol" class="h-5 w-5 text-purple-500 focus:ring-purple-500 border-gray-700 rounded">
-                                        <span class="ml-3">High Cholesterol</span>
-                                    </label>
-                                    <label class="flex items-center p-3 border border-gray-700 rounded-lg hover:border-purple-500 cursor-pointer">
-                                        <input type="checkbox" name="health_condition" value="kidney" class="h-5 w-5 text-purple-500 focus:ring-purple-500 border-gray-700 rounded">
-                                        <span class="ml-3">Kidney Disease</span>
-                                    </label>
-                                    <label class="flex items-center p-3 border border-gray-700 rounded-lg hover:border-purple-500 cursor-pointer">
-                                        <input type="checkbox" name="health_condition" value="pcos" class="h-5 w-5 text-purple-500 focus:ring-purple-500 border-gray-700 rounded">
-                                        <span class="ml-3">PCOS</span>
-                                    </label>
-                                </div>
-                                <textarea name="health_condition_details" rows="2" class="w-full bg-gray-700 rounded border border-gray-700 focus:border-purple-500 focus:bg-gray-600 focus:ring-2 focus:ring-purple-900 text-base outline-none text-white py-1 px-3 leading-8 transition-colors duration-200 ease-in-out" placeholder="Please specify any other conditions and details"></textarea>
-                            </div>
-                            
-                            <!-- Fitness Goals -->
-                            <div class="mb-8">
-                                <h2 class="text-lg font-medium text-white mb-4">3. What are your fitness goals?</h2>
-                                <div class="space-y-4">
-                                    <label class="flex items-center p-4 border border-gray-700 rounded-lg hover:border-purple-500 cursor-pointer">
-                                        <input type="radio" name="fitness_goal" value="weight-loss" class="h-5 w-5 text-purple-500 focus:ring-purple-500 border-gray-700">
-                                        <span class="ml-3">Weight Loss</span>
-                                    </label>
-                                    <label class="flex items-center p-4 border border-gray-700 rounded-lg hover:border-purple-500 cursor-pointer">
-                                        <input type="radio" name="fitness_goal" value="muscle-gain" class="h-5 w-5 text-purple-500 focus:ring-purple-500 border-gray-700">
-                                        <span class="ml-3">Muscle Gain</span>
-                                    </label>
-                                    <label class="flex items-center p-4 border border-gray-700 rounded-lg hover:border-purple-500 cursor-pointer">
-                                        <input type="radio" name="fitness_goal" value="maintenance" class="h-5 w-5 text-purple-500 focus:ring-purple-500 border-gray-700">
-                                        <span class="ml-3">Maintain Current Weight</span>
-                                    </label>
-                                    <label class="flex items-center p-4 border border-gray-700 rounded-lg hover:border-purple-500 cursor-pointer">
-                                        <input type="radio" name="fitness_goal" value="endurance" class="h-5 w-5 text-purple-500 focus:ring-purple-500 border-gray-700">
-                                        <span class="ml-3">Improve Athletic Performance</span>
-                                    </label>
-                                    <label class="flex items-center p-4 border border-gray-700 rounded-lg hover:border-purple-500 cursor-pointer">
-                                        <input type="radio" name="fitness_goal" value="none" class="h-5 w-5 text-purple-500 focus:ring-purple-500 border-gray-700">
-                                        <span class="ml-3">No Specific Goals</span>
-                                    </label>
-                                </div>
-                                <div class="mt-4">
-                                    <label class="block text-sm font-medium text-white mb-2">Current Weight (kg)</label>
-                                    <input type="number" name="current_weight" class="w-full bg-gray-700 rounded border border-gray-700 focus:border-purple-500 focus:bg-gray-600 focus:ring-2 focus:ring-purple-900 text-base outline-none text-white py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
-                                </div>
-                                <div class="mt-2">
-                                    <label class="block text-sm font-medium text-white mb-2">Target Weight (kg) - if any</label>
-                                    <input type="number" name="target_weight" class="w-full bg-gray-700 rounded border border-gray-700 focus:border-purple-500 focus:bg-gray-600 focus:ring-2 focus:ring-purple-900 text-base outline-none text-white py-1 px-3 leading-8 transition-colors duration-200 ease-in-out">
-                                </div>
-                            </div>
-                            
-                            <!-- Activity Level -->
-                            <div class="mb-8">
-                                <h2 class="text-lg font-medium text-white mb-4">4. How active are you?</h2>
-                                <select name="activity_level" class="w-full bg-gray-700 rounded border border-gray-700 focus:border-purple-500 focus:bg-gray-600 focus:ring-2 focus:ring-purple-900 text-base outline-none text-white py-2 px-3 leading-8 transition-colors duration-200 ease-in-out">
-                                    <option value="">Select your activity level</option>
-                                    <option value="sedentary">Sedentary (little or no exercise)</option>
-                                    <option value="light">Lightly active (light exercise 1-3 days/week)</option>
-                                    <option value="moderate">Moderately active (moderate exercise 3-5 days/week)</option>
-                                    <option value="active">Very active (hard exercise 6-7 days/week)</option>
-                                    <option value="extreme">Extremely active (very hard exercise & physical job)</option>
-                                </select>
-                            </div>
-                            
-                            <div class="flex justify-between">
-                                <button type="button" class="prev-step text-gray-300 bg-gray-700 border-0 py-2 px-6 focus:outline-none hover:bg-gray-600 rounded-lg text-lg transition">Back</button>
-                                <button type="button" class="next-step text-white bg-purple-600 border-0 py-2 px-6 focus:outline-none hover:bg-purple-700 rounded-lg text-lg transition">Next</button>
-                            </div>
+                        <!-- Activity Level -->
+                        <div class="mb-8">
+                            <h2 class="text-2xl font-bold mb-6 heading-font text-gray-800">4. Activity Level</h2>
+                            <select name="activity_level" class="w-full bg-amber-50 rounded border border-amber-200 focus:border-red-500 focus:bg-white focus:ring-2 focus:ring-red-200 text-base outline-none text-gray-700 py-3 px-4 leading-8 transition-colors duration-200 ease-in-out">
+                                <option value="">Select your activity level</option>
+                                <option value="sedentary">Sedentary (little or no exercise)</option>
+                                <option value="light">Lightly active (light exercise 1-3 days/week)</option>
+                                <option value="moderate">Moderately active (moderate exercise 3-5 days/week)</option>
+                                <option value="active">Very active (hard exercise 6-7 days/week)</option>
+                                <option value="extreme">Extremely active (very hard exercise & physical job)</option>
+                            </select>
                         </div>
                         
-                        <!-- Step 3: Allergies and Preferences -->
-                        <div id="step3" class="step hidden">
-                            <!-- Allergies and Restrictions -->
-                            <div class="mb-8">
-                                <h2 class="text-lg font-medium text-white mb-4">5. Food Allergies and Intolerances</h2>
-                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-                                    <label class="flex items-center p-3 border border-gray-700 rounded-lg hover:border-purple-500 cursor-pointer">
-                                        <input type="checkbox" name="allergy" value="nuts" class="h-5 w-5 text-purple-500 focus:ring-purple-500 border-gray-700 rounded">
-                                        <span class="ml-3">Nuts</span>
-                                    </label>
-                                    <label class="flex items-center p-3 border border-gray-700 rounded-lg hover:border-purple-500 cursor-pointer">
-                                        <input type="checkbox" name="allergy" value="dairy" class="h-5 w-5 text-purple-500 focus:ring-purple-500 border-gray-700 rounded">
-                                        <span class="ml-3">Dairy</span>
-                                    </label>
-                                    <label class="flex items-center p-3 border border-gray-700 rounded-lg hover:border-purple-500 cursor-pointer">
-                                        <input type="checkbox" name="allergy" value="gluten" class="h-5 w-5 text-purple-500 focus:ring-purple-500 border-gray-700 rounded">
-                                        <span class="ml-3">Gluten</span>
-                                    </label>
-                                    <label class="flex items-center p-3 border border-gray-700 rounded-lg hover:border-purple-500 cursor-pointer">
-                                        <input type="checkbox" name="allergy" value="shellfish" class="h-5 w-5 text-purple-500 focus:ring-purple-500 border-gray-700 rounded">
-                                        <span class="ml-3">Shellfish</span>
-                                    </label>
-                                    <label class="flex items-center p-3 border border-gray-700 rounded-lg hover:border-purple-500 cursor-pointer">
-                                        <input type="checkbox" name="allergy" value="soy" class="h-5 w-5 text-purple-500 focus:ring-purple-500 border-gray-700 rounded">
-                                        <span class="ml-3">Soy</span>
-                                    </label>
-                                    <label class="flex items-center p-3 border border-gray-700 rounded-lg hover:border-purple-500 cursor-pointer">
-                                        <input type="checkbox" name="allergy" value="eggs" class="h-5 w-5 text-purple-500 focus:ring-purple-500 border-gray-700 rounded">
-                                        <span class="ml-3">Eggs</span>
-                                    </label>
-                                </div>
-                                <textarea name="allergy_details" rows="2" class="w-full bg-gray-700 rounded border border-gray-700 focus:border-purple-500 focus:bg-gray-600 focus:ring-2 focus:ring-purple-900 text-base outline-none text-white py-1 px-3 leading-8 transition-colors duration-200 ease-in-out" placeholder="Other allergies or intolerances (please specify)"></textarea>
-                            </div>
-                            
-                            <!-- Meal Preferences -->
-                            <div class="mb-8">
-                                <h2 class="text-lg font-medium text-white mb-4">6. Meal Preferences (Select up to 3)</h2>
-                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                                    <label class="flex items-center p-3 border border-gray-700 rounded-lg hover:border-purple-500 cursor-pointer">
-                                        <input type="checkbox" name="meal_pref" value="high-protein" class="h-5 w-5 text-purple-500 focus:ring-purple-500 border-gray-700 rounded meal-pref-checkbox">
-                                        <span class="ml-3">High Protein</span>
-                                    </label>
-                                    <label class="flex items-center p-3 border border-gray-700 rounded-lg hover:border-purple-500 cursor-pointer">
-                                        <input type="checkbox" name="meal_pref" value="low-carb" class="h-5 w-5 text-purple-500 focus:ring-purple-500 border-gray-700 rounded meal-pref-checkbox">
-                                        <span class="ml-3">Low Carb</span>
-                                    </label>
-                                    <label class="flex items-center p-3 border border-gray-700 rounded-lg hover:border-purple-500 cursor-pointer">
-                                        <input type="checkbox" name="meal_pref" value="keto" class="h-5 w-5 text-purple-500 focus:ring-purple-500 border-gray-700 rounded meal-pref-checkbox">
-                                        <span class="ml-3">Keto</span>
-                                    </label>
-                                    <label class="flex items-center p-3 border border-gray-700 rounded-lg hover:border-purple-500 cursor-pointer">
-                                        <input type="checkbox" name="meal_pref" value="paleo" class="h-5 w-5 text-purple-500 focus:ring-purple-500 border-gray-700 rounded meal-pref-checkbox">
-                                        <span class="ml-3">Paleo</span>
-                                    </label>
-                                    <label class="flex items-center p-3 border border-gray-700 rounded-lg hover:border-purple-500 cursor-pointer">
-                                        <input type="checkbox" name="meal_pref" value="mediterranean" class="h-5 w-5 text-purple-500 focus:ring-purple-500 border-gray-700 rounded meal-pref-checkbox">
-                                        <span class="ml-3">Mediterranean</span>
-                                    </label>
-                                    <label class="flex items-center p-3 border border-gray-700 rounded-lg hover:border-purple-500 cursor-pointer">
-                                        <input type="checkbox" name="meal_pref" value="balanced" class="h-5 w-5 text-purple-500 focus:ring-purple-500 border-gray-700 rounded meal-pref-checkbox">
-                                        <span class="ml-3">Balanced</span>
-                                    </label>
-                                </div>
-                            </div>
-                            
-                            <!-- Additional Information -->
-                            <div class="mb-8">
-                                <h2 class="text-lg font-medium text-white mb-4">7. Additional Information</h2>
-                                <textarea name="additional_info" rows="3" class="w-full bg-gray-700 rounded border border-gray-700 focus:border-purple-500 focus:bg-gray-600 focus:ring-2 focus:ring-purple-900 text-base outline-none text-white py-1 px-3 leading-8 transition-colors duration-200 ease-in-out" placeholder="Any other dietary preferences, restrictions, or health considerations we should know about?"></textarea>
-                            </div>
-                            
-                            <div class="flex justify-between">
-                                <button type="button" class="prev-step text-gray-300 bg-gray-700 border-0 py-2 px-6 focus:outline-none hover:bg-gray-600 rounded-lg text-lg transition">Back</button>
-                                <button type="submit" class="text-white bg-purple-600 border-0 py-2 px-6 focus:outline-none hover:bg-purple-700 rounded-lg text-lg transition">Save Preferences</button>
-                            </div>
+                        <div class="flex justify-between">
+                            <button type="button" class="prev-step text-gray-700 bg-amber-100 hover:bg-amber-200 border-0 py-3 px-6 focus:outline-none rounded-lg text-lg transition border-animate">
+                                <i class="fas fa-arrow-left mr-2"></i> Back
+                            </button>
+                            <button type="button" class="next-step text-white bg-gradient-to-r from-red-600 to-amber-600 hover:from-red-700 hover:to-amber-700 px-6 py-3 rounded-lg font-medium transition shadow-lg btn-shine">
+                                Next <i class="fas fa-arrow-right ml-2"></i>
+                            </button>
                         </div>
-                    </form>
-                </div>
-                
-                <div class="text-center text-sm text-gray-400">
-                    <p>This information helps us provide personalized food recommendations tailored to your health needs and goals. You can update these preferences anytime in your account settings.</p>
-                </div>
-            </div>
-        </section>
-    
-        <!-- Footer -->
-        <footer class="text-gray-400 body-font bg-gray-800">
-            <div class="container px-5 py-8 mx-auto flex items-center sm:flex-row flex-col">
-                <a href="index.html" class="flex title-font font-medium items-center md:justify-start justify-center text-white">
-                    <i class="fas fa-utensils text-purple-500 text-2xl mr-2"></i>
-                    <span class="ml-1 text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-600">NutriOrder</span>
-                </a>
-                <p class="text-sm text-gray-400 sm:ml-4 sm:pl-4 sm:border-l-2 sm:border-gray-700 sm:py-2 sm:mt-0 mt-4">© 2023 NutriOrder —
-                    <a href="#" class="text-gray-500 ml-1" rel="noopener noreferrer" target="_blank">All Rights Reserved</a>
-                </p>
-                <span class="inline-flex sm:ml-auto sm:mt-0 mt-4 justify-center sm:justify-start">
-                    <a href="#" class="text-gray-400 hover:text-purple-400">
-                        <i class="fab fa-facebook-f"></i>
-                    </a>
-                    <a href="#" class="ml-3 text-gray-400 hover:text-purple-400">
-                        <i class="fab fa-twitter"></i>
-                    </a>
-                    <a href="#" class="ml-3 text-gray-400 hover:text-purple-400">
-                        <i class="fab fa-instagram"></i>
-                    </a>
-                </span>
-            </div>
-        </footer>
-    
-
-        <script>
-            // Theme toggle functionality
-            document.addEventListener('DOMContentLoaded', function() {
-                const html = document.documentElement;
-                
-                // Check for saved theme preference
-                if (localStorage.getItem('theme') === 'dark' || 
-                    (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-                    html.classList.add('dark');
-                }
-        
-                // Limit meal preference selections to 3
-                const mealPrefCheckboxes = document.querySelectorAll('.meal-pref-checkbox');
-                mealPrefCheckboxes.forEach(checkbox => {
-                    checkbox.addEventListener('change', function() {
-                        const checked = document.querySelectorAll('.meal-pref-checkbox:checked');
-                        if (checked.length > 3) {
-                            this.checked = false;
-                            alert('Please select no more than 3 meal preferences.');
-                        }
-                    });
-                });
-        
-                // Initialize step navigation
-                let currentStep = 1;
-                const totalSteps = 3;
-                const stepIndicator = document.getElementById('step-indicator');
-
-                // Reset to initial state
-                function initializeSteps() {
-                    // Hide all steps except first
-                    document.querySelectorAll('.step').forEach((step, index) => {
-                        if (index === 0) {
-                            step.classList.add('active');
-                            step.classList.remove('hidden');
-                        } else {
-                            step.classList.remove('active');
-                            step.classList.add('hidden');
-                        }
-                    });
+                    </div>
                     
-                    // Reset current step and update indicator
-                    currentStep = 1;
+                    <!-- Step 3: Allergies and Preferences -->
+                    <div id="step3" class="step hidden p-8">
+                        <!-- Allergies and Restrictions -->
+                        <div class="mb-8">
+                            <h2 class="text-2xl font-bold mb-6 heading-font text-gray-800">5. Food Allergies</h2>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+                                <label class="flex items-center p-4 border border-amber-200 rounded-lg hover:border-red-500 cursor-pointer bg-amber-50">
+                                    <input type="checkbox" name="allergy" value="nuts" class="h-5 w-5 text-red-600 focus:ring-red-500 border-gray-300 rounded">
+                                    <span class="ml-3 text-gray-700">Nuts</span>
+                                </label>
+                                <label class="flex items-center p-4 border border-amber-200 rounded-lg hover:border-red-500 cursor-pointer bg-amber-50">
+                                    <input type="checkbox" name="allergy" value="dairy" class="h-5 w-5 text-red-600 focus:ring-red-500 border-gray-300 rounded">
+                                    <span class="ml-3 text-gray-700">Dairy</span>
+                                </label>
+                                <label class="flex items-center p-4 border border-amber-200 rounded-lg hover:border-red-500 cursor-pointer bg-amber-50">
+                                    <input type="checkbox" name="allergy" value="gluten" class="h-5 w-5 text-red-600 focus:ring-red-500 border-gray-300 rounded">
+                                    <span class="ml-3 text-gray-700">Gluten</span>
+                                </label>
+                                <label class="flex items-center p-4 border border-amber-200 rounded-lg hover:border-red-500 cursor-pointer bg-amber-50">
+                                    <input type="checkbox" name="allergy" value="shellfish" class="h-5 w-5 text-red-600 focus:ring-red-500 border-gray-300 rounded">
+                                    <span class="ml-3 text-gray-700">Shellfish</span>
+                                </label>
+                                <label class="flex items-center p-4 border border-amber-200 rounded-lg hover:border-red-500 cursor-pointer bg-amber-50">
+                                    <input type="checkbox" name="allergy" value="soy" class="h-5 w-5 text-red-600 focus:ring-red-500 border-gray-300 rounded">
+                                    <span class="ml-3 text-gray-700">Soy</span>
+                                </label>
+                                <label class="flex items-center p-4 border border-amber-200 rounded-lg hover:border-red-500 cursor-pointer bg-amber-50">
+                                    <input type="checkbox" name="allergy" value="eggs" class="h-5 w-5 text-red-600 focus:ring-red-500 border-gray-300 rounded">
+                                    <span class="ml-3 text-gray-700">Eggs</span>
+                                </label>
+                            </div>
+                            <textarea name="allergy_details" rows="2" class="w-full bg-amber-50 rounded border border-amber-200 focus:border-red-500 focus:bg-white focus:ring-2 focus:ring-red-200 text-base outline-none text-gray-700 py-2 px-4 leading-8 transition-colors duration-200 ease-in-out" placeholder="Other allergies or intolerances (please specify)"></textarea>
+                        </div>
+                        
+                        <!-- Meal Preferences -->
+                        <div class="mb-8">
+                            <h2 class="text-2xl font-bold mb-6 heading-font text-gray-800">6. Meal Preferences (Select up to 3)</h2>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                <label class="flex items-center p-4 border border-amber-200 rounded-lg hover:border-red-500 cursor-pointer bg-amber-50">
+                                    <input type="checkbox" name="meal_pref" value="high-protein" class="h-5 w-5 text-red-600 focus:ring-red-500 border-gray-300 rounded meal-pref-checkbox">
+                                    <span class="ml-3 text-gray-700">High Protein</span>
+                                </label>
+                                <label class="flex items-center p-4 border border-amber-200 rounded-lg hover:border-red-500 cursor-pointer bg-amber-50">
+                                    <input type="checkbox" name="meal_pref" value="low-carb" class="h-5 w-5 text-red-600 focus:ring-red-500 border-gray-300 rounded meal-pref-checkbox">
+                                    <span class="ml-3 text-gray-700">Low Carb</span>
+                                </label>
+                                <label class="flex items-center p-4 border border-amber-200 rounded-lg hover:border-red-500 cursor-pointer bg-amber-50">
+                                    <input type="checkbox" name="meal_pref" value="keto" class="h-5 w-5 text-red-600 focus:ring-red-500 border-gray-300 rounded meal-pref-checkbox">
+                                    <span class="ml-3 text-gray-700">Keto</span>
+                                </label>
+                                <label class="flex items-center p-4 border border-amber-200 rounded-lg hover:border-red-500 cursor-pointer bg-amber-50">
+                                    <input type="checkbox" name="meal_pref" value="paleo" class="h-5 w-5 text-red-600 focus:ring-red-500 border-gray-300 rounded meal-pref-checkbox">
+                                    <span class="ml-3 text-gray-700">Paleo</span>
+                                </label>
+                                <label class="flex items-center p-4 border border-amber-200 rounded-lg hover:border-red-500 cursor-pointer bg-amber-50">
+                                    <input type="checkbox" name="meal_pref" value="mediterranean" class="h-5 w-5 text-red-600 focus:ring-red-500 border-gray-300 rounded meal-pref-checkbox">
+                                    <span class="ml-3 text-gray-700">Mediterranean</span>
+                                </label>
+                                <label class="flex items-center p-4 border border-amber-200 rounded-lg hover:border-red-500 cursor-pointer bg-amber-50">
+                                    <input type="checkbox" name="meal_pref" value="balanced" class="h-5 w-5 text-red-600 focus:ring-red-500 border-gray-300 rounded meal-pref-checkbox">
+                                    <span class="ml-3 text-gray-700">Balanced</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <!-- Cuisine Preferences -->
+                        <div class="mb-8">
+                            <h2 class="text-2xl font-bold mb-6 heading-font text-gray-800">7. Preferred Cuisines (Optional)</h2>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <label class="flex items-center p-4 border border-amber-200 rounded-lg hover:border-red-500 cursor-pointer bg-amber-50">
+                                    <input type="checkbox" name="cuisine_pref" value="north indian" class="h-5 w-5 text-red-600 focus:ring-red-500 border-gray-300 rounded">
+                                    <span class="ml-3 text-gray-700">North Indian</span>
+                                </label>
+                                <label class="flex items-center p-4 border border-amber-200 rounded-lg hover:border-red-500 cursor-pointer bg-amber-50">
+                                    <input type="checkbox" name="cuisine_pref" value="south indian" class="h-5 w-5 text-red-600 focus:ring-red-500 border-gray-300 rounded">
+                                    <span class="ml-3 text-gray-700">South Indian</span>
+                                </label>
+                                <label class="flex items-center p-4 border border-amber-200 rounded-lg hover:border-red-500 cursor-pointer bg-amber-50">
+                                    <input type="checkbox" name="cuisine_pref" value="chinese" class="h-5 w-5 text-red-600 focus:ring-red-500 border-gray-300 rounded">
+                                    <span class="ml-3 text-gray-700">Chinese</span>
+                                </label>
+                                <label class="flex items-center p-4 border border-amber-200 rounded-lg hover:border-red-500 cursor-pointer bg-amber-50">
+                                    <input type="checkbox" name="cuisine_pref" value="continental" class="h-5 w-5 text-red-600 focus:ring-red-500 border-gray-300 rounded">
+                                    <span class="ml-3 text-gray-700">Continental</span>
+                                </label>
+                                <label class="flex items-center p-4 border border-amber-200 rounded-lg hover:border-red-500 cursor-pointer bg-amber-50">
+                                    <input type="checkbox" name="cuisine_pref" value="street food" class="h-5 w-5 text-red-600 focus:ring-red-500 border-gray-300 rounded">
+                                    <span class="ml-3 text-gray-700">Street Food</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <!-- Additional Information -->
+                        <div class="mb-8">
+                            <h2 class="text-2xl font-bold mb-6 heading-font text-gray-800">8. Additional Information</h2>
+                            <textarea name="additional_info" rows="3" class="w-full bg-amber-50 rounded border border-amber-200 focus:border-red-500 focus:bg-white focus:ring-2 focus:ring-red-200 text-base outline-none text-gray-700 py-2 px-4 leading-8 transition-colors duration-200 ease-in-out" placeholder="Any other dietary preferences, restrictions, or health considerations we should know about?"></textarea>
+                        </div>
+                        
+                        <div class="flex justify-between">
+                            <button type="button" class="prev-step text-gray-700 bg-amber-100 hover:bg-amber-200 border-0 py-3 px-6 focus:outline-none rounded-lg text-lg transition border-animate">
+                                <i class="fas fa-arrow-left mr-2"></i> Back
+                            </button>
+                            <button type="submit" class="text-white bg-gradient-to-r from-red-600 to-amber-600 hover:from-red-700 hover:to-amber-700 px-6 py-3 rounded-lg font-medium transition shadow-lg btn-shine">
+                                Save Preferences <i class="fas fa-check ml-2"></i>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            
+            <div class="text-center mt-8 text-gray-600">
+                <p>This information helps us provide personalized food recommendations tailored to your health needs and goals. You can update these preferences anytime in your account settings.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-white py-16 px-6 border-t border-amber-200">
+        <div class="container mx-auto">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-12">
+                <div>
+                    <h3 class="text-xl font-bold mb-6 flex items-center heading-font">
+                        <i class="fas fa-utensils text-red-500 mr-3"></i> NutriOrder
+                    </h3>
+                    <p class="text-gray-600 mb-4">Where traditional Indian food meets health intelligence. Making healthy eating simple, delicious, and accessible.</p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-gray-600 hover:text-red-600 transition text-lg"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="text-gray-600 hover:text-red-600 transition text-lg"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="text-gray-600 hover:text-red-600 transition text-lg"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="text-gray-600 hover:text-red-600 transition text-lg"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="font-bold text-lg mb-6 text-gray-800">Explore</h4>
+                    <ul class="space-y-3">
+                        <li><a href="homepage.html" class="text-gray-600 hover:text-red-600 transition underline-animate">Home</a></li>
+                        <li><a href="#menu" class="text-gray-600 hover:text-red-600 transition underline-animate">Menu</a></li>
+                        <li><a href="#about" class="text-gray-600 hover:text-red-600 transition underline-animate">About</a></li>
+                        <li><a href="#contact" class="text-gray-600 hover:text-red-600 transition underline-animate">Contact</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold text-lg mb-6 text-gray-800">Company</h4>
+                    <ul class="space-y-3">
+                        <li><a href="#" class="text-gray-600 hover:text-red-600 transition underline-animate">About Us</a></li>
+                        <li><a href="#" class="text-gray-600 hover:text-red-600 transition underline-animate">Careers</a></li>
+                        <li><a href="#" class="text-gray-600 hover:text-red-600 transition underline-animate">Blog</a></li>
+                        <li><a href="#" class="text-gray-600 hover:text-red-600 transition underline-animate">Press</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold text-lg mb-6 text-gray-800">Get Help</h4>
+                    <ul class="space-y-3">
+                        <li><a href="#" class="text-gray-600 hover:text-red-600 transition underline-animate">FAQ</a></li>
+                        <li><a href="#" class="text-gray-600 hover:text-red-600 transition underline-animate">Contact</a></li>
+                        <li><a href="#" class="text-gray-600 hover:text-red-600 transition underline-animate">Privacy</a></li>
+                        <li><a href="#" class="text-gray-600 hover:text-red-600 transition underline-animate">Terms</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-amber-200 mt-12 pt-8 text-center text-gray-500">
+                <p>© 2023 NutriOrder. All rights reserved. | Designed with <i class="fas fa-heart text-red-500"></i> for your health</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize step navigation
+            let currentStep = 1;
+            const totalSteps = 3;
+            const stepIndicator = document.getElementById('step-indicator');
+
+            // Reset to initial state
+            function initializeSteps() {
+                // Hide all steps except first
+                document.querySelectorAll('.step').forEach((step, index) => {
+                    if (index === 0) {
+                        step.classList.add('active');
+                        step.classList.remove('hidden');
+                    } else {
+                        step.classList.remove('active');
+                        step.classList.add('hidden');
+                    }
+                });
+                
+                // Reset current step and update indicator
+                currentStep = 1;
+                updateStepIndicator();
+            }
+
+            function updateStepIndicator() {
+                if (stepIndicator) {
+                    stepIndicator.textContent = `Step ${currentStep} of ${totalSteps}`;
+                }
+            }
+
+            function goToStep(step) {
+                if (step < 1 || step > totalSteps) return;
+                
+                // Hide all steps
+                document.querySelectorAll('.step').forEach(s => {
+                    s.classList.remove('active');
+                    s.classList.add('hidden');
+                });
+                
+                // Show current step
+                const currentStepElement = document.getElementById(`step${step}`);
+                if (currentStepElement) {
+                    currentStepElement.classList.remove('hidden');
+                    currentStepElement.classList.add('active');
+                    
+                    currentStep = step;
                     updateStepIndicator();
                 }
+            }
 
-                function updateStepIndicator() {
-                    if (stepIndicator) {
-                        stepIndicator.textContent = `Step ${currentStep} of ${totalSteps}`;
-                    }
-                }
-
-                function goToStep(step) {
-                    if (step < 1 || step > totalSteps) return;
-                    
-                    // Hide all steps
-                    document.querySelectorAll('.step').forEach(s => {
-                        s.classList.remove('active');
-                        s.classList.add('hidden');
-                    });
-                    
-                    // Show current step
-                    const currentStepElement = document.getElementById(`step${step}`);
-                    if (currentStepElement) {
-                        currentStepElement.classList.remove('hidden');
-                        currentStepElement.classList.add('active');
-                        
-                        currentStep = step;
-                        updateStepIndicator();
-                    }
-                }
-
-                function validateStep(stepNumber) {
-                    switch(stepNumber) {
-                        case 1:
-                            // Check if at least one dietary preference is selected
-                            const dietCheckboxes = document.querySelectorAll('input[name="diet"]:checked');
-                            if (dietCheckboxes.length === 0) {
-                                alert('Please select at least one dietary preference.');
-                                return false;
-                            }
-                            break;
-
-                        case 2:
-                            // Check if fitness goal is selected
-                            const fitnessGoal = document.querySelector('input[name="fitness_goal"]:checked');
-                            const currentWeight = document.querySelector('input[name="current_weight"]').value;
-                            const activityLevel = document.querySelector('select[name="activity_level"]').value;
-
-                            if (!fitnessGoal) {
-                                alert('Please select your fitness goal.');
-                                return false;
-                            }
-                            if (!currentWeight) {
-                                alert('Please enter your current weight.');
-                                return false;
-                            }
-                            if (!activityLevel) {
-                                alert('Please select your activity level.');
-                                return false;
-                            }
-                            break;
-
-                        case 3:
-                            // Nothing to validate on the last step as it's optional
-                            return true;
-                    }
-                    return true;
-                }
-
-                function nextStep() {
-                    if (currentStep < totalSteps) {
-                        if (validateStep(currentStep)) {
-                            goToStep(currentStep + 1);
+            function validateStep(stepNumber) {
+                switch(stepNumber) {
+                    case 1:
+                        // Check if at least one dietary preference is selected
+                        const dietCheckboxes = document.querySelectorAll('input[name="diet"]:checked');
+                        if (dietCheckboxes.length === 0) {
+                            alert('Please select at least one dietary preference.');
+                            return false;
                         }
-                    }
-                }
+                        break;
 
-                function prevStep() {
-                    if (currentStep > 1) {
-                        goToStep(currentStep - 1);
-                    }
-                }
+                    case 2:
+                        // Check if fitness goal is selected
+                        const fitnessGoal = document.querySelector('input[name="fitness_goal"]:checked');
+                        const currentWeight = document.querySelector('input[name="current_weight"]').value;
+                        const activityLevel = document.querySelector('select[name="activity_level"]').value;
 
-                // Attach event listeners to buttons
-                document.addEventListener('click', function(e) {
-                    if (e.target.classList.contains('next-step')) {
-                        e.preventDefault();
-                        nextStep();
-                    }
-                    if (e.target.classList.contains('prev-step')) {
-                        e.preventDefault();
-                        prevStep();
-                    }
-                });
-
-                // Initialize the steps on page load
-                initializeSteps();
-        
-                // Smooth page transitions for links
-                document.querySelectorAll('a').forEach(link => {
-                    link.addEventListener('click', function(e) {
-                        if (!this.href || this.href.includes('#') || this.href === window.location.href) {
-                            return;
+                        if (!fitnessGoal) {
+                            alert('Please select your fitness goal.');
+                            return false;
                         }
-                        e.preventDefault();
-                        document.body.style.opacity = '0';
-                        setTimeout(() => {
-                            window.location.href = this.href;
-                        }, 300);
-                    });
+                        if (!currentWeight) {
+                            alert('Please enter your current weight.');
+                            return false;
+                        }
+                        if (!activityLevel) {
+                            alert('Please select your activity level.');
+                            return false;
+                        }
+                        break;
+
+                    case 3:
+                        // Nothing to validate on the last step as it's optional
+                        return true;
+                }
+                return true;
+            }
+
+            function nextStep() {
+                if (currentStep < totalSteps) {
+                    if (validateStep(currentStep)) {
+                        goToStep(currentStep + 1);
+                    }
+                }
+            }
+
+            function prevStep() {
+                if (currentStep > 1) {
+                    goToStep(currentStep - 1);
+                }
+            }
+
+            // Attach event listeners to buttons
+            document.addEventListener('click', function(e) {
+                if (e.target.classList.contains('next-step')) {
+                    e.preventDefault();
+                    nextStep();
+                }
+                if (e.target.classList.contains('prev-step')) {
+                    e.preventDefault();
+                    prevStep();
+                }
+            });
+
+            // Limit meal preference selections to 3
+            const mealPrefCheckboxes = document.querySelectorAll('.meal-pref-checkbox');
+            mealPrefCheckboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    const checked = document.querySelectorAll('.meal-pref-checkbox:checked');
+                    if (checked.length > 3) {
+                        this.checked = false;
+                        alert('Please select no more than 3 meal preferences.');
+                    }
                 });
             });
-        </script>
+
+            // Initialize the steps on page load
+            initializeSteps();
+    
+            // Smooth page transitions for links
+            document.querySelectorAll('a').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    if (!this.href || this.href.includes('#') || this.href === window.location.href) {
+                        return;
+                    }
+                    e.preventDefault();
+                    document.body.style.opacity = '0';
+                    setTimeout(() => {
+                        window.location.href = this.href;
+                    }, 300);
+                });
+            });
+        });
+    </script>
 </body>
 </html>

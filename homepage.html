@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Recommended Foods - NutriOrder</title>
+    <title>Homepage - NutriOrder</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -62,59 +62,116 @@
                 font-size: 1.1rem;
             }
         }
+
+        /* Food card animation */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .food-card {
+            animation: fadeInUp 0.5s ease-out forwards;
+            animation-delay: calc(var(--order) * 0.1s);
+            opacity: 0;
+        }
+
+        /* Custom scroll snap */
+        .scroll-snap-x {
+            scroll-snap-type: x mandatory;
+        }
+
+        .scroll-snap-item {
+            scroll-snap-align: start;
+        }
+
+        /* Shimmer effect for loading */
+        .shimmer {
+            background: linear-gradient(90deg, #2d3748 0%, #4a5568 50%, #2d3748 100%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+        }
+
+        @keyframes shimmer {
+            0% {
+                background-position: -200% 0;
+            }
+            100% {
+                background-position: 200% 0;
+            }
+        }
     </style>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
         import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
-  
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
+
         const firebaseConfig = {
-          apiKey: "AIzaSyBx0Kt9o04ye0XrtA8ecp84wD8Q9OCDjlA",
-          authDomain: "foodorder-4380c.firebaseapp.com",
-          projectId: "foodorder-4380c",
-          storageBucket: "foodorder-4380c.firebasestorage.app",
-          messagingSenderId: "735023580381",
-          appId: "1:735023580381:web:c6740bef2fc9bdee1b4734"
+            apiKey: "AIzaSyBx0Kt9o04ye0XrtA8ecp84wD8Q9OCDjlA",
+            authDomain: "foodorder-4380c.firebaseapp.com",
+            projectId: "foodorder-4380c",
+            storageBucket: "foodorder-4380c.firebasestorage.app",
+            messagingSenderId: "735023580381",
+            appId: "1:735023580381:web:c6740bef2fc9bdee1b4734"
         };
-  
+
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const provider = new GoogleAuthProvider();
+        const db = getFirestore(app);
 
         // Check auth state
         onAuthStateChanged(auth, (user) => {
-          if (!user) {
-            // If not logged in, redirect to login page
-            localStorage.setItem('redirectAfterLogin', window.location.href);
-            window.location.href = 'login.html';
-          } else {
-            // Update profile name if logged in
-            const profileName = document.getElementById('profile-name');
-            if (profileName) {
-              profileName.textContent = user.displayName || user.email.split('@')[0];
+            if (!user) {
+                // If not logged in, redirect to login page
+                localStorage.setItem('redirectAfterLogin', window.location.href);
+                window.location.href = 'login.html';
+            } else {
+                // Update profile name if logged in
+                const profileName = document.getElementById('profile-name');
+                if (profileName) {
+                    profileName.textContent = user.displayName || user.email.split('@')[0];
+                }
+
+                // Load user preferences from Firestore
+                const userDocRef = doc(db, 'users', user.uid);
+                getDoc(userDocRef).then((doc) => {
+                    if (doc.exists() && doc.data().preferences) {
+                        localStorage.setItem('userPreferences', JSON.stringify(doc.data().preferences));
+                        // Refresh recommendations when preferences are loaded
+                        if (window.updateRecommendations) {
+                            window.updateRecommendations();
+                        }
+                    }
+                });
             }
-          }
         });
-  
+
         // Google sign-in function
         window.signInWithGoogle = async function() {
-          try {
-            const result = await signInWithPopup(auth, provider);
-            const user = result.user;
-            window.location.href = 'homepage.html';
-          } catch (error) {
-            console.error('Google sign-in error:', error);
-            alert('Google sign-in failed: ' + error.message);
-          }
+            try {
+                const result = await signInWithPopup(auth, provider);
+                const user = result.user;
+                window.location.href = 'homepage.html';
+            } catch (error) {
+                console.error('Google sign-in error:', error);
+                alert('Google sign-in failed: ' + error.message);
+            }
         };
 
         // Logout function
         window.logout = async function() {
-          try {
-            await signOut(auth);
-            window.location.href = 'index.html';
-          } catch (error) {
-            console.error('Logout error:', error);
-          }
+            try {
+                await signOut(auth);
+                window.location.href = 'index.html';
+            } catch (error) {
+                console.error('Logout error:', error);
+            }
         };
     </script>
     <script>
@@ -126,10 +183,14 @@
                         primary: '#8b5cf6',
                         secondary: '#7c3aed',
                         dark: '#1f2937',
-                        light: '#f3f4f6'
+                        light: '#f3f4f6',
+                        success: '#10b981',
+                        warning: '#f59e0b',
+                        danger: '#ef4444'
                     },
                     animation: {
                         'click': 'click 300ms ease-out',
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
                     },
                     keyframes: {
                         click: {
@@ -169,8 +230,8 @@
                 </button>
                 <div id="profile-dropdown" class="absolute right-0 mt-2 w-48 bg-gray-800 rounded-md shadow-lg py-1 z-50 hidden border border-gray-700">
                     <a href="dashboard.html" class="block px-4 py-2 text-sm hover:bg-gray-700">Dashboard</a>
-                    <a href="preferences.html" class="block px-4 py-2 text-sm hover:bg-gray-700">Preferences</a>
                     <a href="orders.html" class="block px-4 py-2 text-sm hover:bg-gray-700">My Orders</a>
+                    <a href="settings.html" class="block px-4 py-2 text-sm hover:bg-gray-700">Settings</a>
                     <a href="#" onclick="logout()" class="block px-4 py-2 text-sm hover:bg-gray-700">Sign out</a>
                 </div>
             </div>
@@ -209,165 +270,279 @@
     </div>
     <div id="cart-overlay" class="hidden fixed inset-0 bg-black bg-opacity-50 z-40" onclick="toggleCart()"></div>
 
-    <!-- Recommended Foods Section -->
-    <section class="text-gray-300 body-font py-12">
-        <div class="container px-5 mx-auto">
-            <div class="flex flex-col text-center w-full mb-12">
-                <h1 class="text-3xl font-bold title-font mb-4 text-white">Foods Recommended For You</h1>
-                <p class="lg:w-2/3 mx-auto leading-relaxed">Based on your preferences and dietary needs</p>
-            </div>
-            
-            <!-- Search and Filters -->
-            <div class="mb-8 bg-gray-800 p-6 rounded-lg shadow">
-                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                    <div class="relative flex-grow">
-                        <input type="text" id="food-search" placeholder="Search recommended foods..." class="w-full bg-gray-700 rounded border border-gray-600 focus:border-purple-500 focus:bg-gray-600 focus:ring-2 focus:ring-purple-900 text-base outline-none text-white py-2 px-4 pl-10 leading-8 transition-colors duration-200 ease-in-out">
-                        <i class="fas fa-search absolute left-3 top-3.5 text-gray-400"></i>
-                    </div>
-                    <div class="flex flex-wrap gap-3">
-                        <select id="cuisine-filter" class="bg-gray-700 rounded border border-gray-600 focus:border-purple-500 focus:bg-gray-600 focus:ring-2 focus:ring-purple-900 text-base outline-none text-white py-2 px-3 leading-8 transition-colors duration-200 ease-in-out">
-                            <option value="">All Cuisines</option>
-                            <option value="indian">Indian</option>
-                            <option value="italian">Italian</option>
-                            <option value="chinese">Chinese</option>
-                            <option value="mexican">Mexican</option>
-                            <option value="american">American</option>
-                        </select>
-                        <select id="diet-filter" class="bg-gray-700 rounded border border-gray-600 focus:border-purple-500 focus:bg-gray-600 focus:ring-2 focus:ring-purple-900 text-base outline-none text-white py-2 px-3 leading-8 transition-colors duration-200 ease-in-out">
-                            <option value="">All Diets</option>
-                            <option value="vegetarian">Vegetarian</option>
-                            <option value="vegan">Vegan</option>
-                            <option value="gluten-free">Gluten-Free</option>
-                            <option value="keto">Keto</option>
-                            <option value="low-carb">Low Carb</option>
-                            <option value="high-protein">High Protein</option>
-                        </select>
-                        <button id="reset-filters" class="text-gray-300 hover:text-purple-400 border border-gray-600 py-2 px-4 rounded-lg transition">
-                            Reset
-                        </button>
+    <!-- Hero Banner -->
+    <div class="relative bg-gray-800 overflow-hidden">
+        <div class="max-w-7xl mx-auto">
+            <div class="relative z-10 pb-8 bg-gray-800 sm:pb-16 md:pb-20 lg:max-w-2xl lg:w-full lg:pb-28 xl:pb-32">
+                <div class="pt-10 sm:pt-16 lg:pt-8 lg:pb-14 lg:overflow-hidden">
+                    <div class="mt-10 mx-auto max-w-7xl px-4 sm:mt-12 sm:px-6 md:mt-16 lg:mt-20 lg:px-8 xl:mt-28">
+                        <div class="sm:text-center lg:text-left">
+                            <h1 class="text-4xl tracking-tight font-extrabold text-white sm:text-5xl md:text-6xl">
+                                <span class="block">Healthy food,</span>
+                                <span class="block text-purple-400">delivered to you</span>
+                            </h1>
+                            <p class="mt-3 text-base text-gray-300 sm:mt-5 sm:text-lg sm:max-w-xl sm:mx-auto md:mt-5 md:text-xl lg:mx-0">
+                                Nutritious meals tailored to your dietary needs and health goals. Order from top-rated healthy restaurants near you.
+                            </p>
+                            <div class="mt-5 sm:mt-8 sm:flex sm:justify-center lg:justify-start">
+                                <div class="rounded-md shadow">
+                                    <a href="#food-section" class="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 md:py-4 md:text-lg md:px-10">
+                                        Order Now
+                                    </a>
+                                </div>
+                                <div class="mt-3 sm:mt-0 sm:ml-3">
+                                    <a href="#restaurants" class="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-purple-300 bg-gray-700 hover:bg-gray-600 md:py-4 md:text-lg md:px-10">
+                                        View Restaurants
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-            
-            <!-- Personalized Recommendations -->
-            <div class="mb-8">
-                <h2 class="text-xl font-bold title-font mb-6 text-white flex items-center">
-                    <i class="fas fa-heart text-purple-500 mr-2"></i> Based on Your Preferences
-                </h2>
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" id="recommended-foods">
-                    <!-- Recommended items will be loaded here dynamically -->
+        </div>
+        <div class="lg:absolute lg:inset-y-0 lg:right-0 lg:w-1/2">
+            <img class="h-56 w-full object-cover sm:h-72 md:h-96 lg:w-full lg:h-full" src="https://images.unsplash.com/photo-1490645935967-10de6ba17061?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80" alt="Healthy food">
+        </div>
+    </div>
+
+    <!-- Food Categories -->
+    <div class="bg-gray-800 py-6 px-4">
+        <div class="max-w-7xl mx-auto">
+            <h2 class="text-xl font-bold text-white mb-4">Food Categories</h2>
+            <div class="flex space-x-4 overflow-x-auto pb-4 scroll-snap-x">
+                <button onclick="filterByCategory('all')" class="category-btn flex-shrink-0 px-4 py-2 bg-purple-600 text-white rounded-full font-medium scroll-snap-item">
+                    All Items
+                </button>
+                <button onclick="filterByCategory('indian')" class="category-btn flex-shrink-0 px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-full font-medium scroll-snap-item">
+                    Indian
+                </button>
+                <button onclick="filterByCategory('north indian')" class="category-btn flex-shrink-0 px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-full font-medium scroll-snap-item">
+                    North Indian
+                </button>
+                <button onclick="filterByCategory('south indian')" class="category-btn flex-shrink-0 px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-full font-medium scroll-snap-item">
+                    South Indian
+                </button>
+                <button onclick="filterByCategory('vegetarian')" class="category-btn flex-shrink-0 px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-full font-medium scroll-snap-item">
+                    Vegetarian
+                </button>
+                <button onclick="filterByCategory('vegan')" class="category-btn flex-shrink-0 px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-full font-medium scroll-snap-item">
+                    Vegan
+                </button>
+                <button onclick="filterByCategory('high-protein')" class="category-btn flex-shrink-0 px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-full font-medium scroll-snap-item">
+                    High Protein
+                </button>
+                <button onclick="filterByCategory('low-carb')" class="category-btn flex-shrink-0 px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-full font-medium scroll-snap-item">
+                    Low Carb
+                </button>
+                <button onclick="filterByCategory('keto')" class="category-btn flex-shrink-0 px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-full font-medium scroll-snap-item">
+                    Keto
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Food Section -->
+    <section id="food-section" class="py-8 px-4 bg-gray-900">
+        <div class="max-w-7xl mx-auto">
+            <div class="flex flex-col md:flex-row justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-white mb-4 md:mb-0">Recommended For You</h2>
+                <div class="flex items-center space-x-4">
+                    <div class="relative">
+                        <select id="sort-by" class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-purple-500 focus:border-purple-500 block w-full p-2.5">
+                            <option value="recommended">Recommended</option>
+                            <option value="rating">Rating</option>
+                            <option value="price-low">Price: Low to High</option>
+                            <option value="price-high">Price: High to Low</option>
+                            <option value="calories-low">Calories: Low to High</option>
+                            <option value="calories-high">Calories: High to Low</option>
+                        </select>
+                    </div>
+                    <button id="filter-btn" class="flex items-center text-white bg-gray-700 hover:bg-gray-600 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm px-4 py-2.5">
+                        <i class="fas fa-filter mr-2"></i> Filters
+                    </button>
                 </div>
             </div>
-            
-            <!-- Recommended Restaurants -->
-            <div class="mb-8">
-                <h2 class="text-xl font-bold title-font mb-6 text-white flex items-center">
-                    <i class="fas fa-utensils text-purple-500 mr-2"></i> Restaurants Matching Your Preferences
-                </h2>
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" id="recommended-restaurants">
-                    <!-- Restaurant cards will be loaded here dynamically -->
+
+            <!-- Filter Panel (Hidden by default) -->
+            <div id="filter-panel" class="hidden bg-gray-800 rounded-lg p-4 mb-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div>
+                        <h3 class="font-medium text-white mb-2">Dietary Preferences</h3>
+                        <div class="space-y-2">
+                            <label class="flex items-center">
+                                <input type="checkbox" class="diet-filter" value="vegetarian" checked>
+                                <span class="ml-2 text-gray-300">Vegetarian</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" class="diet-filter" value="vegan" checked>
+                                <span class="ml-2 text-gray-300">Vegan</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" class="diet-filter" value="gluten-free" checked>
+                                <span class="ml-2 text-gray-300">Gluten-Free</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" class="diet-filter" value="jain" checked>
+                                <span class="ml-2 text-gray-300">Jain</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="font-medium text-white mb-2">Meal Type</h3>
+                        <div class="space-y-2">
+                            <label class="flex items-center">
+                                <input type="checkbox" class="meal-filter" value="breakfast" checked>
+                                <span class="ml-2 text-gray-300">Breakfast</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" class="meal-filter" value="lunch" checked>
+                                <span class="ml-2 text-gray-300">Lunch</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" class="meal-filter" value="dinner" checked>
+                                <span class="ml-2 text-gray-300">Dinner</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" class="meal-filter" value="snacks" checked>
+                                <span class="ml-2 text-gray-300">Snacks</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="font-medium text-white mb-2">Nutrition</h3>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-300 mb-1">Max Calories</label>
+                                <input type="range" id="calorie-range" min="100" max="1000" value="1000" class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer">
+                                <div class="flex justify-between text-xs text-gray-400">
+                                    <span>100</span>
+                                    <span id="calorie-value">1000</span>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-300 mb-1">Min Protein (g)</label>
+                                <input type="range" id="protein-range" min="0" max="50" value="0" class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer">
+                                <div class="flex justify-between text-xs text-gray-400">
+                                    <span>0</span>
+                                    <span id="protein-value">50</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-4 flex justify-end space-x-3">
+                    <button id="reset-filters-btn" class="px-4 py-2 text-sm font-medium text-gray-300 bg-gray-700 rounded-lg hover:bg-gray-600">
+                        Reset
+                    </button>
+                    <button id="apply-filters-btn" class="px-4 py-2 text-sm font-medium text-white bg-purple-600 rounded-lg hover:bg-purple-700">
+                        Apply Filters
+                    </button>
                 </div>
             </div>
-            
-            <!-- Health Tips Based on Preferences -->
-            <div class="bg-purple-900 bg-opacity-30 rounded-lg p-6">
-                <h2 class="text-xl font-bold title-font mb-4 text-white flex items-center">
-                    <i class="fas fa-lightbulb text-purple-400 mr-2"></i> Health Tips For You
-                </h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="health-tips">
-                    <!-- Health tips will be loaded here dynamically -->
+
+            <!-- Food Grid -->
+            <div id="food-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <!-- Food items will be loaded here dynamically -->
+            </div>
+
+            <!-- Loading State -->
+            <div id="loading-state" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <!-- Loading skeletons -->
+                <div class="bg-gray-800 rounded-lg overflow-hidden shadow animate-pulse">
+                    <div class="h-48 bg-gray-700"></div>
+                    <div class="p-4">
+                        <div class="h-4 bg-gray-700 rounded w-3/4 mb-2"></div>
+                        <div class="h-3 bg-gray-700 rounded w-1/2 mb-4"></div>
+                        <div class="grid grid-cols-3 gap-2 mb-4">
+                            <div class="h-2 bg-gray-700 rounded"></div>
+                            <div class="h-2 bg-gray-700 rounded"></div>
+                            <div class="h-2 bg-gray-700 rounded"></div>
+                        </div>
+                        <div class="h-8 bg-gray-700 rounded w-full"></div>
+                    </div>
                 </div>
+                <div class="bg-gray-800 rounded-lg overflow-hidden shadow animate-pulse">
+                    <div class="h-48 bg-gray-700"></div>
+                    <div class="p-4">
+                        <div class="h-4 bg-gray-700 rounded w-3/4 mb-2"></div>
+                        <div class="h-3 bg-gray-700 rounded w-1/2 mb-4"></div>
+                        <div class="grid grid-cols-3 gap-2 mb-4">
+                            <div class="h-2 bg-gray-700 rounded"></div>
+                            <div class="h-2 bg-gray-700 rounded"></div>
+                            <div class="h-2 bg-gray-700 rounded"></div>
+                        </div>
+                        <div class="h-8 bg-gray-700 rounded w-full"></div>
+                    </div>
+                </div>
+                <div class="bg-gray-800 rounded-lg overflow-hidden shadow animate-pulse">
+                    <div class="h-48 bg-gray-700"></div>
+                    <div class="p-4">
+                        <div class="h-4 bg-gray-700 rounded w-3/4 mb-2"></div>
+                        <div class="h-3 bg-gray-700 rounded w-1/2 mb-4"></div>
+                        <div class="grid grid-cols-3 gap-2 mb-4">
+                            <div class="h-2 bg-gray-700 rounded"></div>
+                            <div class="h-2 bg-gray-700 rounded"></div>
+                            <div class="h-2 bg-gray-700 rounded"></div>
+                        </div>
+                        <div class="h-8 bg-gray-700 rounded w-full"></div>
+                    </div>
+                </div>
+                <div class="bg-gray-800 rounded-lg overflow-hidden shadow animate-pulse">
+                    <div class="h-48 bg-gray-700"></div>
+                    <div class="p-4">
+                        <div class="h-4 bg-gray-700 rounded w-3/4 mb-2"></div>
+                        <div class="h-3 bg-gray-700 rounded w-1/2 mb-4"></div>
+                        <div class="grid grid-cols-3 gap-2 mb-4">
+                            <div class="h-2 bg-gray-700 rounded"></div>
+                            <div class="h-2 bg-gray-700 rounded"></div>
+                            <div class="h-2 bg-gray-700 rounded"></div>
+                        </div>
+                        <div class="h-8 bg-gray-700 rounded w-full"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- No Results State -->
+            <div id="no-results" class="hidden text-center py-12">
+                <i class="fas fa-utensils text-4xl text-gray-600 mb-4"></i>
+                <h3 class="text-xl font-medium text-gray-300 mb-2">No matching items found</h3>
+                <p class="text-gray-500 mb-4">Try adjusting your filters or search for something else</p>
+                <button id="reset-all-filters" class="px-4 py-2 text-sm font-medium text-white bg-purple-600 rounded-lg hover:bg-purple-700">
+                    Reset All Filters
+                </button>
+            </div>
+
+            <!-- Load More Button -->
+            <div class="mt-8 text-center">
+                <button id="load-more" class="px-6 py-3 text-white bg-purple-600 rounded-lg hover:bg-purple-700 font-medium">
+                    Load More
+                </button>
             </div>
         </div>
     </section>
 
-    <!-- Restaurant Menu Modal -->
-    <div id="restaurant-menu-modal" class="hidden fixed inset-0 z-50 overflow-y-auto">
-        <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            <div class="fixed inset-0 transition-opacity" aria-hidden="true">
-                <div class="absolute inset-0 bg-gray-900 opacity-75" onclick="hideRestaurantMenu()"></div>
-            </div>
-            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-            <div class="inline-block align-bottom bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full border border-gray-700">
-                <div class="px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                    <div class="sm:flex sm:items-start">
-                        <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
-                            <div class="flex justify-between items-center">
-                                <h3 class="text-lg leading-6 font-medium text-white" id="restaurant-menu-title"></h3>
-                                <button onclick="hideRestaurantMenu()" class="text-gray-400 hover:text-white">
-                                    <i class="fas fa-times"></i>
-                                </button>
-                            </div>
-                            <div class="mt-4">
-                                <p class="text-sm text-gray-400 mb-4" id="restaurant-menu-description"></p>
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="restaurant-menu-items">
-                                    <!-- Menu items will be loaded here dynamically -->
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="bg-gray-700 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                    <button type="button" onclick="hideRestaurantMenu()" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-purple-600 text-base font-medium text-white hover:bg-purple-700 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm transition">
-                        Close
-                    </button>
-                </div>
+    <!-- Popular Restaurants Section -->
+    <section id="restaurants" class="py-12 px-4 bg-gray-800">
+        <div class="max-w-7xl mx-auto">
+            <h2 class="text-2xl font-bold text-white mb-6">Popular Restaurants Near You</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="restaurants-grid">
+                <!-- Restaurants will be loaded here dynamically -->
             </div>
         </div>
-    </div>
+    </section>
 
-    <!-- Recipe Modal -->
-    <div id="recipe-modal" class="hidden fixed inset-0 z-50 overflow-y-auto">
-        <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            <div class="fixed inset-0 transition-opacity" aria-hidden="true">
-                <div class="absolute inset-0 bg-gray-900 opacity-75" onclick="hideRecipe()"></div>
-            </div>
-            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-            <div class="inline-block align-bottom bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full border border-gray-700">
-                <div class="px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                    <div class="sm:flex sm:items-start">
-                        <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
-                            <div class="flex justify-between items-center">
-                                <h3 class="text-lg leading-6 font-medium text-white" id="recipe-title"></h3>
-                                <button onclick="hideRecipe()" class="text-gray-400 hover:text-white">
-                                    <i class="fas fa-times"></i>
-                                </button>
-                            </div>
-                            <div class="mt-4">
-                                <img id="recipe-image" class="w-full h-48 object-cover rounded-lg mb-4" src="" alt="">
-                                <div class="flex justify-between items-center mb-4">
-                                    <div class="flex items-center">
-                                        <i class="fas fa-clock text-gray-400 mr-2"></i>
-                                        <span class="text-sm text-gray-300" id="recipe-time"></span>
-                                    </div>
-                                    <div class="flex items-center">
-                                        <i class="fas fa-utensils text-gray-400 mr-2"></i>
-                                        <span class="text-sm text-gray-300" id="recipe-servings"></span>
-                                    </div>
-                                </div>
-                                <div class="bg-gray-700 p-4 rounded-lg mb-4">
-                                    <h4 class="font-medium text-white mb-2">Ingredients:</h4>
-                                    <ul id="recipe-ingredients" class="list-disc list-inside text-gray-300 space-y-1"></ul>
-                                </div>
-                                <div class="mt-4">
-                                    <h4 class="font-medium text-white mb-2">Instructions:</h4>
-                                    <ol id="recipe-instructions" class="text-gray-300 space-y-2 list-decimal list-inside"></ol>
-                                </div>
-                                <div class="mt-6 flex justify-between items-center">
-                                    <button onclick="window.location.href='recipe.html?id='+currentRecipeId" class="text-purple-400 border border-purple-400 py-2 px-4 rounded-lg hover:bg-purple-400 hover:text-white transition">
-                                        View Full Recipe
-                                    </button>
-                                    <button onclick="addToCart(currentRecipeId)" class="bg-purple-600 text-white py-2 px-4 rounded-lg hover:bg-purple-700 transition">
-                                        Add to Cart
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+    <!-- Health Tips Section -->
+    <section class="py-12 px-4 bg-gray-900">
+        <div class="max-w-7xl mx-auto">
+            <h2 class="text-2xl font-bold text-white mb-6">Health Tips For You</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="health-tips">
+                <!-- Health tips will be loaded here dynamically -->
             </div>
         </div>
-    </div>
+    </section>
 
     <!-- Footer -->
     <footer class="text-gray-300 body-font bg-gray-800">
@@ -539,104 +714,119 @@
             }, 2000);
         }
 
-        // Healthy food items database
+        // Food items database (expanded with more items)
         const foodItems = [
             // Vegetarian Indian dishes
             {
                 id: 1,
-                name: "Dal Makhani",
+                name: "Palak Paneer",
                 category: "Indian",
                 diet: ["vegetarian", "gluten-free", "high-protein"],
                 price: 220,
-                description: "Creamy black lentils cooked with minimal oil",
+                description: "Fresh spinach cooked with cottage cheese in aromatic spices",
                 image: "https://images.unsplash.com/photo-1601050690597-df0568f70950?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
                 healthScore: 9,
                 calories: 320,
                 protein: 18,
-                carbs: 40,
-                fat: 10,
+                carbs: 15,
+                fat: 12,
                 restaurantId: 1,
-                prepTime: "10 mins",
-                servings: "4 servings"
+                prepTime: "25 mins",
+                servings: "2 servings",
+                rating: 4.5,
+                type: "lunch",
+                cuisine: "north indian"
             },
             {
                 id: 2,
-                name: "Quinoa Upma",
+                name: "Lauki Chana Dal",
                 category: "Indian",
                 diet: ["vegetarian", "vegan", "gluten-free", "high-protein"],
                 price: 180,
-                description: "Quinoa cooked with Indian spices and vegetables",
+                description: "Bottle gourd cooked with split chickpeas and mild spices",
                 image: "https://images.unsplash.com/photo-1547592180-85f173990554?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
                 healthScore: 8,
                 calories: 280,
-                protein: 10,
-                carbs: 45,
+                protein: 12,
+                carbs: 35,
                 fat: 8,
                 restaurantId: 1,
-                prepTime: "15 mins",
-                servings: "2 servings"
+                prepTime: "30 mins",
+                servings: "2 servings",
+                rating: 4.2,
+                type: "lunch",
+                cuisine: "indian"
             },
             {
                 id: 3,
-                name: "Oats Poha",
+                name: "Moong Dal Chilla",
                 category: "Indian",
-                diet: ["vegetarian", "gluten-free"],
+                diet: ["vegetarian", "gluten-free", "high-protein"],
                 price: 150,
-                description: "Steel-cut oats prepared like traditional poha",
+                description: "Protein-packed pancakes made from soaked and ground moong dal",
                 image: "https://images.unsplash.com/photo-1608500218954-bafec1ae555c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
-                healthScore: 8,
+                healthScore: 9,
                 calories: 250,
-                protein: 8,
-                carbs: 40,
+                protein: 15,
+                carbs: 30,
                 fat: 6,
                 restaurantId: 1,
-                prepTime: "10 mins",
-                servings: "2 servings"
+                prepTime: "20 mins",
+                servings: "2 servings",
+                rating: 4.3,
+                type: "breakfast",
+                cuisine: "indian"
             },
             // Vegan Indian dishes
             {
                 id: 4,
-                name: "Vegan Buddha Bowl",
+                name: "Baingan Bharta",
                 category: "Indian",
                 diet: ["vegetarian", "vegan", "gluten-free"],
                 price: 200,
-                description: "Nutritious bowl with quinoa, roasted vegetables, and tahini dressing",
+                description: "Smoky roasted eggplant mashed and cooked with onions, tomatoes and spices",
                 image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=880&q=80",
-                healthScore: 9,
-                calories: 300,
-                protein: 10,
-                carbs: 45,
-                fat: 10,
+                healthScore: 8,
+                calories: 180,
+                protein: 4,
+                carbs: 20,
+                fat: 8,
                 restaurantId: 1,
-                prepTime: "25 mins",
-                servings: "1 serving"
+                prepTime: "35 mins",
+                servings: "2 servings",
+                rating: 4.1,
+                type: "dinner",
+                cuisine: "north indian"
             },
             // Gluten-free Indian dishes
             {
                 id: 5,
-                name: "Grilled Salmon with Steamed Vegetables",
+                name: "Tandoori Fish Tikka",
                 category: "Indian",
                 diet: ["gluten-free", "high-protein", "low-carb"],
                 price: 320,
-                description: "Fresh salmon with seasonal steamed vegetables",
+                description: "Marinated fish pieces grilled to perfection in tandoor",
                 image: "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
-                healthScore: 10,
-                calories: 350,
-                protein: 35,
-                carbs: 10,
-                fat: 20,
+                healthScore: 9,
+                calories: 280,
+                protein: 30,
+                carbs: 5,
+                fat: 12,
                 restaurantId: 2,
                 prepTime: "30 mins",
-                servings: "1 serving"
+                servings: "2 servings",
+                rating: 4.7,
+                type: "dinner",
+                cuisine: "indian"
             },
             // Keto Indian dishes
             {
                 id: 6,
                 name: "Keto Butter Chicken",
                 category: "Indian",
-                diet: ["keto", "low-carb"],
+                diet: ["keto", "low-carb", "high-protein"],
                 price: 280,
-                description: "Tender chicken in rich tomato and butter gravy",
+                description: "Tender chicken in rich tomato and butter gravy with keto-friendly ingredients",
                 image: "https://images.unsplash.com/photo-1603360946369-dc9bb6258143?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
                 healthScore: 8,
                 calories: 380,
@@ -645,320 +835,498 @@
                 fat: 28,
                 restaurantId: 2,
                 prepTime: "35 mins",
-                servings: "2 servings"
+                servings: "2 servings",
+                rating: 4.6,
+                type: "dinner",
+                cuisine: "north indian"
             },
             // Low-carb Indian dishes
             {
                 id: 7,
-                name: "Tandoori Chicken with Salad",
+                name: "Tandoori Chicken Salad",
                 category: "Indian",
                 diet: ["low-carb", "high-protein", "gluten-free"],
                 price: 260,
-                description: "Grilled chicken with fresh garden salad",
+                description: "Grilled tandoori chicken with fresh garden salad and mint dressing",
                 image: "https://images.unsplash.com/photo-1601050690597-df0568f70950?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
                 healthScore: 9,
                 calories: 300,
-                protein: 40,
+                protein: 35,
                 carbs: 8,
                 fat: 12,
                 restaurantId: 2,
-                prepTime: "30 mins",
-                servings: "1 serving"
+                prepTime: "25 mins",
+                servings: "1 serving",
+                rating: 4.4,
+                type: "lunch",
+                cuisine: "indian"
             },
             // High-protein Indian dishes
             {
                 id: 8,
-                name: "Paneer Protein Shake",
+                name: "Soya Chunks Curry",
                 category: "Indian",
-                diet: ["high-protein", "vegetarian"],
+                diet: ["vegetarian", "high-protein", "gluten-free"],
                 price: 180,
-                description: "Blend of paneer, banana, almond butter and milk",
+                description: "Protein-rich soya chunks cooked in flavorful onion-tomato gravy",
                 image: "https://images.unsplash.com/photo-1519996521439-0408c916b631?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
-                healthScore: 9,
-                calories: 350,
+                healthScore: 8,
+                calories: 280,
                 protein: 25,
-                carbs: 30,
-                fat: 15,
+                carbs: 15,
+                fat: 10,
                 restaurantId: 3,
-                prepTime: "5 mins",
-                servings: "1 serving"
+                prepTime: "20 mins",
+                servings: "2 servings",
+                rating: 4.0,
+                type: "lunch",
+                cuisine: "indian"
             },
-            // Italian dishes
+            // South Indian dishes
             {
                 id: 9,
-                name: "Whole Wheat Pasta Primavera",
-                category: "Italian",
-                diet: ["vegetarian"],
-                price: 250,
-                description: "Whole wheat pasta with fresh seasonal vegetables",
+                name: "Ragi Dosa",
+                category: "Indian",
+                diet: ["vegetarian", "gluten-free", "high-protein"],
+                price: 150,
+                description: "Fermented crepe made from finger millet flour, rich in calcium and protein",
                 image: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
-                healthScore: 7,
-                calories: 350,
+                healthScore: 9,
+                calories: 180,
+                protein: 6,
+                carbs: 30,
+                fat: 3,
+                restaurantId: 3,
+                prepTime: "10 mins",
+                servings: "2 servings",
+                rating: 4.3,
+                type: "breakfast",
+                cuisine: "south indian"
+            },
+            // North Indian dishes
+            {
+                id: 10,
+                name: "Dahi Ke Kebab",
+                category: "Indian",
+                diet: ["vegetarian", "high-protein"],
+                price: 220,
+                description: "Soft kebabs made from hung curd, paneer and mild spices",
+                image: "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+                healthScore: 8,
+                calories: 250,
+                protein: 12,
+                carbs: 15,
+                fat: 12,
+                restaurantId: 3,
+                prepTime: "25 mins",
+                servings: "4 pieces",
+                rating: 4.2,
+                type: "snacks",
+                cuisine: "north indian"
+            },
+            // Additional healthy Indian foods
+            {
+                id: 11,
+                name: "Methi Thepla",
+                category: "Indian",
+                diet: ["vegetarian", "gluten-free"],
+                price: 120,
+                description: "Flatbread made with whole wheat flour, fenugreek leaves and spices",
+                image: "https://images.unsplash.com/photo-1515543904379-9f9b7b5a7b1a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+                healthScore: 8,
+                calories: 150,
+                protein: 5,
+                carbs: 25,
+                fat: 4,
+                restaurantId: 3,
+                prepTime: "20 mins",
+                servings: "2 pieces",
+                rating: 4.1,
+                type: "breakfast",
+                cuisine: "indian"
+            },
+            {
+                id: 12,
+                name: "Masala Oats",
+                category: "Indian",
+                diet: ["vegetarian", "gluten-free"],
+                price: 140,
+                description: "Steel-cut oats cooked with vegetables and mild Indian spices",
+                image: "https://images.unsplash.com/photo-1546793665-c74683f339c1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+                healthScore: 9,
+                calories: 200,
+                protein: 8,
+                carbs: 35,
+                fat: 5,
+                restaurantId: 2,
+                prepTime: "15 mins",
+                servings: "1 serving",
+                rating: 4.4,
+                type: "breakfast",
+                cuisine: "indian"
+            },
+            {
+                id: 13,
+                name: "Sprouts Salad",
+                category: "Indian",
+                diet: ["vegetarian", "vegan", "gluten-free", "high-protein"],
+                price: 160,
+                description: "Fresh sprouted lentils with cucumber, tomatoes and lemon dressing",
+                image: "https://images.unsplash.com/photo-1476718406336-bb5a9690ee2a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+                healthScore: 9,
+                calories: 180,
+                protein: 12,
+                carbs: 25,
+                fat: 3,
+                restaurantId: 1,
+                prepTime: "10 mins",
+                servings: "1 serving",
+                rating: 4.5,
+                type: "snacks",
+                cuisine: "indian"
+            },
+            {
+                id: 14,
+                name: "Bajra Khichdi",
+                category: "Indian",
+                diet: ["vegetarian", "gluten-free"],
+                price: 170,
+                description: "Pearl millet cooked with moong dal and vegetables",
+                image: "https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+                healthScore: 8,
+                calories: 250,
+                protein: 8,
+                carbs: 45,
+                fat: 5,
+                restaurantId: 3,
+                prepTime: "30 mins",
+                servings: "2 servings",
+                rating: 4.0,
+                type: "dinner",
+                cuisine: "indian"
+            },
+            {
+                id: 15,
+                name: "Chana Saag",
+                category: "Indian",
+                diet: ["vegetarian", "vegan", "gluten-free", "high-protein"],
+                price: 190,
+                description: "Chickpeas cooked with spinach in aromatic spices",
+                image: "https://images.unsplash.com/photo-1604977046805-6b8d1c3c3e3d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+                healthScore: 9,
+                calories: 280,
                 protein: 15,
+                carbs: 35,
+                fat: 8,
+                restaurantId: 1,
+                prepTime: "25 mins",
+                servings: "2 servings",
+                rating: 4.3,
+                type: "lunch",
+                cuisine: "north indian"
+            },
+            {
+                id: 16,
+                name: "Egg Curry",
+                category: "Indian",
+                diet: ["high-protein", "gluten-free"],
+                price: 200,
+                description: "Boiled eggs in flavorful onion-tomato gravy with Indian spices",
+                image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=880&q=80",
+                healthScore: 8,
+                calories: 300,
+                protein: 18,
+                carbs: 12,
+                fat: 15,
+                restaurantId: 2,
+                prepTime: "25 mins",
+                servings: "2 servings",
+                rating: 4.2,
+                type: "lunch",
+                cuisine: "indian"
+            },
+            {
+                id: 17,
+                name: "Mushroom Masala",
+                category: "Indian",
+                diet: ["vegetarian", "gluten-free", "low-carb"],
+                price: 210,
+                description: "Fresh mushrooms cooked in rich onion-tomato gravy with spices",
+                image: "https://images.unsplash.com/photo-1551504734-5ee1c4a1479b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+                healthScore: 8,
+                calories: 180,
+                protein: 8,
+                carbs: 15,
+                fat: 8,
+                restaurantId: 3,
+                prepTime: "20 mins",
+                servings: "2 servings",
+                rating: 4.1,
+                type: "dinner",
+                cuisine: "indian"
+            },
+            {
+                id: 18,
+                name: "Moong Dal Halwa",
+                category: "Indian",
+                diet: ["vegetarian", "gluten-free"],
+                price: 160,
+                description: "Healthy dessert made from moong dal, ghee and jaggery",
+                image: "https://images.unsplash.com/photo-1490645935967-10de6ba17061?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+                healthScore: 7,
+                calories: 280,
+                protein: 6,
+                carbs: 35,
+                fat: 12,
+                restaurantId: 1,
+                prepTime: "30 mins",
+                servings: "2 servings",
+                rating: 4.0,
+                type: "snacks",
+                cuisine: "indian"
+            },
+            {
+                id: 19,
+                name: "Rajma Chawal",
+                category: "Indian",
+                diet: ["vegetarian", "high-protein"],
+                price: 200,
+                description: "Red kidney beans curry served with steamed brown rice",
+                image: "https://images.unsplash.com/photo-1632778149955-e80f8ceca2e8?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+                healthScore: 8,
+                calories: 350,
+                protein: 12,
                 carbs: 55,
                 fat: 8,
                 restaurantId: 3,
-                prepTime: "25 mins",
-                servings: "2 servings"
+                prepTime: "40 mins",
+                servings: "2 servings",
+                rating: 4.3,
+                type: "lunch",
+                cuisine: "north indian"
             },
-            // Chinese dishes
             {
-                id: 10,
-                name: "Steamed Fish with Ginger and Spring Onions",
-                category: "Chinese",
-                diet: ["gluten-free", "low-carb", "high-protein"],
-                price: 280,
-                description: "Fresh fish steamed with ginger and spring onions",
+                id: 20,
+                name: "Dhokla",
+                category: "Indian",
+                diet: ["vegetarian", "gluten-free", "high-protein"],
+                price: 140,
+                description: "Steamed savory cake made from fermented chickpea flour",
+                image: "https://images.unsplash.com/photo-1603984362497-0a878f607b92?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+                healthScore: 9,
+                calories: 150,
+                protein: 8,
+                carbs: 20,
+                fat: 3,
+                restaurantId: 2,
+                prepTime: "20 mins",
+                servings: "4 pieces",
+                rating: 4.4,
+                type: "snacks",
+                cuisine: "indian"
+            },
+            // Additional items to reach 30
+            {
+                id: 21,
+                name: "Quinoa Upma",
+                category: "Indian",
+                diet: ["vegetarian", "gluten-free", "high-protein"],
+                price: 180,
+                description: "Healthy twist to traditional upma made with quinoa and vegetables",
+                image: "https://images.unsplash.com/photo-1490645935967-10de6ba17061?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+                healthScore: 9,
+                calories: 220,
+                protein: 10,
+                carbs: 30,
+                fat: 5,
+                restaurantId: 1,
+                prepTime: "20 mins",
+                servings: "2 servings",
+                rating: 4.2,
+                type: "breakfast",
+                cuisine: "south indian"
+            },
+            {
+                id: 22,
+                name: "Avocado Paratha",
+                category: "Indian",
+                diet: ["vegetarian", "high-protein"],
+                price: 190,
+                description: "Healthy paratha stuffed with avocado and spices",
                 image: "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+                healthScore: 8,
+                calories: 280,
+                protein: 8,
+                carbs: 25,
+                fat: 15,
+                restaurantId: 2,
+                prepTime: "25 mins",
+                servings: "2 pieces",
+                rating: 4.1,
+                type: "breakfast",
+                cuisine: "north indian"
+            },
+            {
+                id: 23,
+                name: "Sweet Potato Chaat",
+                category: "Indian",
+                diet: ["vegetarian", "vegan", "gluten-free"],
+                price: 150,
+                description: "Roasted sweet potatoes topped with chutneys and spices",
+                image: "https://images.unsplash.com/photo-1547592180-85f173990554?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+                healthScore: 8,
+                calories: 200,
+                protein: 3,
+                carbs: 40,
+                fat: 4,
+                restaurantId: 3,
+                prepTime: "15 mins",
+                servings: "1 serving",
+                rating: 4.3,
+                type: "snacks",
+                cuisine: "indian"
+            },
+            {
+                id: 24,
+                name: "Grilled Paneer Tikka",
+                category: "Indian",
+                diet: ["vegetarian", "high-protein", "low-carb"],
+                price: 240,
+                description: "Cubes of paneer marinated in spices and grilled to perfection",
+                image: "https://images.unsplash.com/photo-1601050690597-df0568f70950?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+                healthScore: 9,
+                calories: 300,
+                protein: 20,
+                carbs: 8,
+                fat: 18,
+                restaurantId: 1,
+                prepTime: "30 mins",
+                servings: "2 servings",
+                rating: 4.6,
+                type: "dinner",
+                cuisine: "north indian"
+            },
+            {
+                id: 25,
+                name: "Millet Khichdi",
+                category: "Indian",
+                diet: ["vegetarian", "gluten-free"],
+                price: 170,
+                description: "Healthy khichdi made with foxtail millet and lentils",
+                image: "https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
                 healthScore: 9,
                 calories: 250,
-                protein: 30,
-                carbs: 5,
-                fat: 12,
+                protein: 8,
+                carbs: 40,
+                fat: 6,
+                restaurantId: 2,
+                prepTime: "30 mins",
+                servings: "2 servings",
+                rating: 4.2,
+                type: "dinner",
+                cuisine: "indian"
+            },
+            {
+                id: 26,
+                name: "Besan Chilla",
+                category: "Indian",
+                diet: ["vegetarian", "gluten-free", "high-protein"],
+                price: 140,
+                description: "Savory pancakes made from chickpea flour with vegetables",
+                image: "https://images.unsplash.com/photo-1608500218954-bafec1ae555c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+                healthScore: 9,
+                calories: 180,
+                protein: 10,
+                carbs: 20,
+                fat: 5,
                 restaurantId: 3,
-                prepTime: "20 mins",
-                servings: "1 serving"
+                prepTime: "15 mins",
+                servings: "2 servings",
+                rating: 4.3,
+                type: "breakfast",
+                cuisine: "indian"
+            },
+            {
+                id: 27,
+                name: "Kadhai Paneer",
+                category: "Indian",
+                diet: ["vegetarian", "high-protein"],
+                price: 230,
+                description: "Paneer cooked with bell peppers in spicy kadhai gravy",
+                image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=880&q=80",
+                healthScore: 8,
+                calories: 320,
+                protein: 18,
+                carbs: 15,
+                fat: 20,
+                restaurantId: 1,
+                prepTime: "25 mins",
+                servings: "2 servings",
+                rating: 4.4,
+                type: "dinner",
+                cuisine: "north indian"
+            },
+            {
+                id: 28,
+                name: "Vegetable Pulao",
+                category: "Indian",
+                diet: ["vegetarian"],
+                price: 190,
+                description: "Fragrant rice cooked with mixed vegetables and mild spices",
+                image: "https://images.unsplash.com/photo-1604977046805-6b8d1c3c3e3d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+                healthScore: 7,
+                calories: 300,
+                protein: 6,
+                carbs: 50,
+                fat: 8,
+                restaurantId: 2,
+                prepTime: "30 mins",
+                servings: "2 servings",
+                rating: 4.1,
+                type: "lunch",
+                cuisine: "indian"
+            },
+            {
+                id: 29,
+                name: "Masoor Dal",
+                category: "Indian",
+                diet: ["vegetarian", "vegan", "gluten-free", "high-protein"],
+                price: 160,
+                description: "Red lentils cooked with onions, tomatoes and spices",
+                image: "https://images.unsplash.com/photo-1632778149955-e80f8ceca2e8?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+                healthScore: 9,
+                calories: 220,
+                protein: 12,
+                carbs: 30,
+                fat: 6,
+                restaurantId: 3,
+                prepTime: "25 mins",
+                servings: "2 servings",
+                rating: 4.3,
+                type: "lunch",
+                cuisine: "indian"
+            },
+            {
+                id: 30,
+                name: "Idli Sambar",
+                category: "Indian",
+                diet: ["vegetarian", "vegan", "gluten-free"],
+                price: 130,
+                description: "Steamed rice cakes served with lentil soup and coconut chutney",
+                image: "https://images.unsplash.com/photo-1603984362497-0a878f607b92?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+                healthScore: 9,
+                calories: 180,
+                protein: 6,
+                carbs: 30,
+                fat: 3,
+                restaurantId: 1,
+                prepTime: "15 mins",
+                servings: "2 servings",
+                rating: 4.5,
+                type: "breakfast",
+                cuisine: "south indian"
             }
         ];
-
-        // Recipe data for all foods
-        const recipes = {
-            1: {
-                title: "Dal Makhani Recipe",
-                ingredients: [
-                    "1 cup whole black lentils (urad dal)",
-                    "1/4 cup kidney beans (rajma)",
-                    "1 onion, finely chopped",
-                    "2 tomatoes, pureed",
-                    "1 tbsp ginger-garlic paste",
-                    "1 tsp cumin seeds",
-                    "1 tsp coriander powder",
-                    "1/2 tsp garam masala",
-                    "1/2 tsp turmeric powder",
-                    "1 tsp red chili powder",
-                    "1 tbsp oil",
-                    "1 tbsp butter",
-                    "1/2 cup cream",
-                    "Salt to taste",
-                    "Fresh coriander for garnish"
-                ],
-                instructions: [
-                    "Soak lentils and kidney beans overnight. Pressure cook until soft.",
-                    "Heat oil and butter in a pan, add cumin seeds and let them splutter.",
-                    "Add onions and sauté until golden. Add ginger-garlic paste and sauté for a minute.",
-                    "Add tomato puree and cook until oil separates. Add all dry spices and salt.",
-                    "Add cooked lentils and beans along with some water. Simmer for 30 minutes, stirring occasionally.",
-                    "Add cream and simmer for another 10 minutes. Garnish with fresh coriander.",
-                    "Serve hot with roti or rice."
-                ]
-            },
-            2: {
-                title: "Quinoa Upma Recipe",
-                ingredients: [
-                    "1 cup quinoa, rinsed",
-                    "2 cups water",
-                    "1 onion, finely chopped",
-                    "1 carrot, diced",
-                    "1/2 cup green peas",
-                    "1 green chili, chopped",
-                    "1 tsp mustard seeds",
-                    "1 tsp cumin seeds",
-                    "1/2 tsp turmeric powder",
-                    "1 tbsp oil",
-                    "Salt to taste",
-                    "Fresh coriander for garnish",
-                    "Lemon wedges for serving"
-                ],
-                instructions: [
-                    "Dry roast quinoa in a pan for 2-3 minutes until fragrant. Set aside.",
-                    "Heat oil in a pan, add mustard and cumin seeds. Let them splutter.",
-                    "Add onions and green chili, sauté until onions are translucent.",
-                    "Add carrots and peas, sauté for 2 minutes. Add turmeric and salt.",
-                    "Add quinoa and water, bring to a boil. Reduce heat, cover and simmer for 15 minutes.",
-                    "Fluff with fork, garnish with coriander. Serve hot with lemon wedges."
-                ]
-            },
-            3: {
-                title: "Oats Poha Recipe",
-                ingredients: [
-                    "2 cups steel-cut oats",
-                    "1 onion, finely chopped",
-                    "1 green chili, chopped",
-                    "1/2 tsp mustard seeds",
-                    "1/2 tsp cumin seeds",
-                    "10-12 curry leaves",
-                    "2 tbsp peanuts",
-                    "1/2 tsp turmeric powder",
-                    "1 tbsp lemon juice",
-                    "1 tbsp oil",
-                    "Salt to taste",
-                    "Fresh coriander for garnish"
-                ],
-                instructions: [
-                    "Rinse oats and soak in water for 5 minutes. Drain and set aside.",
-                    "Heat oil in a pan, add mustard and cumin seeds. Let them splutter.",
-                    "Add peanuts and roast until golden. Add curry leaves, green chili and onions. Sauté until onions are soft.",
-                    "Add turmeric powder and salt. Mix well.",
-                    "Add soaked oats and stir gently to combine all ingredients.",
-                    "Cover and cook on low heat for 3-4 minutes. Sprinkle lemon juice and garnish with coriander.",
-                    "Serve hot with yogurt or chutney."
-                ]
-            },
-            4: {
-                title: "Vegan Buddha Bowl Recipe",
-                ingredients: [
-                    "1/2 cup cooked quinoa",
-                    "1/2 cup roasted sweet potatoes",
-                    "1/2 cup steamed broccoli",
-                    "1/4 avocado, sliced",
-                    "1/4 cup shredded purple cabbage",
-                    "2 tbsp hummus",
-                    "1 tbsp tahini",
-                    "1 tsp lemon juice",
-                    "1 tsp maple syrup",
-                    "Salt and pepper to taste",
-                    "Pumpkin seeds for garnish"
-                ],
-                instructions: [
-                    "Arrange all vegetables and quinoa in a bowl.",
-                    "In a small bowl, mix tahini, lemon juice, maple syrup, salt and pepper to make dressing.",
-                    "Drizzle dressing over the bowl. Add hummus on the side.",
-                    "Garnish with pumpkin seeds and serve."
-                ]
-            },
-            5: {
-                title: "Grilled Salmon with Steamed Vegetables Recipe",
-                ingredients: [
-                    "1 salmon fillet (about 150g)",
-                    "1 tsp olive oil",
-                    "1/2 tsp lemon zest",
-                    "1/2 tsp dried dill",
-                    "Salt and pepper to taste",
-                    "1 cup mixed vegetables (broccoli, carrots, zucchini)",
-                    "Lemon wedges for serving"
-                ],
-                instructions: [
-                    "Preheat grill to medium-high heat.",
-                    "Rub salmon with olive oil, lemon zest, dill, salt and pepper.",
-                    "Grill salmon for 4-5 minutes per side until cooked through.",
-                    "Meanwhile, steam vegetables until tender-crisp (about 5 minutes).",
-                    "Serve salmon with steamed vegetables and lemon wedges."
-                ]
-            },
-            6: {
-                title: "Keto Butter Chicken Recipe",
-                ingredients: [
-                    "500g chicken thighs, boneless",
-                    "1/2 cup plain yogurt",
-                    "2 tbsp lemon juice",
-                    "1 tbsp ginger-garlic paste",
-                    "1 tsp garam masala",
-                    "1 tsp turmeric powder",
-                    "1 tsp chili powder",
-                    "2 tbsp butter",
-                    "1 onion, finely chopped",
-                    "1 cup tomato puree",
-                    "1/2 cup heavy cream",
-                    "1 tsp fenugreek leaves",
-                    "Salt to taste"
-                ],
-                instructions: [
-                    "Marinate chicken with yogurt, lemon juice, ginger-garlic paste and spices for at least 1 hour.",
-                    "Grill or bake the chicken until cooked through. Set aside.",
-                    "In a pan, melt butter and sauté onions until golden. Add tomato puree and cook for 5 minutes.",
-                    "Add cream and simmer for 5 minutes. Add fenugreek leaves and salt.",
-                    "Add grilled chicken pieces and simmer for 5-10 minutes.",
-                    "Serve hot with cauliflower rice or low-carb naan."
-                ]
-            },
-            7: {
-                title: "Tandoori Chicken Recipe",
-                ingredients: [
-                    "1 kg chicken (legs or breast)",
-                    "1 cup yogurt",
-                    "2 tbsp lemon juice",
-                    "2 tbsp ginger-garlic paste",
-                    "1 tsp turmeric powder",
-                    "1 tbsp red chili powder",
-                    "1 tbsp garam masala",
-                    "1 tsp cumin powder",
-                    "1 tsp coriander powder",
-                    "1 tbsp kasuri methi (dried fenugreek leaves)",
-                    "Salt to taste",
-                    "2 tbsp oil",
-                    "Lemon wedges and onion rings for serving"
-                ],
-                instructions: [
-                    "Make deep cuts in the chicken pieces for marinade to penetrate.",
-                    "Mix all marinade ingredients (yogurt, spices, lemon juice) in a bowl.",
-                    "Coat chicken pieces thoroughly with marinade. Refrigerate for at least 4 hours, preferably overnight.",
-                    "Preheat oven to 200°C (400°F). Place chicken on a wire rack over baking tray.",
-                    "Bake for 25-30 minutes, turning once halfway through. Brush with oil during last 5 minutes.",
-                    "Broil for 2-3 minutes for charred effect.",
-                    "Serve hot with lemon wedges and onion rings."
-                ]
-            },
-            8: {
-                title: "Paneer Protein Shake Recipe",
-                ingredients: [
-                    "100g paneer (cottage cheese)",
-                    "1 banana",
-                    "1 tbsp almond butter",
-                    "1 cup milk (or almond milk)",
-                    "1 tsp honey (optional)",
-                    "1/2 tsp cinnamon powder",
-                    "Ice cubes (optional)"
-                ],
-                instructions: [
-                    "Cut paneer into small cubes for easier blending.",
-                    "Add all ingredients to a blender.",
-                    "Blend until smooth and creamy. Add more milk if needed for desired consistency.",
-                    "Pour into glass and serve immediately.",
-                    "For chilled version, add ice cubes before blending."
-                ]
-            },
-            9: {
-                title: "Whole Wheat Pasta Primavera Recipe",
-                ingredients: [
-                    "2 cups whole wheat pasta",
-                    "2 cups mixed vegetables (zucchini, bell peppers, cherry tomatoes, broccoli)",
-                    "2 cloves garlic, minced",
-                    "2 tbsp olive oil",
-                    "1/4 cup grated parmesan cheese",
-                    "Salt and pepper to taste",
-                    "Fresh basil leaves for garnish"
-                ],
-                instructions: [
-                    "Cook pasta according to package instructions. Reserve 1/2 cup pasta water.",
-                    "Heat olive oil in a pan, add garlic and sauté for 30 seconds.",
-                    "Add vegetables and sauté for 5-7 minutes until tender-crisp.",
-                    "Add cooked pasta, reserved pasta water, salt and pepper. Toss to combine.",
-                    "Sprinkle with parmesan cheese and garnish with fresh basil.",
-                    "Serve immediately."
-                ]
-            },
-            10: {
-                title: "Steamed Fish with Ginger and Spring Onions Recipe",
-                ingredients: [
-                    "1 white fish fillet (like basa or cod)",
-                    "1 inch ginger, julienned",
-                    "2 spring onions, sliced",
-                    "1 tbsp light soy sauce",
-                    "1 tsp sesame oil",
-                    "1/2 tsp sugar",
-                    "1/4 cup water",
-                    "Fresh coriander for garnish"
-                ],
-                instructions: [
-                    "Place fish on a heatproof plate that fits in your steamer.",
-                    "Top fish with ginger and half the spring onions.",
-                    "Mix soy sauce, sesame oil, sugar and water. Pour over fish.",
-                    "Steam for 8-10 minutes until fish flakes easily with a fork.",
-                    "Garnish with remaining spring onions and fresh coriander.",
-                    "Serve hot with steamed rice or vegetables."
-                ]
-            }
-        };
 
         // Restaurants data
         const restaurants = [
@@ -970,7 +1338,9 @@
                 rating: 4.5,
                 reviews: 120,
                 image: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
-                description: "Healthy Indian vegetarian cuisine with organic ingredients. Specializing in nutritious meals made with superfoods."
+                description: "Healthy Indian vegetarian cuisine with organic ingredients. Specializing in nutritious meals made with superfoods.",
+                deliveryTime: "25-35 mins",
+                minOrder: "₹150"
             },
             {
                 id: 2,
@@ -980,7 +1350,9 @@
                 rating: 4.7,
                 reviews: 85,
                 image: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1074&q=80",
-                description: "Healthy international cuisine tailored for fitness enthusiasts. All dishes are balanced for optimal nutrition."
+                description: "Healthy international cuisine tailored for fitness enthusiasts. All dishes are balanced for optimal nutrition.",
+                deliveryTime: "30-40 mins",
+                minOrder: "₹200"
             },
             {
                 id: 3,
@@ -990,32 +1362,14 @@
                 rating: 4.3,
                 reviews: 95,
                 image: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
-                description: "International cuisine with a focus on organic and healthy ingredients. Our menu features dishes from around the world with Indian influences."
+                description: "International cuisine with a focus on organic and healthy ingredients. Our menu features dishes from around the world with Indian influences.",
+                deliveryTime: "35-45 mins",
+                minOrder: "₹180"
             }
         ];
 
-        // Health tips based on preferences
-        const healthTips = [
-            {
-                title: "Balanced Nutrition",
-                content: "Since you indicated you're health conscious, try to include a variety of colorful vegetables in each meal for maximum nutrient diversity."
-            },
-            {
-                title: "Portion Control",
-                content: "Even with healthy foods, portion size matters. Our recommendations are already portion-controlled for optimal health benefits."
-            },
-            {
-                title: "Protein Intake",
-                content: "Based on your fitness goals, we recommend consuming adequate protein to support muscle growth and recovery."
-            },
-            {
-                title: "Hydration",
-                content: "Remember to drink plenty of water throughout the day, especially if you're following a high-protein diet."
-            }
-        ];
-
-        // Sample user preferences (would normally come from your backend)
-        const userPreferences = {
+        // Sample user preferences (will be overridden by actual user preferences from localStorage)
+        const defaultUserPreferences = {
             diet: ["vegetarian", "gluten-free"], // User's dietary preferences
             health_condition: [], // Any health conditions
             fitness_goal: "weight-loss", // User's fitness goal
@@ -1023,45 +1377,368 @@
             target_weight: 70, // in kg
             activity_level: "moderate", // Activity level
             allergy: [], // Food allergies
-            meal_pref: ["high-protein", "low-carb"] // Meal preferences
+            meal_pref: ["high-protein", "low-carb"], // Meal preferences
+            cuisine_pref: ["north indian", "south indian"] // Cuisine preferences
         };
 
-        // Function to recommend foods based on user preferences
+        // Enhanced recommendation algorithm
         function recommendFoods() {
-            // Filter foods based on user's dietary preferences
-            let recommended = foodItems.filter(item => {
-                // Check if food matches any of the user's dietary preferences
-                const matchesDiet = userPreferences.diet.length === 0 || 
-                    userPreferences.diet.some(pref => item.diet.includes(pref));
-                
-                // Check if food matches any of the user's meal preferences
-                const matchesMealPref = userPreferences.meal_pref.length === 0 || 
-                    userPreferences.meal_pref.some(pref => item.diet.includes(pref));
-                
-                // For users with weight loss goal, prioritize lower calorie options
-                const matchesFitnessGoal = userPreferences.fitness_goal !== "weight-loss" || 
-                    item.calories < 400;
-                
-                return matchesDiet && matchesMealPref && matchesFitnessGoal;
+            // Get user preferences from localStorage or use sample data
+            const userPrefs = JSON.parse(localStorage.getItem('userPreferences')) || defaultUserPreferences;
+            
+            // Filter out foods that contain any of the user's allergens
+            let filteredFoods = foodItems.filter(item => {
+                return !userPrefs.allergy.some(allergen => {
+                    // This would be more sophisticated in a real app with proper allergen mapping
+                    return item.name.toLowerCase().includes(allergen) || 
+                           item.description.toLowerCase().includes(allergen);
+                });
             });
-
-            // Sort by health score (higher is better)
-            recommended.sort((a, b) => b.healthScore - a.healthScore);
-
-            return recommended;
+            
+            // Score each food based on how well it matches user preferences
+            filteredFoods = filteredFoods.map(food => {
+                let score = food.healthScore; // Start with base health score
+                
+                // Dietary preferences matching (high weight)
+                const dietMatchScore = userPrefs.diet.reduce((sum, pref) => {
+                    return sum + (food.diet.includes(pref) ? 3 : 0);
+                }, 0);
+                
+                // Meal preferences matching (medium weight)
+                const mealPrefScore = userPrefs.meal_pref.reduce((sum, pref) => {
+                    return sum + (food.diet.includes(pref) ? 2 : 0);
+                }, 0);
+                
+                // Cuisine preferences matching (medium weight)
+                const cuisinePrefScore = userPrefs.cuisine_pref.reduce((sum, pref) => {
+                    return sum + (food.cuisine === pref) ? 2 : 0;
+                }, 0);
+                
+                // Fitness goal alignment (high weight)
+                let fitnessScore = 0;
+                switch(userPrefs.fitness_goal) {
+                    case 'weight-loss':
+                        // Lower calorie, higher protein foods
+                        fitnessScore = (food.calories < 400 ? 2 : 0) + 
+                                      (food.protein > 20 ? 1 : 0);
+                        break;
+                    case 'muscle-gain':
+                        // Higher protein foods
+                        fitnessScore = food.protein / 5; // 5g protein = 1 point
+                        break;
+                    case 'endurance':
+                        // Balanced carbs and protein
+                        fitnessScore = (food.carbs > 30 && food.carbs < 60 ? 2 : 0) + 
+                                      (food.protein > 15 ? 1 : 0);
+                        break;
+                    case 'maintenance':
+                        // Balanced macros
+                        const macroBalance = Math.abs(food.carbs - 40) + 
+                                             Math.abs(food.protein - 20) + 
+                                             Math.abs(food.fat - 15);
+                        fitnessScore = 5 - (macroBalance / 15); // Higher for better balance
+                        break;
+                }
+                
+                // Health condition considerations (very high weight)
+                let healthConditionScore = 0;
+                if (userPrefs.health_condition.includes('diabetes')) {
+                    // Lower glycemic index foods
+                    healthConditionScore += (food.carbs < 30 ? 5 : 0);
+                }
+                if (userPrefs.health_condition.includes('hypertension') || 
+                    userPrefs.health_condition.includes('heart-disease')) {
+                    // Lower sodium foods
+                    healthConditionScore += (food.fat < 15 ? 3 : 0);
+                }
+                if (userPrefs.health_condition.includes('cholesterol')) {
+                    // Lower saturated fat foods
+                    healthConditionScore += (food.fat < 10 ? 3 : 0);
+                }
+                
+                // Activity level adjustment
+                let activityScore = 0;
+                if (userPrefs.activity_level === 'sedentary') {
+                    activityScore = food.calories < 300 ? 1 : 0;
+                } else if (userPrefs.activity_level === 'active' || 
+                          userPrefs.activity_level === 'extreme') {
+                    activityScore = food.calories > 400 ? 1 : 0;
+                }
+                
+                // Calculate total score with weights
+                const totalScore = score + 
+                                  (dietMatchScore * 1.5) + 
+                                  (mealPrefScore * 1.2) + 
+                                  (cuisinePrefScore * 1.5) +
+                                  (fitnessScore * 2) + 
+                                  (healthConditionScore * 3) + 
+                                  activityScore;
+                
+                return {
+                    ...food,
+                    matchScore: totalScore
+                };
+            });
+            
+            // Sort by match score (descending) then by rating (descending)
+            filteredFoods.sort((a, b) => {
+                if (b.matchScore !== a.matchScore) {
+                    return b.matchScore - a.matchScore;
+                }
+                return b.rating - a.rating;
+            });
+            
+            return filteredFoods;
         }
 
-        // Function to recommend restaurants based on user preferences
+        // Enhanced restaurant recommendation algorithm
         function recommendRestaurants() {
-            // In a real app, this would be more sophisticated
-            // For now, we'll just filter by cuisine if specified
-            return restaurants.filter(restaurant => {
-                // If user has Indian dietary preferences, show Indian restaurants
-                if (userPreferences.diet.includes("vegetarian") || 
-                    userPreferences.diet.includes("vegan")) {
-                    return restaurant.cuisine === "Indian";
+            const userPrefs = JSON.parse(localStorage.getItem('userPreferences')) || defaultUserPreferences;
+            
+            // Score restaurants based on how well they match user preferences
+            const scoredRestaurants = restaurants.map(restaurant => {
+                let score = restaurant.rating * 2; // Base score from rating
+                
+                // Dietary preference matching
+                const dietMatchScore = userPrefs.diet.reduce((sum, pref) => {
+                    return sum + (restaurant.specialties.some(s => 
+                        s.toLowerCase().includes(pref.toLowerCase())) ? 2 : 0);
+                }, 0);
+                
+                // Meal preference matching
+                const mealPrefScore = userPrefs.meal_pref.reduce((sum, pref) => {
+                    return sum + (restaurant.specialties.some(s => 
+                        s.toLowerCase().includes(pref.toLowerCase())) ? 1.5 : 0);
+                },   0);
+                
+                // Fitness goal alignment
+                let fitnessScore = 0;
+                if (userPrefs.fitness_goal === 'weight-loss' && 
+                    restaurant.specialties.some(s => s.includes('Low-Calorie'))) {
+                    fitnessScore += 3;
                 }
-                return true;
+                if (userPrefs.fitness_goal === 'muscle-gain' && 
+                    restaurant.specialties.some(s => s.includes('High-Protein'))) {
+                    fitnessScore += 3;
+                }
+                
+                // Health condition considerations
+                let healthConditionScore = 0;
+                if ((userPrefs.health_condition.includes('diabetes') || 
+                     userPrefs.health_condition.includes('cholesterol')) && 
+                    restaurant.specialties.some(s => s.includes('Healthy'))) {
+                    healthConditionScore += 2;
+                }
+                
+                // Calculate total score
+                const totalScore = score + dietMatchScore + mealPrefScore + 
+                                   fitnessScore + healthConditionScore;
+                
+                return {
+                    ...restaurant,
+                    matchScore: totalScore
+                };
+            });
+            
+            // Sort by match score then by rating
+            scoredRestaurants.sort((a, b) => {
+                if (b.matchScore !== a.matchScore) {
+                    return b.matchScore - a.matchScore;
+                }
+                return b.rating - a.rating;
+            });
+            
+            return scoredRestaurants;
+        }
+
+        // Enhanced health tips based on user preferences
+        function getPersonalizedHealthTips() {
+            const userPrefs = JSON.parse(localStorage.getItem('userPreferences')) || defaultUserPreferences;
+            let tips = [];
+            
+            // General tips for everyone
+            tips.push({
+                title: "Stay Hydrated",
+                content: "Drink at least 8 glasses of water daily to support metabolism and overall health."
+            });
+            
+            // Tips based on dietary preferences
+            if (userPrefs.diet.includes('vegetarian')) {
+                tips.push({
+                    title: "Vegetarian Protein Sources",
+                    content: "Include a variety of plant proteins like lentils, beans, quinoa, and tofu to meet your protein needs."
+                });
+            }
+            if (userPrefs.diet.includes('gluten-free')) {
+                tips.push({
+                    title: "Gluten-Free Grains",
+                    content: "Try quinoa, buckwheat, and amaranth as nutritious gluten-free alternatives to wheat."
+                });
+            }
+            
+            // Tips based on fitness goals
+            if (userPrefs.fitness_goal === 'weight-loss') {
+                tips.push({
+                    title: "Weight Loss Strategy",
+                    content: "Focus on portion control and include protein with each meal to stay full longer."
+                });
+            }
+            if (userPrefs.fitness_goal === 'muscle-gain') {
+                tips.push({
+                    title: "Muscle Building Nutrition",
+                    content: "Consume protein-rich foods within 30 minutes after workouts for optimal muscle recovery."
+                });
+            }
+            
+            // Tips based on health conditions
+            if (userPrefs.health_condition.includes('diabetes')) {
+                tips.push({
+                    title: "Blood Sugar Management",
+                    content: "Pair carbohydrates with protein or healthy fats to slow glucose absorption."
+                });
+            }
+            if (userPrefs.health_condition.includes('hypertension')) {
+                tips.push({
+                    title: "Blood Pressure Control",
+                    content: "Reduce sodium intake and increase potassium-rich foods like bananas and spinach."
+                });
+            }
+            
+            // Randomly select 2 tips to display
+            return tips.sort(() => 0.5 - Math.random()).slice(0, 2);
+        }
+
+        // Function to display food items
+        function displayFoods(foods, containerId = 'food-grid', limit = 8) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+
+            if (foods.length === 0) {
+                document.getElementById('no-results').classList.remove('hidden');
+                document.getElementById('load-more').classList.add('hidden');
+                return;
+            } else {
+                document.getElementById('no-results').classList.add('hidden');
+            }
+
+            // Show only limited items initially
+            const foodsToShow = foods.slice(0, limit);
+            
+            foodsToShow.forEach((food, index) => {
+                const foodCard = document.createElement('div');
+                foodCard.className = 'food-card bg-gray-800 rounded-lg shadow overflow-hidden hover:shadow-lg transition transform hover:-translate-y-1';
+                foodCard.style.setProperty('--order', index);
+                
+                // Generate badges for dietary tags that match user preferences
+                const matchingDietTags = food.diet.filter(diet => 
+                    (defaultUserPreferences.diet.includes(diet) || 
+                    (defaultUserPreferences.meal_pref.includes(diet))
+                ));
+                
+                foodCard.innerHTML = `
+                    <div class="relative">
+                        <img class="w-full h-48 object-cover" src="${food.image}" alt="${food.name}">
+                        ${matchingDietTags.length > 0 ? 
+                            `<div class="absolute top-2 left-2 flex flex-wrap gap-1">
+                                ${matchingDietTags.map(tag => `
+                                    <span class="bg-green-900 text-green-200 text-xs font-semibold px-2 py-0.5 rounded">
+                                        ${tag.toUpperCase()}
+                                    </span>
+                                `).join('')}
+                            </div>` : ''}
+                        <div class="absolute top-2 right-2 bg-purple-600 text-white text-xs font-semibold px-2.5 py-0.5 rounded">
+                            ${Math.round(food.matchScore)}/10 MATCH
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h3 class="text-lg font-semibold text-white">${food.name}</h3>
+                                <p class="text-sm text-gray-400">${food.cuisine ? food.cuisine.toUpperCase() : food.category} • ${food.type.toUpperCase()}</p>
+                            </div>
+                            <div class="flex items-center">
+                                <i class="fas fa-star text-yellow-400 mr-1"></i>
+                                <span class="text-white">${food.rating.toFixed(1)}</span>
+                            </div>
+                        </div>
+                        <p class="mt-2 text-sm text-gray-300">${food.description}</p>
+                        <div class="mt-3 grid grid-cols-3 gap-2 text-xs text-center">
+                            <div class="bg-gray-700 p-1 rounded">
+                                <div class="font-medium">${food.calories}</div>
+                                <div class="text-gray-400">CAL</div>
+                            </div>
+                            <div class="bg-gray-700 p-1 rounded">
+                                <div class="font-medium">${food.protein}g</div>
+                                <div class="text-gray-400">PRO</div>
+                            </div>
+                            <div class="bg-gray-700 p-1 rounded">
+                                <div class="font-medium">${food.carbs}g</div>
+                                <div class="text-gray-400">CARB</div>
+                            </div>
+                        </div>
+                        <div class="mt-4 flex justify-between items-center">
+                            <span class="text-lg font-bold text-white">₹${food.price.toFixed(2)}</span>
+                            <div class="flex space-x-2">
+                                <button onclick="showRecipe(${food.id})" class="text-purple-400 border border-purple-400 py-1 px-3 focus:outline-none hover:bg-purple-400 hover:text-white rounded text-sm transition">
+                                    View Recipe
+                                </button>
+                                <button onclick="addToCart(${food.id})" class="text-white bg-purple-600 border-0 py-1 px-3 focus:outline-none hover:bg-purple-700 rounded text-sm transition">
+                                    Add to Cart
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(foodCard);
+            });
+
+            // Show or hide load more button based on remaining items
+            if (foods.length > limit) {
+                document.getElementById('load-more').classList.remove('hidden');
+                document.getElementById('load-more').onclick = () => {
+                    displayFoods(foods, containerId, limit + 8);
+                };
+            } else {
+                document.getElementById('load-more').classList.add('hidden');
+            }
+        }
+
+        // Function to display restaurants
+        function displayRestaurants(restaurants, containerId = 'restaurants-grid') {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+
+            restaurants.forEach(restaurant => {
+                const restaurantCard = document.createElement('div');
+                restaurantCard.className = 'bg-gray-800 rounded-lg shadow overflow-hidden hover:shadow-lg transition transform hover:-translate-y-1';
+                restaurantCard.innerHTML = `
+                    <img class="w-full h-48 object-cover" src="${restaurant.image}" alt="${restaurant.name}">
+                    <div class="p-4">
+                        <h3 class="text-lg font-semibold text-white">${restaurant.name}</h3>
+                        <div class="flex items-center mt-2">
+                            <div class="flex text-yellow-400">
+                                ${Array(Math.floor(restaurant.rating)).fill().map(() => '<i class="fas fa-star"></i>').join('')}
+                                ${restaurant.rating % 1 >= 0.5 ? '<i class="fas fa-star-half-alt"></i>' : ''}
+                                ${Array(5 - Math.ceil(restaurant.rating)).fill().map(() => '<i class="far fa-star"></i>').join('')}
+                            </div>
+                            <span class="ml-2 text-sm text-gray-400">${restaurant.rating.toFixed(1)} (${restaurant.reviews} reviews)</span>
+                        </div>
+                        <div class="mt-2 flex flex-wrap gap-2">
+                            ${restaurant.specialties.map(spec => 
+                                `<span class="text-xs bg-purple-900 text-purple-300 px-2 py-1 rounded">${spec}</span>`
+                            ).join('')}
+                        </div>
+                        <p class="mt-2 text-sm text-gray-300">${restaurant.description}</p>
+                        <div class="mt-3 flex justify-between items-center text-sm text-gray-400">
+                            <span><i class="fas fa-clock mr-1"></i> ${restaurant.deliveryTime}</span>
+                            <span><i class="fas fa-shopping-bag mr-1"></i> Min. ${restaurant.minOrder}</span>
+                        </div>
+                        <button onclick="showRestaurantMenu(${restaurant.id})" class="mt-4 w-full bg-purple-600 text-white py-2 rounded-lg hover:bg-purple-700 transition">
+                            View Menu
+                        </button>
+                    </div>
+                `;
+                container.appendChild(restaurantCard);
             });
         }
 
@@ -1121,241 +1798,212 @@
             document.getElementById('restaurant-menu-modal').classList.add('hidden');
         }
 
-        // Show recipe modal
-        function showRecipe(itemId) {
-            const foodItem = foodItems.find(item => item.id === itemId);
-            const recipe = recipes[itemId];
+        // Filter foods by category
+        function filterByCategory(category) {
+            const recommendedFoods = recommendFoods();
             
-            if (!foodItem || !recipe) {
-                // If recipe not found in modal data, redirect to full recipe page
-                window.location.href = 'recipe.html?id=' + itemId;
-                return;
+            if (category === 'all') {
+                displayFoods(recommendedFoods);
+            } else {
+                const filtered = recommendedFoods.filter(food => 
+                    food.diet.includes(category) || 
+                    food.cuisine === category ||
+                    food.type === category
+                );
+                displayFoods(filtered);
             }
             
-            currentRecipeId = itemId;
-            
-            document.getElementById('recipe-title').textContent = recipe.title;
-            document.getElementById('recipe-image').src = foodItem.image;
-            document.getElementById('recipe-time').textContent = foodItem.prepTime;
-            document.getElementById('recipe-servings').textContent = foodItem.servings;
-            
-            const ingredientsList = document.getElementById('recipe-ingredients');
-            ingredientsList.innerHTML = '';
-            recipe.ingredients.forEach(ingredient => {
-                const li = document.createElement('li');
-                li.textContent = ingredient;
-                ingredientsList.appendChild(li);
+            // Update active category button
+            document.querySelectorAll('.category-btn').forEach(btn => {
+                if (btn.textContent.trim().toLowerCase() === category || 
+                    (category === 'all' && btn.textContent.trim().toLowerCase() === 'all items')) {
+                    btn.classList.remove('bg-gray-700');
+                    btn.classList.add('bg-purple-600');
+                } else {
+                    btn.classList.remove('bg-purple-600');
+                    btn.classList.add('bg-gray-700');
+                }
             });
-            
-            const instructionsList = document.getElementById('recipe-instructions');
-            instructionsList.innerHTML = '';
-            recipe.instructions.forEach(instruction => {
-                const li = document.createElement('li');
-                li.textContent = instruction;
-                instructionsList.appendChild(li);
-            });
-            
-            document.getElementById('recipe-modal').classList.remove('hidden');
         }
 
-        // Hide recipe modal
-        function hideRecipe() {
-            document.getElementById('recipe-modal').classList.add('hidden');
-            currentRecipeId = null;
-        }
-
-        // Function to display recommended foods
-        function displayRecommendedFoods(foods) {
-            const container = document.getElementById('recommended-foods');
-            container.innerHTML = '';
-
-            if (foods.length === 0) {
-                container.innerHTML = `
-                    <div class="col-span-full text-center py-12">
-                        <p class="text-gray-400">No recommended foods found based on your preferences.</p>
-                        <a href="preferences.html" class="mt-4 inline-block text-purple-400 hover:underline">
-                            Update your preferences
-                        </a>
-                    </div>
-                `;
-                return;
+        // Sort foods based on selected option
+        function sortFoods(foods, sortBy) {
+            switch(sortBy) {
+                case 'rating':
+                    return [...foods].sort((a, b) => b.rating - a.rating);
+                case 'price-low':
+                    return [...foods].sort((a, b) => a.price - b.price);
+                case 'price-high':
+                    return [...foods].sort((a, b) => b.price - a.price);
+                case 'calories-low':
+                    return [...foods].sort((a, b) => a.calories - b.calories);
+                case 'calories-high':
+                    return [...foods].sort((a, b) => b.calories - a.calories);
+                case 'recommended':
+                default:
+                    return [...foods].sort((a, b) => b.matchScore - a.matchScore);
             }
-
-            foods.forEach(food => {
-                const foodCard = document.createElement('div');
-                foodCard.className = 'bg-gray-800 rounded-lg shadow overflow-hidden hover:shadow-lg transition transform hover:-translate-y-1';
-                foodCard.innerHTML = `
-                    <div class="relative">
-                        <img class="w-full h-48 object-cover" src="${food.image}" alt="${food.name}">
-                        ${userPreferences.diet.some(d => food.diet.includes(d)) ? 
-                            `<div class="absolute top-2 left-2 bg-green-900 text-green-200 text-xs font-semibold px-2.5 py-0.5 rounded">
-                                ${userPreferences.diet.find(d => food.diet.includes(d)).toUpperCase()}
-                            </div>` : ''}
-                        <div class="absolute top-2 right-2 bg-purple-600 text-white text-xs font-semibold px-2.5 py-0.5 rounded">RECOMMENDED</div>
-                    </div>
-                    <div class="p-4">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <h3 class="text-lg font-semibold text-white">${food.name}</h3>
-                                <p class="text-sm text-gray-400">${food.category} • ${food.diet.join(', ')}</p>
-                            </div>
-                            <div class="flex items-center">
-                                <i class="fas fa-star text-yellow-400 mr-1"></i>
-                                <span class="text-white">${(food.healthScore / 2).toFixed(1)}</span>
-                            </div>
-                        </div>
-                        <p class="mt-2 text-sm text-gray-300">${food.description}</p>
-                        <div class="mt-3 grid grid-cols-3 gap-2 text-xs text-center">
-                            <div class="bg-gray-700 p-1 rounded">
-                                <div class="font-medium">${food.calories}</div>
-                                <div class="text-gray-400">CAL</div>
-                            </div>
-                            <div class="bg-gray-700 p-1 rounded">
-                                <div class="font-medium">${food.protein}g</div>
-                                <div class="text-gray-400">PRO</div>
-                            </div>
-                            <div class="bg-gray-700 p-1 rounded">
-                                <div class="font-medium">${food.carbs}g</div>
-                                <div class="text-gray-400">CARB</div>
-                            </div>
-                        </div>
-                        <div class="mt-4 flex justify-between items-center">
-                            <span class="text-lg font-bold text-white">₹${food.price.toFixed(2)}</span>
-                            <div class="flex space-x-2">
-                                <button onclick="showRecipe(${food.id})" class="text-purple-400 border border-purple-400 py-1 px-3 focus:outline-none hover:bg-purple-400 hover:text-white rounded text-sm transition">
-                                    View Recipe
-                                </button>
-                                <button onclick="addToCart(${food.id})" class="text-white bg-purple-600 border-0 py-1 px-3 focus:outline-none hover:bg-purple-700 rounded text-sm transition">
-                                    Add to Cart
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                `;
-                container.appendChild(foodCard);
-            });
         }
 
-        // Function to display recommended restaurants
-        function displayRecommendedRestaurants(restaurants) {
-            const container = document.getElementById('recommended-restaurants');
-            container.innerHTML = '';
-
-            restaurants.forEach(restaurant => {
-                const restaurantCard = document.createElement('div');
-                restaurantCard.className = 'bg-gray-800 rounded-lg shadow overflow-hidden hover:shadow-lg transition transform hover:-translate-y-1';
-                restaurantCard.innerHTML = `
-                    <img class="w-full h-48 object-cover" src="${restaurant.image}" alt="${restaurant.name}">
-                    <div class="p-4">
-                        <h3 class="text-lg font-semibold text-white">${restaurant.name}</h3>
-                        <div class="flex items-center mt-2">
-                            <div class="flex text-yellow-400">
-                                ${Array(Math.floor(restaurant.rating)).fill().map(() => '<i class="fas fa-star"></i>').join('')}
-                                ${restaurant.rating % 1 >= 0.5 ? '<i class="fas fa-star-half-alt"></i>' : ''}
-                                ${Array(5 - Math.ceil(restaurant.rating)).fill().map(() => '<i class="far fa-star"></i>').join('')}
-                            </div>
-                            <span class="ml-2 text-sm text-gray-400">${restaurant.rating} (${restaurant.reviews} reviews)</span>
-                        </div>
-                        <div class="mt-2 flex flex-wrap gap-2">
-                            ${restaurant.specialties.map(spec => 
-                                `<span class="text-xs bg-purple-900 text-purple-300 px-2 py-1 rounded">${spec}</span>`
-                            ).join('')}
-                        </div>
-                        <p class="mt-2 text-sm text-gray-300">Specializing in ${restaurant.specialties.join(', ').toLowerCase()} cuisine.</p>
-                        <button onclick="showRestaurantMenu(${restaurant.id})" class="mt-4 w-full bg-purple-600 text-white py-2 rounded-lg hover:bg-purple-700 transition">
-                            View Menu
-                        </button>
-                    </div>
-                `;
-                container.appendChild(restaurantCard);
-            });
-        }
-
-        // Function to display health tips
-        function displayHealthTips() {
-            const container = document.getElementById('health-tips');
-            container.innerHTML = '';
-
-            // Select 2 random health tips (or all if less than 2)
-            const tipsToShow = healthTips.sort(() => 0.5 - Math.random()).slice(0, 2);
+        // Apply filters to foods
+        function applyFilters() {
+            const recommendedFoods = recommendFoods();
             
-            tipsToShow.forEach(tip => {
-                const tipCard = document.createElement('div');
-                tipCard.className = 'bg-gray-800 p-4 rounded-lg shadow';
-                tipCard.innerHTML = `
-                    <h3 class="font-semibold text-lg text-white mb-2">${tip.title}</h3>
-                    <p class="text-gray-300">${tip.content}</p>
-                `;
-                container.appendChild(tipCard);
-            });
-        }
-
-        // Filter foods based on search and filters
-        function filterFoods() {
-            const searchTerm = document.getElementById('food-search').value.toLowerCase();
-            const cuisineFilter = document.getElementById('cuisine-filter').value.toLowerCase();
-            const dietFilter = document.getElementById('diet-filter').value.toLowerCase();
+            // Get filter values
+            const sortBy = document.getElementById('sort-by').value;
+            const maxCalories = parseInt(document.getElementById('calorie-range').value);
+            const minProtein = parseInt(document.getElementById('protein-range').value);
             
-            let filtered = recommendFoods();
+            // Get selected dietary filters
+            const selectedDiets = Array.from(document.querySelectorAll('.diet-filter:checked')).map(el => el.value);
+            const selectedMeals = Array.from(document.querySelectorAll('.meal-filter:checked')).map(el => el.value);
             
-            if (searchTerm) {
-                filtered = filtered.filter(item => 
-                    item.name.toLowerCase().includes(searchTerm) || 
-                    item.description.toLowerCase().includes(searchTerm) ||
-                    item.category.toLowerCase().includes(searchTerm)
+            // Apply filters
+            let filtered = recommendedFoods.filter(food => 
+                food.calories <= maxCalories &&
+                food.protein >= minProtein
+            );
+            
+            // Apply dietary filters if any are selected
+            if (selectedDiets.length > 0) {
+                filtered = filtered.filter(food => 
+                    selectedDiets.some(diet => food.diet.includes(diet))
                 );
             }
             
-            if (cuisineFilter) {
-                filtered = filtered.filter(item => 
-                    item.category.toLowerCase().includes(cuisineFilter)
-                );
+            // Apply meal type filters if any are selected
+            if (selectedMeals.length > 0) {
+                filtered = filtered.filter(food => 
+                    selectedMeals.includes(food.type)
+                );  
             }
             
-            if (dietFilter) {
-                filtered = filtered.filter(item => 
-                    item.diet.some(d => d.toLowerCase().includes(dietFilter))
-                );
-            }
+            // Sort the results
+            filtered = sortFoods(filtered, sortBy);
             
-            displayRecommendedFoods(filtered);
+            // Display results
+            displayFoods(filtered);
         }
 
-        // Reset filters
-        function resetFilters() {
-            document.getElementById('food-search').value = '';
-            document.getElementById('cuisine-filter').value = '';
-            document.getElementById('diet-filter').value = '';
-            displayRecommendedFoods(recommendFoods());
+        // Reset all filters
+        function resetAllFilters() {
+            // Reset form elements
+            document.getElementById('sort-by').value = 'recommended';
+            document.getElementById('calorie-range').value = 1000;
+            document.getElementById('protein-range').value = 0;
+            document.getElementById('calorie-value').textContent = '1000';
+            document.getElementById('protein-value').textContent = '0';
+            
+            // Check all diet and meal filters
+            document.querySelectorAll('.diet-filter, .meal-filter').forEach(checkbox => {
+                checkbox.checked = true;
+            });
+            
+            // Reset category filter
+            filterByCategory('all');
+            
+            // Close filter panel if open
+            document.getElementById('filter-panel').classList.add('hidden');
         }
+
+        // Function to update recommendations
+        window.updateRecommendations = function() {
+            // Show loading state
+            document.getElementById('loading-state').classList.remove('hidden');
+            document.getElementById('food-grid').classList.add('hidden');
+            
+            // Simulate loading delay (in real app, this would be API calls)
+            setTimeout(() => {
+                const recommendedFoods = recommendFoods();
+                const recommendedRestaurants = recommendRestaurants();
+                const healthTips = getPersonalizedHealthTips();
+                
+                // Display recommendations
+                displayFoods(recommendedFoods);
+                displayRestaurants(recommendedRestaurants);
+                
+                // Display health tips
+                const healthTipsContainer = document.getElementById('health-tips');
+                healthTipsContainer.innerHTML = '';
+                healthTips.forEach(tip => {
+                    const tipElement = document.createElement('div');
+                    tipElement.className = 'bg-gray-800 p-4 rounded-lg shadow';
+                    tipElement.innerHTML = `
+                        <h3 class="font-semibold text-lg text-white mb-2 flex items-center">
+                            <i class="fas fa-lightbulb text-purple-500 mr-2"></i>
+                            ${tip.title}
+                        </h3>
+                        <p class="text-gray-300">${tip.content}</p>
+                    `;
+                    healthTipsContainer.appendChild(tipElement);
+                });
+                
+                // Hide loading state
+                document.getElementById('loading-state').classList.add('hidden');
+                document.getElementById('food-grid').classList.remove('hidden');
+            }, 1000);
+        };
 
         // Initialize the page
         document.addEventListener('DOMContentLoaded', function() {
             // Initialize cart from localStorage
             updateCart();
             
-            // Display recommendations based on user preferences
-            displayRecommendedFoods(recommendFoods());
-            displayRecommendedRestaurants(recommendRestaurants());
-            displayHealthTips();
+            // Set up event listeners
+            document.getElementById('filter-btn').addEventListener('click', function() {
+                document.getElementById('filter-panel').classList.toggle('hidden');
+            });
             
-            // Set up event listeners for search and filters
-            document.getElementById('food-search').addEventListener('input', filterFoods);
-            document.getElementById('cuisine-filter').addEventListener('change', filterFoods);
-            document.getElementById('diet-filter').addEventListener('change', filterFoods);
-            document.getElementById('reset-filters').addEventListener('click', resetFilters);
+            document.getElementById('apply-filters-btn').addEventListener('click', function() {
+                applyFilters();
+                document.getElementById('filter-panel').classList.add('hidden');
+            });
+            
+            document.getElementById('reset-filters-btn').addEventListener('click', function() {
+                resetAllFilters();
+            });
+            
+            document.getElementById('reset-all-filters').addEventListener('click', function() {
+                resetAllFilters();
+            });
+            
+            document.getElementById('sort-by').addEventListener('change', function() {
+                applyFilters();
+            });
+            
+            // Range sliders
+            document.getElementById('calorie-range').addEventListener('input', function() {
+                document.getElementById('calorie-value').textContent = this.value;
+            });
+            
+            document.getElementById('protein-range').addEventListener('input', function() {
+                document.getElementById('protein-value').textContent = this.value;
+            });
+            
+            // Initialize category buttons
+            document.querySelectorAll('.category-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    // Remove active class from all buttons
+                    document.querySelectorAll('.category-btn').forEach(b => {
+                        b.classList.remove('bg-purple-600');
+                        b.classList.add('bg-gray-700');
+                    });
+                    
+                    // Add active class to clicked button
+                    this.classList.remove('bg-gray-700');
+                    this.classList.add('bg-purple-600');
+                });
+            });
+            
+            // Load initial recommendations
+            updateRecommendations();
             
             // Check if user is logged in
             const userData = JSON.parse(localStorage.getItem('userData'));
             
             if (userData) {
                 // Show profile section and update with user data
-                const profileSection = document.getElementById('profile-section');
                 const profileName = document.getElementById('profile-name');
-                const profileButton = document.getElementById('profile-button');
-                
-                // Show the profile section that was hidden by default
-                profileSection.classList.remove('hidden');
                 
                 // Set the profile name
                 profileName.textContent = userData.displayName || userData.email || 'User';
@@ -1377,67 +2025,9 @@
                     // Add it to the beginning of the profile button
                     profileButton.prepend(profilePic);
                 }
-                
-                // Set up dropdown toggle
-                profileButton.addEventListener('click', function() {
-                    const dropdown = document.getElementById('profile-dropdown');
-                    dropdown.classList.toggle('hidden');
-                });
-                
-                // Close dropdown when clicking outside
-                document.addEventListener('click', function(event) {
-                    const dropdown = document.getElementById('profile-dropdown');
-                    const profileButton = document.getElementById('profile-button');
-                    
-                    if (!profileButton.contains(event.target) && !dropdown.contains(event.target)) {
-                        dropdown.classList.add('hidden');
-                    }
-                });
             }
         });
 
-        // Add this script to your pages where the profile section exists
-        document.addEventListener('DOMContentLoaded', function() {
-            // Check if user is logged in with data in localStorage
-            const userData = JSON.parse(localStorage.getItem('userData') || '{}');
-            
-            // Get the profile section elements
-            const profileSection = document.getElementById('profile-section');
-            const profileName = document.getElementById('profile-name');
-            const profileButton = document.getElementById('profile-button');
-            
-            if (userData && userData.photoURL && profileButton) {
-                // Show the profile section if it was hidden
-                if (profileSection) {
-                    profileSection.classList.remove('hidden');
-                }
-                
-                // Update the profile name if it exists
-                if (profileName) {
-                    profileName.textContent = userData.displayName || userData.email || 'User';
-                }
-                
-                // Find the existing icon to replace
-                const existingIcon = profileButton.querySelector('.fas.fa-user-circle');
-                
-                // If we found the icon, replace it with the profile picture
-                if (existingIcon) {
-                    // Create profile picture element
-                    const profilePic = document.createElement('img');
-                    profilePic.src = userData.photoURL;
-                    profilePic.alt = 'Profile';
-                    profilePic.className = 'h-8 w-8 rounded-full object-cover mr-2';
-                    
-                    // Replace the icon with the profile picture
-                    existingIcon.parentNode.replaceChild(profilePic, existingIcon);
-                }
-            } else if (userData && userData.displayName && profileName) {
-                // If there's no photo but there is a name, at least show the name
-                profileSection.classList.remove('hidden');
-                profileName.textContent = userData.displayName || userData.email || 'User';
-            }
-        });
-        
         // Add smooth transition to all links
         document.addEventListener('DOMContentLoaded', function() {
             document.querySelectorAll('a').forEach(link => {

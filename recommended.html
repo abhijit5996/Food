@@ -62,7 +62,74 @@
                 font-size: 1.1rem;
             }
         }
+
+        /* Match score indicator */
+        .match-score {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            box-shadow: 0 0 10px rgba(139, 92, 246, 0.5);
+        }
+
+        .match-score-text {
+            font-size: 12px;
+            margin-top: 2px;
+        }
     </style>
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+      import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+      import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyBx0Kt9o04ye0XrtA8ecp84wD8Q9OCDjlA",
+        authDomain: "foodorder-4380c.firebaseapp.com",
+        projectId: "foodorder-4380c",
+        storageBucket: "foodorder-4380c.appspot.com",
+        messagingSenderId: "735023580381",
+        appId: "1:735023580381:web:c6740bef2fc9bdee1b4734"
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const auth = getAuth(app);
+      const db = getFirestore(app);
+
+      // Check auth state and load user preferences
+      onAuthStateChanged(auth, async (user) => {
+        if (!user) {
+          window.location.href = 'login.html';
+        } else {
+          // Load user preferences from Firestore
+          const userDocRef = doc(db, 'users', user.uid);
+          const docSnap = await getDoc(userDocRef);
+          
+          if (docSnap.exists()) {
+            const userData = docSnap.data();
+            if (userData.preferences) {
+              // Save preferences to localStorage for quick access
+              localStorage.setItem('foodPreferences', JSON.stringify(userData.preferences));
+              
+              // Initialize the page with these preferences
+              initializePageWithPreferences(userData.preferences);
+            }
+          }
+        }
+      });
+
+      function initializePageWithPreferences(preferences) {
+        // This will be called after the DOM is loaded
+        window.userPreferences = preferences;
+      }
+    </script>
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -93,10 +160,6 @@
                 <a href="restaurants.html" class="mr-5 hover:text-purple-400 transition">Restaurants</a>
                 <a href="index.html#contact" class="mr-5 hover:text-purple-400 transition">Contact</a>
             </nav>
-            <button id="theme-toggle" class="p-2 rounded-lg focus:outline-none text-gray-400 hover:bg-gray-700 mr-4">
-                <i class="fas fa-moon dark:hidden"></i>
-                <i class="fas fa-sun hidden dark:block"></i>
-            </button>
             <button onclick="toggleCart()" class="inline-flex items-center bg-purple-600 text-white border-0 py-2 px-4 focus:outline-none hover:bg-purple-700 rounded-lg transition mt-4 md:mt-0">
                 <i class="fas fa-shopping-cart mr-2"></i> Cart
                 <span id="cart-count" class="ml-2 bg-white text-purple-600 rounded-full w-6 h-6 flex items-center justify-center">0</span>
@@ -144,6 +207,21 @@
                 <p class="lg:w-2/3 mx-auto leading-relaxed">Based on your preferences and dietary needs</p>
             </div>
             
+            <!-- User Preferences Summary -->
+            <div class="mb-8 bg-gray-800 p-6 rounded-lg shadow">
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                    <div>
+                        <h2 class="text-lg font-semibold text-white mb-2">Your Dietary Profile</h2>
+                        <div id="health-recommendation-tags" class="flex flex-wrap gap-2">
+                            <!-- Health tags will be added here dynamically -->
+                        </div>
+                    </div>
+                    <a href="preferences.html" class="text-purple-400 hover:text-purple-300 text-sm font-medium flex items-center">
+                        <i class="fas fa-edit mr-1"></i> Edit Preferences
+                    </a>
+                </div>
+            </div>
+            
             <!-- Search and Filters -->
             <div class="mb-8 bg-gray-800 p-6 rounded-lg shadow">
                 <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -177,11 +255,8 @@
             <!-- Personalized Recommendations -->
             <div class="mb-8">
                 <h2 class="text-xl font-bold title-font mb-6 text-white flex items-center">
-                    <i class="fas fa-heart text-purple-400 mr-2"></i> Based on Your Preferences
+                    <i class="fas fa-heart text-purple-400 mr-2"></i> Best Matches For You
                 </h2>
-                <div id="health-recommendation-tags" class="flex flex-wrap gap-2 mb-6">
-                    <!-- Health tags will be added here dynamically -->
-                </div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" id="recommended-foods">
                     <!-- Foods will be loaded dynamically -->
                 </div>
@@ -347,6 +422,12 @@
 
         // Get user preferences from localStorage (set in preferences form)
         function getUserPreferences() {
+            // Use the preferences loaded from Firebase if available
+            if (window.userPreferences) {
+                return window.userPreferences;
+            }
+            
+            // Fallback to localStorage
             const preferences = localStorage.getItem('foodPreferences');
             return preferences ? JSON.parse(preferences) : {
                 diet: [],
@@ -354,7 +435,9 @@
                 fitness_goal: '',
                 activity_level: '',
                 allergy: [],
-                meal_pref: []
+                meal_pref: [],
+                current_weight: '',
+                target_weight: ''
             };
         }
 
@@ -364,6 +447,7 @@
             const tagsContainer = document.getElementById('health-recommendation-tags');
             tagsContainer.innerHTML = '';
             
+            // Show health conditions if any
             if (preferences.health_condition && preferences.health_condition.length > 0) {
                 preferences.health_condition.forEach(condition => {
                     const tag = document.createElement('div');
@@ -373,6 +457,7 @@
                 });
             }
             
+            // Show dietary preferences if any
             if (preferences.diet && preferences.diet.length > 0) {
                 preferences.diet.forEach(diet => {
                     const tag = document.createElement('div');
@@ -382,11 +467,33 @@
                 });
             }
             
-            if (preferences.fitness_goal) {
+            // Show fitness goal if set
+            if (preferences.fitness_goal && preferences.fitness_goal !== 'none') {
                 const tag = document.createElement('div');
                 tag.className = 'bg-purple-900 text-purple-200 text-sm font-medium px-3 py-1 rounded-full flex items-center';
                 tag.innerHTML = `<i class="fas fa-dumbbell mr-1"></i> ${getFitnessGoalDisplayName(preferences.fitness_goal)}`;
                 tagsContainer.appendChild(tag);
+            }
+            
+            // Show weight information if available
+            if (preferences.current_weight && preferences.target_weight) {
+                const tag = document.createElement('div');
+                tag.className = 'bg-yellow-900 text-yellow-200 text-sm font-medium px-3 py-1 rounded-full flex items-center';
+                tag.innerHTML = `<i class="fas fa-weight-scale mr-1"></i> ${preferences.current_weight}kg → ${preferences.target_weight}kg`;
+                tagsContainer.appendChild(tag);
+            } else if (preferences.current_weight) {
+                const tag = document.createElement('div');
+                tag.className = 'bg-yellow-900 text-yellow-200 text-sm font-medium px-3 py-1 rounded-full flex items-center';
+                tag.innerHTML = `<i class="fas fa-weight-scale mr-1"></i> ${preferences.current_weight}kg`;
+                tagsContainer.appendChild(tag);
+            }
+            
+            // If no preferences set, show a message
+            if (tagsContainer.children.length === 0) {
+                const message = document.createElement('div');
+                message.className = 'text-gray-400 text-sm';
+                message.textContent = 'No specific preferences set. Showing general recommendations.';
+                tagsContainer.appendChild(message);
             }
         }
 
@@ -413,43 +520,80 @@
             return goalNames[goal] || goal;
         }
 
-        // Updated Indian food database with healthy options
+        // Enhanced Indian food database with traditional healthy Indian foods
         const foodDatabase = [
             // Diabetes-friendly foods (low sugar, low glycemic index)
             {
                 id: 101,
-                name: "Quinoa Khichdi",
+                name: "Bajra Roti with Lauki Sabzi",
                 category: "Healthy",
-                price: 180,
-                description: "Protein-rich quinoa cooked with moong dal and vegetables. Low glycemic index makes it perfect for blood sugar control.",
-                image: "https://images.unsplash.com/photo-1601050690597-df0568f70950?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
-                cuisine: "indian",
+                price: 150,
+                description: "Nutritious pearl millet flatbread with bottle gourd curry. Low glycemic index makes it perfect for blood sugar control.",
+                image: "https://images.unsplash.com/photo-1633945274309-2c16c9682a8c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+                cuisine: "north indian",
                 diet: ["vegetarian", "gluten-free"],
-                health_benefits: ["diabetes", "heart-disease", "cholesterol"],
+                health_benefits: ["diabetes", "heart-disease"],
                 fitness_goals: ["weight-loss", "maintenance"],
-                rating: 4.7,
-                prepTime: "30 mins",
-                servings: "2 servings"
+                meal_pref: ["balanced"],
+                calories: 280,
+                protein: 8,
+                carbs: 45,
+                fats: 5,
+                fiber: 10,
+                rating: 4.4,
+                prepTime: "25 mins",
+                servings: "2 servings",
+                ingredients: ["Bajra flour", "Bottle gourd", "Tomato", "Spices"],
+                allergens: []
             },
             {
                 id: 102,
-                name: "Grilled Salmon with Steamed Vegetables",
-                category: "Protein",
-                price: 320,
-                description: "Fresh salmon grilled with herbs served with nutrient-rich steamed vegetables. Rich in omega-3 fatty acids.",
-                image: "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
-                cuisine: "continental",
-                diet: ["gluten-free"],
-                health_benefits: ["diabetes", "heart-disease", "cholesterol"],
-                fitness_goals: ["muscle-gain", "weight-loss"],
-                rating: 4.8,
+                name: "Methi Thepla with Low-fat Curd",
+                category: "Healthy",
+                price: 130,
+                description: "Fenugreek flatbread made with whole wheat and gram flour. Helps with insulin resistance.",
+                image: "https://images.unsplash.com/photo-1601050690775-d8523a9a72c3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+                cuisine: "north indian",
+                diet: ["vegetarian"],
+                health_benefits: ["diabetes", "pcos"],
+                fitness_goals: ["weight-loss", "maintenance"],
+                meal_pref: ["balanced", "mediterranean"],
+                calories: 250,
+                protein: 10,
+                carbs: 40,
+                fats: 6,
+                fiber: 8,
+                rating: 4.5,
                 prepTime: "25 mins",
-                servings: "1 serving"
+                servings: "2 servings",
+                ingredients: ["Whole Wheat", "Gram Flour", "Fenugreek Leaves", "Low-fat Curd", "Spices"],
+                allergens: ["gluten"]
             },
-            
-            // Heart-healthy foods (low sodium, low saturated fat)
             {
-                id: 103,
+                id: 114,
+                name: "Moong Dal Chilla",
+                category: "Healthy",
+                price: 140,
+                description: "Protein-packed moong dal pancakes with mint chutney. Low calorie and nutrient dense.",
+                image: "https://images.unsplash.com/photo-1626700051175-6818013e1d4f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1064&q=80",
+                cuisine: "north indian",
+                diet: ["vegetarian", "gluten-free"],
+                health_benefits: ["diabetes", "heart-disease"],
+                fitness_goals: ["weight-loss"],
+                meal_pref: ["high-protein", "low-carb"],
+                calories: 220,
+                protein: 15,
+                carbs: 25,
+                fats: 6,
+                fiber: 8,
+                rating: 4.4,
+                prepTime: "20 mins",
+                servings: "2 servings",
+                ingredients: ["Moong Dal", "Spices", "Mint", "Coriander", "Green Chili"],
+                allergens: []
+            },
+            {
+                id: 115,
                 name: "Sprouts Salad",
                 category: "Salad",
                 price: 120,
@@ -459,12 +603,22 @@
                 diet: ["vegetarian", "vegan", "gluten-free"],
                 health_benefits: ["hypertension", "heart-disease", "cholesterol"],
                 fitness_goals: ["weight-loss", "maintenance"],
+                meal_pref: ["balanced", "mediterranean"],
+                calories: 180,
+                protein: 12,
+                carbs: 25,
+                fats: 4,
+                fiber: 10,
                 rating: 4.5,
                 prepTime: "15 mins",
-                servings: "1 serving"
+                servings: "1 serving",
+                ingredients: ["Moong Sprouts", "Cucumber", "Tomato", "Onion", "Lemon", "Coriander"],
+                allergens: []
             },
+            
+            // Heart-healthy foods (low sodium, low saturated fat)
             {
-                id: 104,
+                id: 103,
                 name: "Oats Idli with Sambar",
                 category: "Breakfast",
                 price: 110,
@@ -474,29 +628,91 @@
                 diet: ["vegetarian", "gluten-free"],
                 health_benefits: ["hypertension", "heart-disease", "cholesterol", "diabetes"],
                 fitness_goals: ["weight-loss", "maintenance"],
+                meal_pref: ["balanced", "mediterranean"],
+                calories: 280,
+                protein: 10,
+                carbs: 45,
+                fats: 5,
+                fiber: 8,
                 rating: 4.6,
                 prepTime: "20 mins",
-                servings: "2 servings"
+                servings: "2 servings",
+                ingredients: ["Oats", "Urad Dal", "Vegetables", "Sambar Powder", "Mustard Seeds"],
+                allergens: []
+            },
+            {
+                id: 104,
+                name: "Jowar Roti with Palak Dal",
+                category: "Healthy",
+                price: 140,
+                description: "Sorghum flatbread with protein-rich spinach dal. Rich in antioxidants and heart-healthy nutrients.",
+                image: "https://images.unsplash.com/photo-1601050690597-df0568f70950?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+                cuisine: "north indian",
+                diet: ["vegetarian", "gluten-free"],
+                health_benefits: ["hypertension", "heart-disease", "cholesterol"],
+                fitness_goals: ["weight-loss", "maintenance"],
+                meal_pref: ["balanced", "mediterranean"],
+                calories: 300,
+                protein: 12,
+                carbs: 50,
+                fats: 6,
+                fiber: 9,
+                rating: 4.5,
+                prepTime: "25 mins",
+                servings: "2 servings",
+                ingredients: ["Jowar flour", "Toor dal", "Spinach", "Tomato", "Spices"],
+                allergens: []
+            },
+            {
+                id: 116,
+                name: "Masala Dosa with Coconut Chutney",
+                category: "Healthy",
+                price: 140,
+                description: "Fermented rice and lentil crepe stuffed with spiced potatoes. Gut-friendly probiotic food.",
+                image: "https://images.unsplash.com/photo-1608500218954-bafec1ae555c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+                cuisine: "south indian",
+                diet: ["vegetarian"],
+                health_benefits: ["diabetes"],
+                fitness_goals: ["weight-loss", "maintenance"],
+                meal_pref: ["balanced"],
+                calories: 280,
+                protein: 8,
+                carbs: 45,
+                fats: 8,
+                fiber: 6,
+                rating: 4.6,
+                prepTime: "20 mins",
+                servings: "1 serving",
+                ingredients: ["Rice", "Urad dal", "Potatoes", "Coconut", "Spices"],
+                allergens: []
+            },
+            {
+                id: 117,
+                name: "Tandoori Chicken with Mint Chutney",
+                category: "Protein",
+                price: 240,
+                description: "Skinless chicken marinated in yogurt and spices, cooked in tandoor. Low-fat high protein option.",
+                image: "https://images.unsplash.com/photo-1603360946369-dc9bb6258143?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+                cuisine: "north indian",
+                diet: ["gluten-free"],
+                health_benefits: ["heart-disease"],
+                fitness_goals: ["muscle-gain", "weight-loss"],
+                meal_pref: ["high-protein", "low-carb"],
+                calories: 280,
+                protein: 35,
+                carbs: 5,
+                fats: 12,
+                fiber: 2,
+                rating: 4.7,
+                prepTime: "30 mins",
+                servings: "1 serving",
+                ingredients: ["Chicken breast", "Yogurt", "Spices", "Mint", "Lemon"],
+                allergens: ["dairy"]
             },
             
             // High-protein foods for muscle gain
             {
                 id: 105,
-                name: "Grilled Chicken with Quinoa",
-                category: "Protein",
-                price: 240,
-                description: "Lean chicken breast grilled with herbs served with protein-packed quinoa.",
-                image: "https://images.unsplash.com/photo-1603360946369-dc9bb6258143?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
-                cuisine: "continental",
-                diet: ["gluten-free"],
-                health_benefits: [],
-                fitness_goals: ["muscle-gain"],
-                rating: 4.7,
-                prepTime: "25 mins",
-                servings: "1 serving"
-            },
-            {
-                id: 106,
                 name: "Paneer Bhurji with Multigrain Roti",
                 category: "Protein",
                 price: 180,
@@ -506,41 +722,180 @@
                 diet: ["vegetarian"],
                 health_benefits: [],
                 fitness_goals: ["muscle-gain", "endurance"],
+                meal_pref: ["high-protein", "balanced"],
+                calories: 380,
+                protein: 25,
+                carbs: 35,
+                fats: 16,
+                fiber: 7,
                 rating: 4.5,
                 prepTime: "20 mins",
-                servings: "2 servings"
+                servings: "2 servings",
+                ingredients: ["Paneer", "Tomato", "Onion", "Spices", "Multigrain Flour"],
+                allergens: ["dairy"]
+            },
+            {
+                id: 106,
+                name: "Soya Chunks Curry with Brown Rice",
+                category: "Protein",
+                price: 160,
+                description: "Protein-rich soya chunks in tomato-based gravy served with fiber-rich brown rice.",
+                image: "https://images.unsplash.com/photo-1633945274309-2c16c9682a8c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+                cuisine: "indian",
+                diet: ["vegetarian", "vegan"],
+                health_benefits: [],
+                fitness_goals: ["muscle-gain"],
+                meal_pref: ["high-protein", "balanced"],
+                calories: 350,
+                protein: 28,
+                carbs: 40,
+                fats: 8,
+                fiber: 9,
+                rating: 4.3,
+                prepTime: "25 mins",
+                servings: "1 serving",
+                ingredients: ["Soya chunks", "Tomato", "Onion", "Brown rice", "Spices"],
+                allergens: ["soy"]
+            },
+            {
+                id: 118,
+                name: "Dal Tadka with Jeera Rice",
+                category: "Protein",
+                price: 150,
+                description: "Protein-packed yellow dal tempered with spices, served with cumin-infused rice.",
+                image: "https://images.unsplash.com/photo-1601050690597-df0568f70950?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+                cuisine: "north indian",
+                diet: ["vegetarian", "gluten-free"],
+                health_benefits: [],
+                fitness_goals: ["muscle-gain", "endurance"],
+                meal_pref: ["high-protein", "balanced"],
+                calories: 400,
+                protein: 22,
+                carbs: 60,
+                fats: 8,
+                fiber: 10,
+                rating: 4.6,
+                prepTime: "30 mins",
+                servings: "2 servings",
+                ingredients: ["Toor dal", "Rice", "Cumin", "Tomato", "Onion", "Spices"],
+                allergens: []
+            },
+            {
+                id: 119,
+                name: "Chana Masala with Missi Roti",
+                category: "Protein",
+                price: 170,
+                description: "Protein-rich chickpea curry served with gram flour flatbread. Excellent muscle-building meal.",
+                image: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+                cuisine: "north indian",
+                diet: ["vegetarian", "gluten-free"],
+                health_benefits: [],
+                fitness_goals: ["muscle-gain"],
+                meal_pref: ["high-protein"],
+                calories: 420,
+                protein: 25,
+                carbs: 55,
+                fats: 10,
+                fiber: 15,
+                rating: 4.7,
+                prepTime: "30 mins",
+                servings: "2 servings",
+                ingredients: ["Chickpeas", "Gram flour", "Tomato", "Onion", "Spices"],
+                allergens: []
             },
             
             // Weight loss friendly options
             {
                 id: 107,
-                name: "Moong Dal Chilla",
+                name: "Vegetable Clear Soup with Tofu",
                 category: "Healthy",
-                price: 130,
-                description: "Protein-packed moong dal pancakes with mint chutney. Low calorie and nutrient dense.",
-                image: "https://images.unsplash.com/photo-1626700051175-6818013e1d4f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1064&q=80",
-                cuisine: "north indian",
-                diet: ["vegetarian", "gluten-free"],
-                health_benefits: ["diabetes", "heart-disease"],
+                price: 150,
+                description: "Light vegetable broth with tofu cubes. Low calorie density for weight management.",
+                image: "https://images.unsplash.com/photo-1606787366850-de6330128bfc?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+                cuisine: "continental",
+                diet: ["vegetarian", "vegan", "gluten-free"],
+                health_benefits: ["diabetes"],
                 fitness_goals: ["weight-loss"],
-                rating: 4.4,
-                prepTime: "20 mins",
-                servings: "2 servings"
+                meal_pref: ["low-carb"],
+                calories: 120,
+                protein: 10,
+                carbs: 8,
+                fats: 5,
+                fiber: 3,
+                rating: 4.2,
+                prepTime: "15 mins",
+                servings: "1 serving",
+                ingredients: ["Vegetable broth", "Tofu", "Carrots", "Mushrooms", "Spring onions"],
+                allergens: ["soy"]
             },
             {
                 id: 108,
-                name: "Greek Yogurt with Berries",
-                category: "Dessert",
+                name: "Ragi Dosa with Mint Chutney",
+                category: "Healthy",
+                price: 130,
+                description: "Fermented finger millet crepe served with mint chutney. High in fiber and calcium.",
+                image: "https://images.unsplash.com/photo-1608500218954-bafec1ae555c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+                cuisine: "south indian",
+                diet: ["vegetarian", "gluten-free"],
+                health_benefits: ["diabetes"],
+                fitness_goals: ["weight-loss"],
+                meal_pref: ["low-carb"],
+                calories: 180,
+                protein: 6,
+                carbs: 30,
+                fats: 4,
+                fiber: 8,
+                rating: 4.4,
+                prepTime: "20 mins",
+                servings: "2 servings",
+                ingredients: ["Ragi flour", "Urad dal", "Mint", "Coriander", "Green chili"],
+                allergens: []
+            },
+            {
+                id: 120,
+                name: "Lauki Chana Dal",
+                category: "Healthy",
                 price: 140,
-                description: "Protein-rich Greek yogurt with antioxidant-packed fresh berries.",
-                image: "https://images.unsplash.com/photo-1505576399279-565b52d4ac71?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
-                cuisine: "continental",
-                diet: ["vegetarian"],
-                health_benefits: ["diabetes", "heart-disease"],
-                fitness_goals: ["weight-loss", "muscle-gain"],
-                rating: 4.6,
-                prepTime: "5 mins",
-                servings: "1 serving"
+                description: "Bottle gourd cooked with split chickpeas. Low calorie and high protein combination.",
+                image: "https://images.unsplash.com/photo-1633945274309-2c16c9682a8c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+                cuisine: "north indian",
+                diet: ["vegetarian", "gluten-free"],
+                health_benefits: ["diabetes"],
+                fitness_goals: ["weight-loss"],
+                meal_pref: ["high-protein", "low-carb"],
+                calories: 200,
+                protein: 12,
+                carbs: 25,
+                fats: 5,
+                fiber: 8,
+                rating: 4.3,
+                prepTime: "25 mins",
+                servings: "2 servings",
+                ingredients: ["Bottle gourd", "Chana dal", "Tomato", "Spices"],
+                allergens: []
+            },
+            {
+                id: 121,
+                name: "Vegetable Jalfrezi with Quinoa",
+                category: "Healthy",
+                price: 180,
+                description: "Stir-fried vegetables in light gravy served with protein-rich quinoa.",
+                image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1180&q=80",
+                cuisine: "indian",
+                diet: ["vegetarian", "gluten-free"],
+                health_benefits: ["diabetes"],
+                fitness_goals: ["weight-loss"],
+                meal_pref: ["high-protein", "low-carb"],
+                calories: 220,
+                protein: 10,
+                carbs: 30,
+                fats: 6,
+                fiber: 8,
+                rating: 4.5,
+                prepTime: "25 mins",
+                servings: "1 serving",
+                ingredients: ["Quinoa", "Bell peppers", "Carrots", "Beans", "Light gravy"],
+                allergens: []
             },
             
             // Kidney-friendly options (low potassium, low phosphorus)
@@ -555,9 +910,40 @@
                 diet: ["vegetarian", "gluten-free"],
                 health_benefits: ["kidney"],
                 fitness_goals: ["weight-loss", "maintenance"],
+                meal_pref: ["low-carb", "balanced"],
+                calories: 150,
+                protein: 3,
+                carbs: 25,
+                fats: 4,
+                fiber: 5,
                 rating: 4.3,
                 prepTime: "20 mins",
-                servings: "1 serving"
+                servings: "1 serving",
+                ingredients: ["Bottle Gourd", "Cumin", "Pepper", "Coriander"],
+                allergens: []
+            },
+            {
+                id: 122,
+                name: "Rice with Cabbage Sabzi",
+                category: "Healthy",
+                price: 130,
+                description: "Simple white rice with low-potassium cabbage stir-fry. Kidney-friendly meal option.",
+                image: "https://images.unsplash.com/photo-1633945274309-2c16c9682a8c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+                cuisine: "indian",
+                diet: ["vegetarian", "gluten-free"],
+                health_benefits: ["kidney"],
+                fitness_goals: ["maintenance"],
+                meal_pref: ["balanced"],
+                calories: 300,
+                protein: 6,
+                carbs: 60,
+                fats: 5,
+                fiber: 6,
+                rating: 4.2,
+                prepTime: "25 mins",
+                servings: "1 serving",
+                ingredients: ["Rice", "Cabbage", "Carrots", "Green beans", "Spices"],
+                allergens: []
             },
             
             // PCOS-friendly options (low glycemic, anti-inflammatory)
@@ -572,97 +958,300 @@
                 diet: ["vegetarian"],
                 health_benefits: ["pcos", "diabetes"],
                 fitness_goals: ["weight-loss", "maintenance"],
+                meal_pref: ["balanced", "mediterranean"],
+                calories: 280,
+                protein: 12,
+                carbs: 45,
+                fats: 6,
+                fiber: 8,
                 rating: 4.5,
                 prepTime: "25 mins",
-                servings: "2 servings"
+                servings: "2 servings",
+                ingredients: ["Whole Wheat", "Fenugreek Leaves", "Low-fat Curd", "Spices"],
+                allergens: ["dairy", "gluten"]
+            },
+            {
+                id: 123,
+                name: "Flaxseed Smoothie Bowl",
+                category: "Healthy",
+                price: 160,
+                description: "Omega-3 rich flaxseed smoothie topped with seeds and nuts. Helps with PCOS symptoms.",
+                image: "https://images.unsplash.com/photo-1505576399279-565b52d4ac71?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+                cuisine: "continental",
+                diet: ["vegetarian", "gluten-free"],
+                health_benefits: ["pcos"],
+                fitness_goals: ["weight-loss", "maintenance"],
+                meal_pref: ["balanced"],
+                calories: 220,
+                protein: 8,
+                carbs: 25,
+                fats: 10,
+                fiber: 7,
+                rating: 4.4,
+                prepTime: "10 mins",
+                servings: "1 serving",
+                ingredients: ["Flaxseeds", "Banana", "Almond milk", "Chia seeds", "Walnuts"],
+                allergens: ["nuts"]
+            },
+            
+            // More options for different preferences
+            {
+                id: 111,
+                name: "Palak Paneer with Jowar Roti",
+                category: "Healthy",
+                price: 190,
+                description: "Spinach and cottage cheese curry with sorghum flatbread. Rich in iron and calcium.",
+                image: "https://images.unsplash.com/photo-1519996521439-0408c916b631?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+                cuisine: "north indian",
+                diet: ["vegetarian"],
+                health_benefits: ["heart-disease"],
+                fitness_goals: ["weight-loss", "muscle-gain"],
+                meal_pref: ["high-protein", "balanced"],
+                calories: 350,
+                protein: 20,
+                carbs: 30,
+                fats: 15,
+                fiber: 8,
+                rating: 4.7,
+                prepTime: "25 mins",
+                servings: "2 servings",
+                ingredients: ["Paneer", "Spinach", "Jowar flour", "Tomato", "Spices"],
+                allergens: ["dairy"]
+            },
+            {
+                id: 112,
+                name: "Vegetable Kofta in Tomato Gravy",
+                category: "Healthy",
+                price: 180,
+                description: "Mixed vegetable dumplings in light tomato gravy. Baked instead of fried for healthier option.",
+                image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1180&q=80",
+                cuisine: "north indian",
+                diet: ["vegetarian"],
+                health_benefits: ["heart-disease"],
+                fitness_goals: ["weight-loss"],
+                meal_pref: ["balanced"],
+                calories: 280,
+                protein: 8,
+                carbs: 35,
+                fats: 12,
+                fiber: 7,
+                rating: 4.6,
+                prepTime: "30 mins",
+                servings: "2 servings",
+                ingredients: ["Mixed vegetables", "Besan", "Tomato", "Spices"],
+                allergens: []
+            },
+            {
+                id: 113,
+                name: "Jain Khichdi",
+                category: "Healthy",
+                price: 150,
+                description: "Light and nutritious khichdi made without onion and garlic. Easy to digest and Jain-friendly.",
+                image: "https://images.unsplash.com/photo-1633945274309-2c16c9682a8c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+                cuisine: "indian",
+                diet: ["vegetarian", "jain"],
+                health_benefits: ["heart-disease"],
+                fitness_goals: ["maintenance"],
+                meal_pref: ["balanced"],
+                calories: 300,
+                protein: 10,
+                carbs: 50,
+                fats: 6,
+                fiber: 8,
+                rating: 4.3,
+                prepTime: "25 mins",
+                servings: "2 servings",
+                ingredients: ["Rice", "Moong Dal", "Ghee", "Turmeric", "Cumin"],
+                allergens: []
+            },
+            {
+                id: 124,
+                name: "Chana Chaat",
+                category: "Healthy",
+                price: 120,
+                description: "Protein-packed chickpeas with vegetables and tangy spices. High fiber snack option.",
+                image: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+                cuisine: "street food",
+                diet: ["vegetarian", "vegan", "gluten-free"],
+                health_benefits: ["diabetes", "heart-disease"],
+                fitness_goals: ["weight-loss", "maintenance"],
+                meal_pref: ["high-protein", "balanced"],
+                calories: 200,
+                protein: 10,
+                carbs: 30,
+                fats: 5,
+                fiber: 9,
+                rating: 4.5,
+                prepTime: "15 mins",
+                servings: "1 serving",
+                ingredients: ["Chickpeas", "Tomato", "Onion", "Cucumber", "Lemon", "Spices"],
+                allergens: []
+            },
+            {
+                id: 125,
+                name: "Rajma Chawal",
+                category: "Healthy",
+                price: 160,
+                description: "Kidney beans curry with steamed rice. Comfort food with high protein and fiber.",
+                image: "https://images.unsplash.com/photo-1601050690597-df0568f70950?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+                cuisine: "north indian",
+                diet: ["vegetarian", "gluten-free"],
+                health_benefits: ["diabetes", "heart-disease"],
+                fitness_goals: ["weight-loss", "maintenance"],
+                meal_pref: ["high-protein", "balanced"],
+                calories: 350,
+                protein: 15,
+                carbs: 55,
+                fats: 8,
+                fiber: 12,
+                rating: 4.6,
+                prepTime: "30 mins",
+                servings: "2 servings",
+                ingredients: ["Kidney beans", "Rice", "Tomato", "Onion", "Spices"],
+                allergens: []
             }
         ];
 
-        // Algorithm to recommend foods based on user preferences
+        // Enhanced recommendation algorithm with multi-factor scoring
         function getRecommendedFoods() {
             const preferences = getUserPreferences();
             let recommended = [];
             
-            // If no preferences set, return all foods
-            if (preferences.health_condition.length === 0 && 
-                preferences.diet.length === 0 && 
-                !preferences.fitness_goal) {
-                return foodDatabase;
+            // If no preferences set, return all foods with basic sorting
+            if ((!preferences.health_condition || preferences.health_condition.length === 0) && 
+                (!preferences.diet || preferences.diet.length === 0) && 
+                (!preferences.fitness_goal || preferences.fitness_goal === 'none')) {
+                return foodDatabase.sort((a, b) => b.rating - a.rating);
             }
             
             // Score each food based on how well it matches user preferences
             foodDatabase.forEach(food => {
                 let score = 0;
+                let matchReasons = [];
                 
-                // Health condition matching
+                // 1. Health condition matching (highest priority)
                 if (preferences.health_condition && preferences.health_condition.length > 0) {
                     preferences.health_condition.forEach(condition => {
                         if (food.health_benefits && food.health_benefits.includes(condition)) {
-                            score += 3; // High priority for health conditions
+                            score += 4; // High priority for health conditions
+                            matchReasons.push(`Good for ${getConditionDisplayName(condition)}`);
                         }
                     });
                 }
                 
-                // Diet matching
+                // 2. Dietary restrictions (must match all)
                 if (preferences.diet && preferences.diet.length > 0) {
+                    let dietMatch = true;
                     preferences.diet.forEach(diet => {
-                        if (food.diet && food.diet.includes(diet)) {
-                            score += 2; // Medium priority for dietary preferences
+                        if (!food.diet || !food.diet.includes(diet)) {
+                            dietMatch = false;
                         }
                     });
-                }
-                
-                // Fitness goal matching
-                if (preferences.fitness_goal && food.fitness_goals && food.fitness_goals.includes(preferences.fitness_goal)) {
-                    score += 1; // Lower priority for fitness goals
-                }
-                
-                // Avoid allergens
-                if (preferences.allergy && preferences.allergy.length > 0) {
-                    // This would need a more sophisticated check based on ingredients
-                    // For demo, we'll just skip if there's any potential conflict
-                    if (food.allergy_warning && preferences.allergy.some(allergen => food.allergy_warning.includes(allergen))) {
-                        score = -100; // Effectively exclude this food
+                    
+                    if (dietMatch) {
+                        score += 3; // Medium-high priority for dietary restrictions
+                        matchReasons.push(`Matches your ${preferences.diet.join('/')} diet`);
+                    } else {
+                        // If food doesn't match dietary restrictions, skip it entirely
+                        return;
                     }
                 }
                 
-                // Meal preferences
+                // 3. Avoid allergens (absolute exclusion)
+                if (preferences.allergy && preferences.allergy.length > 0) {
+                    if (food.allergens && preferences.allergy.some(allergen => food.allergens.includes(allergen))) {
+                        // Skip foods that contain user's allergens
+                        return;
+                    }
+                }
+                
+                // 4. Fitness goal matching
+                if (preferences.fitness_goal && preferences.fitness_goal !== 'none') {
+                    if (food.fitness_goals && food.fitness_goals.includes(preferences.fitness_goal)) {
+                        score += 2; // Medium priority for fitness goals
+                        matchReasons.push(`Good for ${getFitnessGoalDisplayName(preferences.fitness_goal)}`);
+                    }
+                }
+                
+                // 5. Meal preferences (bonus points)
                 if (preferences.meal_pref && preferences.meal_pref.length > 0) {
                     preferences.meal_pref.forEach(pref => {
                         if (food.meal_pref && food.meal_pref.includes(pref)) {
-                            score += 1;
+                            score += 1; // Lower priority for meal preferences
+                            matchReasons.push(`Matches ${pref} preference`);
                         }
                     });
                 }
                 
-                if (score >= 0) {
-                    recommended.push({
-                        ...food,
-                        matchScore: score
-                    });
+                // 6. Activity level considerations
+                if (preferences.activity_level) {
+                    // Higher calorie needs for active users
+                    if ((preferences.activity_level === 'active' || preferences.activity_level === 'extreme') && 
+                        food.calories && food.calories > 350) {
+                        score += 1;
+                    }
+                    // Lower calorie options for sedentary users
+                    else if (preferences.activity_level === 'sedentary' && 
+                             food.calories && food.calories < 300) {
+                        score += 1;
+                    }
                 }
+                
+                // 7. Weight management considerations
+                if (preferences.current_weight && preferences.target_weight) {
+                    const currentWeight = parseFloat(preferences.current_weight);
+                    const targetWeight = parseFloat(preferences.target_weight);
+                    
+                    if (!isNaN(currentWeight)) {
+                        // For weight loss, prefer lower calorie density
+                        if (currentWeight > targetWeight && food.calories && (food.calories / food.servings) < 200) {
+                            score += 1;
+                        }
+                        // For muscle gain, prefer higher protein
+                        else if (currentWeight < targetWeight && food.protein && (food.protein / food.servings) > 20) {
+                            score += 1;
+                        }
+                    }
+                }
+                
+                // Calculate match percentage (0-100%)
+                const maxPossibleScore = 10; // 4 (health) + 3 (diet) + 2 (fitness) + 1 (meal pref)
+                const matchPercentage = Math.min(Math.round((score / maxPossibleScore) * 100), 100);
+                
+                // Add to recommendations with match details
+                recommended.push({
+                    ...food,
+                    matchScore: score,
+                    matchPercentage: matchPercentage,
+                    matchReasons: matchReasons
+                });
             });
             
-            // Sort by match score (highest first)
-            recommended.sort((a, b) => b.matchScore - a.matchScore);
+            // Sort by match score (highest first), then by rating
+            recommended.sort((a, b) => {
+                if (b.matchScore !== a.matchScore) {
+                    return b.matchScore - a.matchScore;
+                }
+                return b.rating - a.rating;
+            });
             
-            // If we have high matches, return those (score >= 3)
-            const highMatches = recommended.filter(food => food.matchScore >= 3);
-            if (highMatches.length > 0) {
+            // If we have high matches (score >= 5), return those
+            const highMatches = recommended.filter(food => food.matchScore >= 5);
+            if (highMatches.length > 3) {
                 return highMatches;
             }
             
-            // Otherwise return medium matches (score >= 1)
-            const mediumMatches = recommended.filter(food => food.matchScore >= 1);
+            // Otherwise return medium matches (score >= 3)
+            const mediumMatches = recommended.filter(food => food.matchScore >= 3);
             if (mediumMatches.length > 0) {
                 return mediumMatches;
             }
             
-            // Fallback to all foods if no matches (shouldn't happen with our scoring)
-            return foodDatabase;
+            // Fallback to all matching foods (shouldn't be empty due to dietary restrictions)
+            return recommended;
         }
 
-        // Load recommended foods
+        // Load recommended foods with personalized information
         function loadRecommendedFoods() {
             const container = document.getElementById('recommended-foods');
             container.innerHTML = '';
@@ -674,7 +1263,10 @@
                     <div class="col-span-full text-center py-12">
                         <i class="fas fa-utensils text-4xl text-gray-500 mb-4"></i>
                         <h3 class="text-lg font-medium text-white">No specific recommendations found</h3>
-                        <p class="mt-2 text-gray-400">We couldn't find foods matching all your preferences. Try adjusting your filters.</p>
+                        <p class="mt-2 text-gray-400">We couldn't find foods matching all your preferences. Try adjusting your filters or updating your preferences.</p>
+                        <a href="preferences.html" class="mt-4 inline-flex text-white bg-purple-600 border-0 py-2 px-4 focus:outline-none hover:bg-purple-700 rounded-lg text-sm transition">
+                            Update Preferences
+                        </a>
                     </div>
                 `;
                 return;
@@ -702,11 +1294,25 @@
                     ).join('');
                 }
                 
+                // Create match reasons tooltip
+                let matchTooltip = '';
+                if (food.matchReasons && food.matchReasons.length > 0) {
+                    matchTooltip = `
+                        <div class="absolute z-10 invisible group-hover:visible bg-gray-700 text-white text-xs rounded p-2 bottom-full mb-2 w-48">
+                            ${food.matchReasons.map(reason => `<div class="mb-1 last:mb-0">✓ ${reason}</div>`).join('')}
+                            <div class="text-purple-300 font-semibold">${food.matchPercentage}% match</div>
+                        </div>
+                    `;
+                }
+                
                 foodItem.innerHTML = `
-                    <div class="relative">
+                    <div class="relative group">
                         <img class="w-full h-48 object-cover" src="${food.image}" alt="${food.name}">
                         ${food.diet && food.diet.includes('vegetarian') ? '<div class="absolute top-2 left-2 bg-green-900 text-green-200 text-xs font-semibold px-2.5 py-0.5 rounded">VEGETARIAN</div>' : ''}
-                        <div class="absolute top-2 right-2 bg-purple-600 text-white text-xs font-semibold px-2.5 py-0.5 rounded">RECOMMENDED</div>
+                        <div class="match-score">
+                            ${food.matchPercentage || '80'}%
+                            <div class="match-score-text">match</div>
+                        </div>
                     </div>
                     <div class="p-4">
                         <div class="flex justify-between items-start">
@@ -726,7 +1332,8 @@
                         <p class="mt-2 text-sm text-gray-300">${food.description}</p>
                         <div class="mt-4 flex justify-between items-center">
                             <span class="text-lg font-bold text-white">₹${food.price.toFixed(2)}</span>
-                            <div class="flex space-x-2">
+                            <div class="flex space-x-2 relative">
+                                ${matchTooltip}
                                 <button onclick="showRecipe(${food.id})" class="text-purple-400 border border-purple-400 py-1 px-3 focus:outline-none hover:bg-purple-600 hover:text-white rounded text-sm transition">
                                     View Recipe
                                 </button>
@@ -758,7 +1365,10 @@
 
         // Initialize page
         document.addEventListener('DOMContentLoaded', function() {
+            // Display user's dietary profile
             displayHealthTags();
+            
+            // Load recommended foods based on preferences
             loadRecommendedFoods();
             
             // Initialize cart from localStorage

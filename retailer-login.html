@@ -3,14 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Retailer Login | NutriOrder</title>
+    <title>Retailer Login - NutriOrder</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         body {
             opacity: 0;
             animation: fadeIn 0.5s ease-in forwards;
-            font-family: 'Poppins', sans-serif;
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(to bottom, #1a1a1a, #2d2d2d);
         }
         
         @keyframes fadeIn {
@@ -18,6 +19,19 @@
             to { opacity: 1; }
         }
         
+        .glass {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .gradient-text {
+            background: linear-gradient(to right, #a855f7, #ec4899);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
         a, button {
             transition: all 0.3s ease;
         }
@@ -212,107 +226,90 @@
         }
     </script>
 </head>
-<body class="bg-gray-900 text-gray-100 min-h-screen flex items-center justify-center bg-[url('https://images.unsplash.com/photo-1504674900247-0877df9cc836?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80')] bg-cover bg-center">
-    <div class="auth-container rounded-xl shadow-2xl overflow-hidden w-full max-w-md">
-        <!-- Login Form -->
-        <div id="login-form" class="p-8">
-            <div class="text-center mb-8">
-                <div class="flex items-center justify-center space-x-2 mb-4">
+<body class="min-h-screen text-gray-100">
+    <!-- Header -->
+    <header class="sticky top-0 z-50 glass">
+        <div class="container mx-auto px-4 py-4">
+            <nav class="flex items-center justify-between">
+                <a href="index.html" class="flex items-center space-x-2">
                     <i class="fas fa-utensils text-purple-500 text-2xl"></i>
-                    <span class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-600">NutriOrder Retailer</span>
-                </div>
-                <h2 class="text-2xl font-bold">Welcome Back</h2>
-                <p class="text-gray-400">Login to your retailer account</p>
-            </div>
+                    <span class="text-2xl font-bold gradient-text">NutriOrder</span>
+                </a>
+                <button id="theme-toggle" class="p-2 rounded-full glass hover:bg-gray-700">
+                    <i class="fas fa-moon"></i>
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-12">
+        <div class="max-w-md mx-auto glass rounded-2xl p-8">
+            <h1 class="text-3xl font-bold gradient-text text-center mb-8">Retailer Login</h1>
             
-            <div id="authError" class="hidden bg-red-900 text-red-100 px-4 py-3 rounded relative mb-4"></div>
-            
-            <div class="space-y-4">
+            <form class="space-y-6">
                 <div>
-                    <label for="retailer-email" class="block text-sm font-medium mb-1">Email</label>
-                    <input type="email" id="retailer-email" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500">
-                    <div id="emailError" class="error-message"></div>
+                    <label class="block text-gray-400 mb-2">Email</label>
+                    <input type="email" class="w-full p-3 rounded-xl bg-gray-800 border border-gray-700 focus:border-purple-500 focus:outline-none">
                 </div>
+                
                 <div>
-                    <label for="retailer-password" class="block text-sm font-medium mb-1">Password</label>
-                    <input type="password" id="retailer-password" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500">
-                    <div id="passwordError" class="error-message"></div>
+                    <label class="block text-gray-400 mb-2">Password</label>
+                    <input type="password" class="w-full p-3 rounded-xl bg-gray-800 border border-gray-700 focus:border-purple-500 focus:outline-none">
                 </div>
-                <div class="flex items-center">
-                    <input type="checkbox" id="remember" class="w-4 h-4 text-purple-600 bg-gray-700 rounded border-gray-600 focus:ring-purple-500">
-                    <label for="remember" class="ml-2 text-sm text-gray-400">Remember me</label>
-                </div>
-                <button onclick="loginRetailer(document.getElementById('retailer-email').value, document.getElementById('retailer-password').value, document.getElementById('remember').checked)" 
-                        class="w-full bg-purple-600 hover:bg-purple-700 text-white py-2 rounded-lg font-bold transition transform hover:scale-[1.02]">
+                
+                <button type="submit" class="w-full py-3 rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 hover:opacity-90 transition font-bold">
                     Login
                 </button>
-            </div>
-            
-            <div class="text-center mt-6">
-                <p class="text-gray-400">Don't have an account? <button onclick="toggleAuthForm()" class="text-purple-400 hover:underline">Sign up</button></p>
-                <div class="relative flex py-5 items-center">
-                    <div class="flex-grow border-t border-gray-600"></div>
-                    <span class="flex-shrink mx-4 text-gray-400">OR</span>
-                    <div class="flex-grow border-t border-gray-600"></div>
-                </div>
-                <button onclick="signInRetailerWithGoogle()" class="flex items-center justify-center w-full bg-gray-700 border border-gray-600 text-white py-2 px-4 rounded-lg hover:bg-gray-600 transition-all duration-300 transform hover:scale-[1.02]">
-                    <i class="fab fa-google text-red-400 mr-2"></i> Continue with Google
-                </button>
-                <a href="index.html" class="text-sm text-gray-400 hover:text-white mt-4 inline-block">
-                    <i class="fas fa-arrow-left mr-1"></i> Back to main site
-                </a>
-            </div>
+                
+                <p class="text-center text-gray-400">
+                    Don't have an account? 
+                    <a href="#" class="text-purple-400 hover:text-purple-300">Register here</a>
+                </p>
+            </form>
         </div>
-        
-        <!-- Signup Form -->
-        <div id="signup-form" class="p-8 hidden">
-            <div class="text-center mb-8">
-                <div class="flex items-center justify-center space-x-2 mb-4">
+    </main>
+
+    <!-- Footer -->
+    <footer class="glass mt-12">
+        <div class="container mx-auto px-4 py-8">
+            <div class="flex flex-col md:flex-row items-center justify-between">
+                <a href="index.html" class="flex items-center space-x-2 mb-4 md:mb-0">
                     <i class="fas fa-utensils text-purple-500 text-2xl"></i>
-                    <span class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-600">NutriOrder Retailer</span>
-                </div>
-                <h2 class="text-2xl font-bold">Create Account</h2>
-                <p class="text-gray-400">Register your restaurant with us</p>
-            </div>
-            
-            <div id="authError" class="hidden bg-red-900 text-red-100 px-4 py-3 rounded relative mb-4"></div>
-            
-            <div class="space-y-4">
-                <div>
-                    <label for="restaurant-name" class="block text-sm font-medium mb-1">Restaurant Name</label>
-                    <input type="text" id="restaurant-name" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500">
-                </div>
-                <div>
-                    <label for="signup-email" class="block text-sm font-medium mb-1">Email</label>
-                    <input type="email" id="signup-email" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500">
-                </div>
-                <div>
-                    <label for="signup-password" class="block text-sm font-medium mb-1">Password</label>
-                    <input type="password" id="signup-password" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500">
-                </div>
-                <div>
-                    <label for="phone" class="block text-sm font-medium mb-1">Phone Number</label>
-                    <input type="tel" id="phone" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500">
-                </div>
-                <div>
-                    <label for="address" class="block text-sm font-medium mb-1">Restaurant Address</label>
-                    <textarea id="address" rows="2" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"></textarea>
-                </div>
-                <button onclick="signupRetailer()" class="w-full bg-purple-600 hover:bg-purple-700 text-white py-2 rounded-lg font-bold transition transform hover:scale-[1.02]">
-                    Register Restaurant
-                </button>
-            </div>
-            
-            <div class="text-center mt-6">
-                <p class="text-gray-400">Already have an account? <button onclick="toggleAuthForm()" class="text-purple-400 hover:underline">Login</button></p>
-                <a href="index.html" class="text-sm text-gray-400 hover:text-white mt-4 inline-block">
-                    <i class="fas fa-arrow-left mr-1"></i> Back to main site
+                    <span class="text-2xl font-bold gradient-text">NutriOrder</span>
                 </a>
+                <p class="text-sm text-gray-400">© 2023 NutriOrder — All Rights Reserved</p>
+                <div class="flex space-x-6 mt-4 md:mt-0">
+                    <a href="#" class="text-gray-400 hover:text-purple-400 transition">
+                        <i class="fab fa-facebook-f"></i>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-purple-400 transition">
+                        <i class="fab fa-twitter"></i>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-purple-400 transition">
+                        <i class="fab fa-instagram"></i>
+                    </a>
+                </div>
             </div>
         </div>
-    </div>
+    </footer>
 
     <script>
+        // Theme toggle functionality
+        const themeToggle = document.getElementById('theme-toggle');
+        const html = document.documentElement;
+
+        if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            html.classList.add('dark');
+        } else {
+            html.classList.remove('dark');
+        }
+
+        themeToggle.addEventListener('click', () => {
+            html.classList.toggle('dark');
+            localStorage.setItem('theme', html.classList.contains('dark') ? 'dark' : 'light');
+        });
+
         // Check for remembered email
         document.addEventListener('DOMContentLoaded', function() {
             const rememberedEmail = localStorage.getItem('rememberRetailerEmail');
