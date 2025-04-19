@@ -210,10 +210,27 @@
                 left: 120%;
             }
         }
+
+        /* Loading spinner */
+        .spinner {
+            width: 24px;
+            height: 24px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+            display: inline-block;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
     </style>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
+        import { getDatabase, ref, push, set } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js";
   
         const firebaseConfig = {
           apiKey: "AIzaSyBx0Kt9o04ye0XrtA8ecp84wD8Q9OCDjlA",
@@ -221,12 +238,14 @@
           projectId: "foodorder-4380c",
           storageBucket: "foodorder-4380c.appspot.com",
           messagingSenderId: "735023580381",
-          appId: "1:735023580381:web:c6740bef2fc9bdee1b4734"
+          appId: "1:735023580381:web:c6740bef2fc9bdee1b4734",
+          databaseURL: "https://foodorder-4380c-default-rtdb.asia-southeast1.firebasedatabase.app/"
         };
   
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const provider = new GoogleAuthProvider();
+        const database = getDatabase(app);
   
         // Check auth state
         onAuthStateChanged(auth, (user) => {
@@ -235,6 +254,10 @@
             document.getElementById('login-btn').classList.add('hidden');
             document.getElementById('profile-section').classList.remove('hidden');
             document.getElementById('profile-name').textContent = user.displayName || user.email.split('@')[0];
+            
+            // Update form with user data
+            document.getElementById('name').value = user.displayName || '';
+            document.getElementById('email').value = user.email || '';
             
             const redirectAfterLogin = localStorage.getItem('redirectAfterLogin');
             if (redirectAfterLogin) {
@@ -268,6 +291,19 @@
           } catch (error) {
             console.error('Logout error:', error);
           }
+        };
+
+        // Save order to Firebase
+        window.saveOrderToFirebase = async function(order) {
+            try {
+                const ordersRef = ref(database, 'orders');
+                const newOrderRef = push(ordersRef);
+                await set(newOrderRef, order);
+                return newOrderRef.key; // Return the generated order ID
+            } catch (error) {
+                console.error('Error saving order:', error);
+                throw error;
+            }
         };
     </script>
     <script>
@@ -364,13 +400,13 @@
                             <span class="text-gray-600">Subtotal:</span>
                             <span id="checkout-subtotal" class="font-medium">₹0.00</span>
                         </div>
-                        <div class="flex justify-between mb-2">
+                        <div class="flex justify-between mb-2" id="delivery-fee-container">
                             <span class="text-gray-600">Delivery Fee:</span>
                             <span class="font-medium">₹30.00</span>
                         </div>
                         <div class="flex justify-between text-lg font-bold mt-4 pt-2 border-t border-amber-200">
                             <span>Total:</span>
-                            <span id="checkout-total" class="text-red-600">₹30.00</span>
+                            <span id="checkout-total" class="text-red-600">₹0.00</span>
                         </div>
                     </div>
                 </div>
@@ -383,33 +419,35 @@
                     
                     <form id="checkout-form" class="space-y-4">
                         <div>
-                            <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
-                            <input type="text" id="name" class="w-full bg-amber-50 rounded border border-amber-300 focus:border-red-500 focus:ring-2 focus:ring-red-200 px-4 py-2 outline-none transition-colors duration-200">
+                            <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Full Name *</label>
+                            <input type="text" id="name" required class="w-full bg-amber-50 rounded border border-amber-300 focus:border-red-500 focus:ring-2 focus:ring-red-200 px-4 py-2 outline-none transition-colors duration-200">
                         </div>
                         
                         <div>
-                            <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                            <input type="email" id="email" class="w-full bg-amber-50 rounded border border-amber-300 focus:border-red-500 focus:ring-2 focus:ring-red-200 px-4 py-2 outline-none transition-colors duration-200">
+                            <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email *</label>
+                            <input type="email" id="email" required class="w-full bg-amber-50 rounded border border-amber-300 focus:border-red-500 focus:ring-2 focus:ring-red-200 px-4 py-2 outline-none transition-colors duration-200">
                         </div>
                         
                         <div>
-                            <label for="phone" class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
-                            <input type="tel" id="phone" class="w-full bg-amber-50 rounded border border-amber-300 focus:border-red-500 focus:ring-2 focus:ring-red-200 px-4 py-2 outline-none transition-colors duration-200">
+                            <label for="phone" class="block text-sm font-medium text-gray-700 mb-1">Phone Number *</label>
+                            <input type="tel" id="phone" required pattern="[0-9]{10}" maxlength="10" class="w-full bg-amber-50 rounded border border-amber-300 focus:border-red-500 focus:ring-2 focus:ring-red-200 px-4 py-2 outline-none transition-colors duration-200">
+                            <p class="text-xs text-gray-500 mt-1">10 digit Indian mobile number</p>
                         </div>
                         
                         <div>
-                            <label for="address" class="block text-sm font-medium text-gray-700 mb-1">Delivery Address</label>
-                            <textarea id="address" rows="3" class="w-full bg-amber-50 rounded border border-amber-300 focus:border-red-500 focus:ring-2 focus:ring-red-200 px-4 py-2 outline-none transition-colors duration-200"></textarea>
+                            <label for="address" class="block text-sm font-medium text-gray-700 mb-1">Delivery Address *</label>
+                            <textarea id="address" rows="3" required class="w-full bg-amber-50 rounded border border-amber-300 focus:border-red-500 focus:ring-2 focus:ring-red-200 px-4 py-2 outline-none transition-colors duration-200"></textarea>
                         </div>
                         
                         <div class="grid grid-cols-2 gap-4">
                             <div>
-                                <label for="city" class="block text-sm font-medium text-gray-700 mb-1">City</label>
-                                <input type="text" id="city" class="w-full bg-amber-50 rounded border border-amber-300 focus:border-red-500 focus:ring-2 focus:ring-red-200 px-4 py-2 outline-none transition-colors duration-200">
+                                <label for="city" class="block text-sm font-medium text-gray-700 mb-1">City *</label>
+                                <input type="text" id="city" required class="w-full bg-amber-50 rounded border border-amber-300 focus:border-red-500 focus:ring-2 focus:ring-red-200 px-4 py-2 outline-none transition-colors duration-200">
                             </div>
                             <div>
-                                <label for="pincode" class="block text-sm font-medium text-gray-700 mb-1">Pincode</label>
-                                <input type="text" id="pincode" class="w-full bg-amber-50 rounded border border-amber-300 focus:border-red-500 focus:ring-2 focus:ring-red-200 px-4 py-2 outline-none transition-colors duration-200">
+                                <label for="pincode" class="block text-sm font-medium text-gray-700 mb-1">Pincode *</label>
+                                <input type="text" id="pincode" required pattern="[0-9]{6}" maxlength="6" class="w-full bg-amber-50 rounded border border-amber-300 focus:border-red-500 focus:ring-2 focus:ring-red-200 px-4 py-2 outline-none transition-colors duration-200">
+                                <p class="text-xs text-gray-500 mt-1">6 digit Indian pincode</p>
                             </div>
                         </div>
                         
@@ -436,8 +474,11 @@
                         </div>
                         
                         <div class="pt-4">
-                            <button type="submit" class="w-full bg-gradient-to-r from-red-600 to-amber-600 hover:from-red-700 hover:to-amber-700 text-white py-3 rounded-lg font-bold transition transform hover:scale-[1.02] shadow-lg btn-shine">
+                            <button type="submit" id="submit-btn" class="w-full bg-gradient-to-r from-red-600 to-amber-600 hover:from-red-700 hover:to-amber-700 text-white py-3 rounded-lg font-bold transition transform hover:scale-[1.02] shadow-lg btn-shine">
                                 <i class="fas fa-check-circle mr-2"></i> Place Order
+                            </button>
+                            <button type="button" id="loading-btn" class="w-full bg-gradient-to-r from-red-600 to-amber-600 text-white py-3 rounded-lg font-bold shadow-lg hidden" disabled>
+                                <span class="spinner mr-2"></span> Processing Order...
                             </button>
                         </div>
                     </form>
@@ -539,21 +580,17 @@
                     const dropdown = document.getElementById('profile-dropdown');
                     dropdown.classList.toggle('hidden');
                 });
-                
-                // Close dropdown when clicking outside
-                document.addEventListener('click', function(event) {
-                    const dropdown = document.getElementById('profile-dropdown');
-                    const profileButton = document.getElementById('profile-button');
-                    
-                    if (!profileButton.contains(event.target) && !dropdown.contains(event.target)) {
-                        dropdown.classList.add('hidden');
-                    }
-                });
-                
-                // Pre-fill user details in checkout form
-                document.getElementById('name').value = userData.displayName || '';
-                document.getElementById('email').value = userData.email || '';
             }
+            
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function(event) {
+                const dropdown = document.getElementById('profile-dropdown');
+                const profileButton = document.getElementById('profile-button');
+                
+                if (profileButton && !profileButton.contains(event.target) && dropdown && !dropdown.contains(event.target)) {
+                    dropdown.classList.add('hidden');
+                }
+            });
             
             // Initialize checkout page
             renderCheckoutItems();
@@ -584,7 +621,7 @@
             });
             
             // Handle checkout form submission
-            document.getElementById('checkout-form').addEventListener('submit', function(e) {
+            document.getElementById('checkout-form').addEventListener('submit', async function(e) {
                 e.preventDefault();
                 
                 if (cart.length === 0) {
@@ -592,51 +629,95 @@
                     return;
                 }
                 
-                // Simple validation
-                const name = document.getElementById('name').value.trim();
-                const email = document.getElementById('email').value.trim();
-                const phone = document.getElementById('phone').value.trim();
-                const address = document.getElementById('address').value.trim();
-                const city = document.getElementById('city').value.trim();
-                const pincode = document.getElementById('pincode').value.trim();
+                // Get form elements
+                const form = e.target;
+                const submitBtn = document.getElementById('submit-btn');
+                const loadingBtn = document.getElementById('loading-btn');
                 
-                if (!name || !email || !phone || !address || !city || !pincode) {
-                    alert('Please fill in all required fields.');
-                    return;
+                // Show loading state
+                submitBtn.classList.add('hidden');
+                loadingBtn.classList.remove('hidden');
+                
+                try {
+                    // Simple validation
+                    const name = document.getElementById('name').value.trim();
+                    const email = document.getElementById('email').value.trim();
+                    const phone = document.getElementById('phone').value.trim();
+                    const address = document.getElementById('address').value.trim();
+                    const city = document.getElementById('city').value.trim();
+                    const pincode = document.getElementById('pincode').value.trim();
+                    
+                    if (!name || !email || !phone || !address || !city || !pincode) {
+                        throw new Error('Please fill in all required fields.');
+                    }
+                    
+                    // Validate phone number (10 digits)
+                    if (!/^\d{10}$/.test(phone)) {
+                        throw new Error('Please enter a valid 10-digit phone number.');
+                    }
+                    
+                    // Validate pincode (6 digits)
+                    if (!/^\d{6}$/.test(pincode)) {
+                        throw new Error('Please enter a valid 6-digit pincode.');
+                    }
+                    
+                    // Validate email
+                    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                        throw new Error('Please enter a valid email address.');
+                    }
+                    
+                    // Calculate totals
+                    const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+                    const deliveryFee = cart.length > 0 ? 30 : 0;
+                    const total = subtotal + deliveryFee;
+                    
+                    // Create order object
+                    const order = {
+                        date: new Date().toISOString(),
+                        items: cart,
+                        customer: {
+                            name,
+                            email,
+                            phone,
+                            address,
+                            city,
+                            pincode,
+                            instructions: document.getElementById('instructions').value.trim()
+                        },
+                        paymentMethod: document.querySelector('input[name="payment"]:checked').value,
+                        status: 'pending',
+                        subtotal,
+                        deliveryFee,
+                        total
+                    };
+                    
+                    // Save order to Firebase
+                    const orderId = await saveOrderToFirebase(order);
+                    
+                    // Also save to localStorage for offline access
+                    try {
+                        const orders = JSON.parse(localStorage.getItem('orders')) || [];
+                        orders.push({...order, id: orderId});
+                        localStorage.setItem('orders', JSON.stringify(orders));
+                    } catch (e) {
+                        console.warn('Failed to save order to localStorage:', e);
+                    }
+                    
+                    // Clear cart
+                    cart = [];
+                    localStorage.setItem('cart', JSON.stringify(cart));
+                    
+                    // Redirect to order confirmation page
+                    window.location.href = `order-confirmation.html?orderId=${orderId}`;
+                    
+                } catch (error) {
+                    alert(error.message);
+                    console.error('Checkout error:', error);
+                } finally {
+                    // Restore submit button
+                    submitBtn.classList.remove('hidden');
+                    loadingBtn.classList.add('hidden');
                 }
-                
-                // Create order object
-                const order = {
-                    id: Date.now().toString(),
-                    date: new Date().toISOString(),
-                    items: cart,
-                    customer: {
-                        name,
-                        email,
-                        phone,
-                        address,
-                        city,
-                        pincode,
-                        instructions: document.getElementById('instructions').value.trim()
-                    },
-                    paymentMethod: document.querySelector('input[name="payment"]:checked').value,
-                    status: 'pending',
-                    subtotal: cart.reduce((sum, item) => sum + (item.price * item.quantity), 0),
-                    deliveryFee: 30,
-                    total: cart.reduce((sum, item) => sum + (item.price * item.quantity), 0) + 30
-                };
-                
-                // Save order to localStorage (in a real app, this would be sent to a server)
-                const orders = JSON.parse(localStorage.getItem('orders')) || [];
-                orders.push(order);
-                localStorage.setItem('orders', JSON.stringify(orders));
-                
-                // Clear cart
-                cart = [];
-                localStorage.setItem('cart', JSON.stringify(cart));
-                
-                // Redirect to order confirmation page
-                window.location.href = `order-confirmation.html?orderId=${order.id}`;
             });
         });
         
@@ -645,6 +726,7 @@
             const checkoutItemsContainer = document.getElementById('checkout-items');
             const checkoutSubtotal = document.getElementById('checkout-subtotal');
             const checkoutTotal = document.getElementById('checkout-total');
+            const deliveryFeeContainer = document.getElementById('delivery-fee-container');
             
             // Update checkout items
             if (cart.length === 0) {
@@ -657,6 +739,9 @@
                         </a>
                     </div>
                 `;
+                
+                // Hide delivery fee when cart is empty
+                deliveryFeeContainer.classList.add('hidden');
             } else {
                 checkoutItemsContainer.innerHTML = '';
                 cart.forEach(item => {
@@ -677,11 +762,14 @@
                     `;
                     checkoutItemsContainer.appendChild(checkoutItem);
                 });
+                
+                // Show delivery fee when cart has items
+                deliveryFeeContainer.classList.remove('hidden');
             }
             
             // Update totals
             const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-            const deliveryFee = 30; // 30 INR delivery fee
+            const deliveryFee = cart.length > 0 ? 30 : 0; // Only show delivery fee if cart has items
             const total = subtotal + deliveryFee;
             
             checkoutSubtotal.textContent = `₹${subtotal.toFixed(2)}`;
@@ -700,11 +788,8 @@
         
         // Toggle cart visibility
         function toggleCart() {
-            const cartSidebar = document.getElementById('cart-sidebar');
-            const cartOverlay = document.getElementById('cart-overlay');
-            
-            cartSidebar.classList.toggle('translate-x-full');
-            cartOverlay.classList.toggle('hidden');
+            alert('Cart sidebar functionality would be implemented here');
+            // In a real implementation, this would show/hide the cart sidebar
         }
     </script>
 </body>
