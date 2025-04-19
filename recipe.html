@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Recipe Details - NutriOrder</title>
+    <title>Recipe Details - NutriOrder | Traditional Indian Healthy Foods</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         /* Page transition animations */
         body {
@@ -30,16 +31,16 @@
         }
 
         ::-webkit-scrollbar-track {
-            background: #1a202c;
+            background: #f1f1f1;
         }
 
         ::-webkit-scrollbar-thumb {
-            background: #4a5568;
+            background: #e11d48;
             border-radius: 4px;
         }
 
         ::-webkit-scrollbar-thumb:hover {
-            background: #718096;
+            background: #be123c;
         }
 
         /* Animation for hover effects */
@@ -49,7 +50,96 @@
 
         /* Custom glow effect */
         .glow {
-            box-shadow: 0 0 15px rgba(139, 92, 246, 0.5);
+            box-shadow: 0 0 15px rgba(225, 29, 72, 0.3);
+        }
+
+        /* Pulse animation for CTA */
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        /* Gradient text */
+        .gradient-text {
+            background: linear-gradient(90deg, #e11d48, #f59e0b);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        /* Floating animation */
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .floating {
+            animation: float 6s ease-in-out infinite;
+        }
+
+        /* Responsive tweaks */
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2.5rem;
+            }
+            
+            .hero-subtitle {
+                font-size: 1.1rem;
+            }
+        }
+
+        /* Custom card hover effect */
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(225, 29, 72, 0.15);
+        }
+
+        /* Custom border animation */
+        .border-animate {
+            position: relative;
+        }
+
+        .border-animate::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 0.5rem;
+            padding: 2px;
+            background: linear-gradient(45deg, #e11d48, #f59e0b);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .border-animate:hover::before {
+            opacity: 1;
+        }
+
+        /* Custom underline animation */
+        .underline-animate {
+            position: relative;
+        }
+
+        .underline-animate::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -2px;
+            left: 0;
+            background: linear-gradient(90deg, #e11d48, #f59e0b);
+            transition: width 0.3s ease;
+        }
+
+        .underline-animate:hover::after {
+            width: 100%;
         }
 
         /* Recipe step styling */
@@ -64,7 +154,7 @@
             position: absolute;
             left: 0;
             top: 0;
-            background-color: #8b5cf6;
+            background-color: #e11d48;
             color: white;
             font-weight: bold;
             width: 1.75rem;
@@ -99,7 +189,7 @@
             position: absolute;
             top: 10px;
             right: 10px;
-            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+            background: linear-gradient(135deg, #e11d48, #f59e0b);
             color: white;
             width: 40px;
             height: 40px;
@@ -108,38 +198,119 @@
             align-items: center;
             justify-content: center;
             font-weight: bold;
-            box-shadow: 0 0 10px rgba(139, 92, 246, 0.5);
+            box-shadow: 0 0 10px rgba(225, 29, 72, 0.5);
         }
 
-        .match-score-text {
-            font-size: 12px;
-            margin-top: 2px;
+        /* Indian pattern overlay */
+        .indian-pattern {
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23e11d48' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            opacity: 0.1;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
         }
 
-        /* Responsive tweaks */
-        @media (max-width: 768px) {
-            .recipe-step {
-                padding-left: 2rem;
-            }
-            .recipe-step::before {
-                width: 1.5rem;
-                height: 1.5rem;
+        /* Special heading font */
+        .heading-font {
+            font-family: 'Playfair Display', serif;
+        }
+
+        /* Custom button shine effect */
+        .btn-shine:hover {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-shine:hover::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -60%;
+            width: 40%;
+            height: 200%;
+            background: rgba(255, 255, 255, 0.2);
+            transform: rotate(30deg);
+            animation: shine 1.5s ease;
+        }
+
+        @keyframes shine {
+            100% {
+                left: 120%;
             }
         }
     </style>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
+  
+        const firebaseConfig = {
+          apiKey: "AIzaSyBx0Kt9o04ye0XrtA8ecp84wD8Q9OCDjlA",
+          authDomain: "foodorder-4380c.firebaseapp.com",
+          projectId: "foodorder-4380c",
+          storageBucket: "foodorder-4380c.appspot.com",
+          messagingSenderId: "735023580381",
+          appId: "1:735023580381:web:c6740bef2fc9bdee1b4734"
+        };
+  
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const provider = new GoogleAuthProvider();
+  
+        // Check auth state
+        onAuthStateChanged(auth, (user) => {
+          if (user) {
+            // Update UI for logged in user
+            document.getElementById('login-btn').classList.add('hidden');
+            document.getElementById('profile-section').classList.remove('hidden');
+            document.getElementById('profile-name').textContent = user.displayName || user.email.split('@')[0];
+            
+            const redirectAfterLogin = localStorage.getItem('redirectAfterLogin');
+            if (redirectAfterLogin) {
+              localStorage.removeItem('redirectAfterLogin');
+              window.location.href = redirectAfterLogin;
+            }
+          } else {
+            // Update UI for logged out user
+            document.getElementById('login-btn').classList.remove('hidden');
+            document.getElementById('profile-section').classList.add('hidden');
+          }
+        });
+  
+        // Google sign-in function
+        window.signInWithGoogle = async function() {
+          try {
+            const result = await signInWithPopup(auth, provider);
+            const user = result.user;
+            window.location.href = 'homepage.html';
+          } catch (error) {
+            console.error('Google sign-in error:', error);
+            alert('Google sign-in failed: ' + error.message);
+          }
+        };
+
+        // Logout function
+        window.logout = async function() {
+          try {
+            await signOut(auth);
+            window.location.href = 'index.html';
+          } catch (error) {
+            console.error('Logout error:', error);
+          }
+        };
+    </script>
     <script>
         tailwind.config = {
-            darkMode: 'class',
             theme: {
                 extend: {
                     colors: {
-                        primary: '#8b5cf6',
-                        secondary: '#7c3aed',
-                        dark: '#1f2937',
-                        light: '#f3f4f6',
-                        success: '#10b981',
-                        warning: '#f59e0b',
-                        danger: '#ef4444'
+                        primary: '#e11d48',
+                        secondary: '#be123c',
+                        accent: '#f59e0b',
+                        light: '#fff7ed',
+                        dark: '#1f2937'
                     },
                     animation: {
                         'click': 'click 300ms ease-out',
@@ -156,78 +327,56 @@
         }
     </script>
 </head>
-<body class="bg-gray-900 text-gray-100 min-h-screen">
-    <!-- Header/Navigation -->
-    <header class="sticky top-0 z-50 bg-gray-800 shadow-md">
-        <div class="container mx-auto flex flex-wrap p-5 flex-col md:flex-row items-center">
-            <a href="index.html" class="flex title-font font-medium items-center text-white mb-4 md:mb-0">
-                <i class="fas fa-utensils text-purple-500 text-2xl mr-2"></i>
-                <span class="ml-3 text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-600">NutriOrder</span>
-            </a>
-            <nav class="md:ml-auto flex flex-wrap items-center text-base justify-center">
-                <a href="homepage.html" class="mr-5 hover:text-purple-400 transition">Home</a>
-                <a href="recommended.html" class="mr-5 hover:text-purple-400 transition">Recommended</a>
-                <a href="restaurants.html" class="mr-5 hover:text-purple-400 transition">Restaurants</a>
-            </nav>
-            <button id="theme-toggle" class="p-2 rounded-lg focus:outline-none text-gray-300 hover:bg-gray-700 mr-4">
-                <i class="fas fa-moon dark:hidden"></i>
-                <i class="fas fa-sun hidden dark:block"></i>
-            </button>
-            <button onclick="toggleCart()" class="inline-flex items-center bg-purple-600 text-white border-0 py-2 px-4 focus:outline-none hover:bg-purple-700 rounded-lg transition mr-4">
-                <i class="fas fa-shopping-cart mr-2"></i> Cart
-                <span id="cart-count" class="ml-2 bg-white text-purple-600 rounded-full w-6 h-6 flex items-center justify-center">0</span>
-            </button>
-            <div class="relative">
-                <button id="profile-button" class="inline-flex items-center bg-gray-700 text-white border-0 py-2 px-4 focus:outline-none hover:bg-gray-600 rounded-lg transition">
-                    <i class="fas fa-user-circle mr-2"></i> <span id="profile-name"></span>
-                </button>
-                <div id="profile-dropdown" class="absolute right-0 mt-2 w-48 bg-gray-800 rounded-md shadow-lg py-1 z-50 hidden border border-gray-700">
-                    <a href="dashboard.html" class="block px-4 py-2 text-sm hover:bg-gray-700">Dashboard</a>
-                    <a href="orders.html" class="block px-4 py-2 text-sm hover:bg-gray-700">My Orders</a>
-                    <a href="settings.html" class="block px-4 py-2 text-sm hover:bg-gray-700">Settings</a>
-                    <a href="#" onclick="logout()" class="block px-4 py-2 text-sm hover:bg-gray-700">Sign out</a>
+<body class="bg-amber-50 text-gray-800 min-h-screen">
+    <!-- Navigation -->
+    <nav class="bg-white/90 backdrop-blur-md py-4 px-6 shadow-sm sticky top-0 z-50 border-b border-amber-200">
+        <div class="container mx-auto flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <i class="fas fa-utensils text-red-600 text-2xl"></i>
+                <span class="text-xl font-bold gradient-text heading-font">NutriOrder</span>
+            </div>
+            <div class="hidden md:flex space-x-6">
+                <a href="homepage.html" class="hover:text-red-600 transition underline-animate">Home</a>
+                <a href="#menu" class="hover:text-red-600 transition underline-animate">Menu</a>
+                <a href="#about" class="hover:text-red-600 transition underline-animate">About</a>
+                <a href="#contact" class="hover:text-red-600 transition underline-animate">Contact</a>
+            </div>
+            <div class="flex items-center space-x-4">
+                <a href="retailer-login.html" class="flex items-center space-x-2 bg-amber-100 hover:bg-amber-200 px-4 py-2 rounded-full transition border-animate">
+                    <i class="fas fa-store text-red-600"></i>
+                    <span class="text-gray-700">Retailer Login</span>
+                </a>
+                <a href="login.html" id="login-btn" class="flex items-center space-x-2 bg-gradient-to-r from-red-600 to-amber-600 hover:from-red-700 hover:to-amber-700 px-4 py-2 rounded-full transition shadow-lg text-white btn-shine">
+                    <i class="fas fa-sign-in-alt"></i>
+                    <span>Login</span>
+                </a>
+                <div id="profile-section" class="hidden relative">
+                    <button id="profile-button" class="flex items-center space-x-2 bg-amber-100 hover:bg-amber-200 px-4 py-2 rounded-full transition border-animate">
+                        <i class="fas fa-user-circle text-red-600"></i>
+                        <span id="profile-name" class="text-gray-700"></span>
+                    </button>
+                    <div id="profile-dropdown" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 hidden border border-amber-200 backdrop-blur-sm">
+                        <a href="homepage.html" class="block px-4 py-2 text-sm hover:bg-amber-50 transition text-gray-700">Dashboard</a>
+                        <a href="orders.html" class="block px-4 py-2 text-sm hover:bg-amber-50 transition text-gray-700">My Orders</a>
+                        <a href="settings.html" class="block px-4 py-2 text-sm hover:bg-amber-50 transition text-gray-700">Settings</a>
+                        <a href="#" onclick="logout()" class="block px-4 py-2 text-sm hover:bg-amber-50 transition text-gray-700">Sign out</a>
+                    </div>
                 </div>
+                <button onclick="toggleCart()" class="flex items-center space-x-2 bg-gradient-to-r from-red-600 to-amber-600 hover:from-red-700 hover:to-amber-700 px-4 py-2 rounded-full transition shadow-lg relative group text-white btn-shine">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span id="cart-count" class="bg-white text-red-600 rounded-full w-6 h-6 flex items-center justify-center font-bold">0</span>
+                    <span class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity" id="cart-hover-count">0</span>
+                </button>
             </div>
         </div>
-    </header>
-
-    <!-- Shopping Cart Sidebar -->
-    <div id="cart-sidebar" class="fixed top-0 right-0 h-full w-80 bg-gray-800 shadow-lg transform translate-x-full transition-transform duration-300 ease-in-out z-50 overflow-y-auto border-l border-gray-700">
-        <div class="p-4 border-b border-gray-700 flex justify-between items-center">
-            <h3 class="text-lg font-semibold text-white">Your Order</h3>
-            <button onclick="toggleCart()" class="text-gray-400 hover:text-white">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-        <div id="cart-items" class="p-4">
-            <!-- Cart items will be added here dynamically -->
-            <p class="text-gray-400 text-center py-8">Your cart is empty</p>
-        </div>
-        <div class="p-4 border-t border-gray-700">
-            <div class="flex justify-between mb-2 text-white">
-                <span>Subtotal:</span>
-                <span id="cart-subtotal">₹0.00</span>
-            </div>
-            <div class="flex justify-between mb-4 text-white">
-                <span>Delivery:</span>
-                <span>₹30.00</span>
-            </div>
-            <div class="flex justify-between font-bold text-lg text-white">
-                <span>Total:</span>
-                <span id="cart-total">₹30.00</span>
-            </div>
-            <a href="checkout.html" class="w-full bg-purple-600 text-white py-2 rounded-lg mt-4 hover:bg-purple-700 transition flex items-center justify-center">
-                Checkout
-            </a>
-        </div>
-    </div>
-    <div id="cart-overlay" class="hidden fixed inset-0 bg-black bg-opacity-50 z-40" onclick="toggleCart()"></div>
+    </nav>
 
     <!-- Recipe Details Section -->
-    <section class="py-8 px-4 bg-gray-900">
-        <div class="max-w-7xl mx-auto">
+    <section class="relative py-16 px-6 bg-gradient-to-br from-amber-50 to-red-50">
+        <div class="indian-pattern"></div>
+        <div class="container mx-auto relative z-10">
             <!-- Back Button -->
-            <button onclick="window.history.back()" class="mb-6 flex items-center text-purple-400 hover:text-purple-300 transition">
+            <button onclick="window.history.back()" class="mb-6 flex items-center text-red-600 hover:text-red-500 transition">
                 <i class="fas fa-arrow-left mr-2"></i> Back to Results
             </button>
             
@@ -235,10 +384,10 @@
             <div class="flex flex-col lg:flex-row gap-8">
                 <!-- Recipe Image and Basic Info -->
                 <div class="lg:w-1/2">
-                    <div class="relative rounded-xl overflow-hidden shadow-lg">
+                    <div class="relative rounded-xl overflow-hidden shadow-lg border-4 border-white">
                         <img id="recipe-main-image" class="w-full h-96 object-cover" src="" alt="">
                         <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-6">
-                            <h1 id="recipe-title" class="text-3xl font-bold text-white mb-2"></h1>
+                            <h1 id="recipe-title" class="text-3xl font-bold text-white mb-2 heading-font"></h1>
                             <div class="flex items-center">
                                 <div class="flex text-yellow-400 mr-4">
                                     <i class="fas fa-star"></i>
@@ -247,34 +396,34 @@
                                     <i class="fas fa-star"></i>
                                     <i class="fas fa-star-half-alt"></i>
                                 </div>
-                                <span class="text-gray-300">4.7 (120 reviews)</span>
+                                <span class="text-gray-200">4.7 (120 reviews)</span>
                             </div>
                         </div>
                     </div>
                     
-                    <div class="mt-6 bg-gray-800 p-6 rounded-xl shadow-lg">
-                        <p id="recipe-description" class="text-gray-300 mb-6"></p>
+                    <div class="mt-6 bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 card-hover border-animate">
+                        <p id="recipe-description" class="text-gray-600 mb-6"></p>
                         
                         <div class="grid grid-cols-3 gap-4 mb-6">
-                            <div class="bg-gray-700 p-3 rounded-lg text-center hover:bg-gray-600 transition">
-                                <div class="text-lg font-bold text-white" id="recipe-prep-time">15 min</div>
-                                <div class="text-sm text-gray-400">Prep Time</div>
+                            <div class="bg-amber-100 p-3 rounded-lg text-center hover:bg-amber-200 transition">
+                                <div class="text-lg font-bold text-gray-800" id="recipe-prep-time">15 min</div>
+                                <div class="text-sm text-gray-600">Prep Time</div>
                             </div>
-                            <div class="bg-gray-700 p-3 rounded-lg text-center hover:bg-gray-600 transition">
-                                <div class="text-lg font-bold text-white" id="recipe-cook-time">30 min</div>
-                                <div class="text-sm text-gray-400">Cook Time</div>
+                            <div class="bg-amber-100 p-3 rounded-lg text-center hover:bg-amber-200 transition">
+                                <div class="text-lg font-bold text-gray-800" id="recipe-cook-time">30 min</div>
+                                <div class="text-sm text-gray-600">Cook Time</div>
                             </div>
-                            <div class="bg-gray-700 p-3 rounded-lg text-center hover:bg-gray-600 transition">
-                                <div class="text-lg font-bold text-white" id="recipe-servings">4</div>
-                                <div class="text-sm text-gray-400">Servings</div>
+                            <div class="bg-amber-100 p-3 rounded-lg text-center hover:bg-amber-200 transition">
+                                <div class="text-lg font-bold text-gray-800" id="recipe-servings">4</div>
+                                <div class="text-sm text-gray-600">Servings</div>
                             </div>
                         </div>
                         
                         <div class="flex space-x-4">
-                            <button onclick="addToCartFromRecipe()" class="flex-1 bg-purple-600 text-white py-3 rounded-lg hover:bg-purple-700 transition flex items-center justify-center">
+                            <button onclick="addToCartFromRecipe()" class="flex-1 bg-gradient-to-r from-red-600 to-amber-600 text-white py-3 rounded-lg hover:from-red-700 hover:to-amber-700 transition shadow-lg btn-shine">
                                 <i class="fas fa-shopping-cart mr-2"></i> Add to Cart
                             </button>
-                            <button class="w-12 h-12 bg-gray-700 text-purple-400 rounded-lg hover:bg-gray-600 transition flex items-center justify-center">
+                            <button class="w-12 h-12 bg-amber-100 text-red-600 rounded-lg hover:bg-amber-200 transition flex items-center justify-center border border-amber-200">
                                 <i class="fas fa-heart"></i>
                             </button>
                         </div>
@@ -283,44 +432,44 @@
                 
                 <!-- Recipe Content -->
                 <div class="lg:w-1/2">
-                    <div class="bg-gray-800 p-6 rounded-xl shadow-lg mb-6">
-                        <h2 class="text-xl font-bold text-white mb-4 flex items-center">
-                            <i class="fas fa-list-ul text-purple-400 mr-2"></i> Ingredients
+                    <div class="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 card-hover border-animate mb-6">
+                        <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center heading-font">
+                            <i class="fas fa-list-ul text-red-600 mr-2"></i> Ingredients
                         </h2>
                         <ul id="recipe-ingredients" class="space-y-3">
                             <!-- Ingredients will be added here dynamically -->
                         </ul>
                     </div>
                     
-                    <div class="bg-gray-800 p-6 rounded-xl shadow-lg mb-6">
-                        <h2 class="text-xl font-bold text-white mb-4 flex items-center">
-                            <i class="fas fa-list-ol text-purple-400 mr-2"></i> Instructions
+                    <div class="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 card-hover border-animate mb-6">
+                        <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center heading-font">
+                            <i class="fas fa-list-ol text-red-600 mr-2"></i> Instructions
                         </h2>
                         <div id="recipe-instructions" class="space-y-4">
                             <!-- Instructions will be added here dynamically -->
                         </div>
                     </div>
                     
-                    <div class="bg-gray-800 p-6 rounded-xl shadow-lg">
-                        <h2 class="text-xl font-bold text-white mb-4 flex items-center">
-                            <i class="fas fa-utensils text-purple-400 mr-2"></i> Nutrition Information
+                    <div class="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 card-hover border-animate">
+                        <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center heading-font">
+                            <i class="fas fa-utensils text-red-600 mr-2"></i> Nutrition Information
                         </h2>
                         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                            <div class="bg-gray-700 p-3 rounded-lg text-center hover:bg-gray-600 transition">
-                                <div class="text-lg font-bold text-white" id="recipe-calories">350</div>
-                                <div class="text-sm text-gray-400">Calories</div>
+                            <div class="bg-amber-100 p-3 rounded-lg text-center hover:bg-amber-200 transition">
+                                <div class="text-lg font-bold text-gray-800" id="recipe-calories">350</div>
+                                <div class="text-sm text-gray-600">Calories</div>
                             </div>
-                            <div class="bg-gray-700 p-3 rounded-lg text-center hover:bg-gray-600 transition">
-                                <div class="text-lg font-bold text-white" id="recipe-protein">22g</div>
-                                <div class="text-sm text-gray-400">Protein</div>
+                            <div class="bg-amber-100 p-3 rounded-lg text-center hover:bg-amber-200 transition">
+                                <div class="text-lg font-bold text-gray-800" id="recipe-protein">22g</div>
+                                <div class="text-sm text-gray-600">Protein</div>
                             </div>
-                            <div class="bg-gray-700 p-3 rounded-lg text-center hover:bg-gray-600 transition">
-                                <div class="text-lg font-bold text-white" id="recipe-carbs">45g</div>
-                                <div class="text-sm text-gray-400">Carbs</div>
+                            <div class="bg-amber-100 p-3 rounded-lg text-center hover:bg-amber-200 transition">
+                                <div class="text-lg font-bold text-gray-800" id="recipe-carbs">45g</div>
+                                <div class="text-sm text-gray-600">Carbs</div>
                             </div>
-                            <div class="bg-gray-700 p-3 rounded-lg text-center hover:bg-gray-600 transition">
-                                <div class="text-lg font-bold text-white" id="recipe-fat">15g</div>
-                                <div class="text-sm text-gray-400">Fat</div>
+                            <div class="bg-amber-100 p-3 rounded-lg text-center hover:bg-amber-200 transition">
+                                <div class="text-lg font-bold text-gray-800" id="recipe-fat">15g</div>
+                                <div class="text-sm text-gray-600">Fat</div>
                             </div>
                         </div>
                     </div>
@@ -329,27 +478,93 @@
         </div>
     </section>
 
-    <!-- Footer -->
-    <footer class="text-gray-300 body-font bg-gray-800">
-        <div class="container px-5 py-8 mx-auto flex items-center sm:flex-row flex-col">
-            <a href="index.html" class="flex title-font font-medium items-center md:justify-start justify-center text-white">
-                <i class="fas fa-utensils text-purple-500 text-2xl mr-2"></i>
-                <span class="ml-3 text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-600">NutriOrder</span>
+    <!-- Shopping Cart Sidebar -->
+    <div id="cart-sidebar" class="fixed top-0 right-0 h-full w-96 bg-white shadow-xl transform translate-x-full transition-transform duration-300 ease-in-out z-50 overflow-y-auto border-l border-amber-200">
+        <div class="p-6 border-b border-amber-200 flex justify-between items-center bg-white">
+            <h3 class="text-xl font-semibold text-gray-800 flex items-center">
+                <i class="fas fa-shopping-cart mr-2 text-red-600"></i> Your Order
+            </h3>
+            <button onclick="toggleCart()" class="text-gray-500 hover:text-gray-700 text-xl">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div id="cart-items" class="p-6">
+            <!-- Cart items will be added here dynamically -->
+            <div class="text-center py-12">
+                <i class="fas fa-shopping-cart text-4xl text-gray-400 mb-4"></i>
+                <p class="text-gray-500">Your cart is empty</p>
+                <button onclick="toggleCart()" class="mt-4 text-red-600 hover:text-red-500 underline">
+                    Browse our menu
+                </button>
+            </div>
+        </div>
+        <div class="p-6 border-t border-amber-200 bg-white">
+            <div class="flex justify-between mb-3 text-gray-700">
+                <span>Subtotal:</span>
+                <span id="cart-subtotal">₹0.00</span>
+            </div>
+            <div class="flex justify-between mb-3 text-gray-700">
+                <span>Delivery Fee:</span>
+                <span>₹30.00</span>
+            </div>
+            <div class="flex justify-between mb-6 text-lg font-bold text-gray-800">
+                <span>Total:</span>
+                <span id="cart-total">₹30.00</span>
+            </div>
+            <a href="orders.html" class="w-full bg-gradient-to-r from-red-600 to-amber-600 text-white py-3 rounded-lg hover:from-red-700 hover:to-amber-700 transition flex items-center justify-center shadow-lg btn-shine">
+                <i class="fas fa-credit-card mr-2"></i> Proceed to Checkout
             </a>
-            <p class="text-sm text-gray-400 sm:ml-4 sm:pl-4 sm:border-l-2 sm:border-gray-700 sm:py-2 sm:mt-0 mt-4">© 2023 NutriOrder —
-                <a href="#" class="text-gray-300 ml-1" rel="noopener noreferrer" target="_blank">All Rights Reserved</a>
-            </p>
-            <span class="inline-flex sm:ml-auto sm:mt-0 mt-4 justify-center sm:justify-start">
-                <a href="#" class="text-gray-400 hover:text-purple-400">
-                    <i class="fab fa-facebook-f"></i>
-                </a>
-                <a href="#" class="ml-3 text-gray-400 hover:text-purple-400">
-                    <i class="fab fa-twitter"></i>
-                </a>
-                <a href="#" class="ml-3 text-gray-400 hover:text-purple-400">
-                    <i class="fab fa-instagram"></i>
-                </a>
-            </span>
+        </div>
+    </div>
+    <div id="cart-overlay" class="hidden fixed inset-0 bg-black bg-opacity-50 z-40 backdrop-blur-sm" onclick="toggleCart()"></div>
+
+    <!-- Footer -->
+    <footer class="bg-white py-16 px-6 border-t border-amber-200">
+        <div class="container mx-auto">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-12">
+                <div>
+                    <h3 class="text-xl font-bold mb-6 flex items-center heading-font">
+                        <i class="fas fa-utensils text-red-500 mr-3"></i> NutriOrder
+                    </h3>
+                    <p class="text-gray-600 mb-4">Where traditional Indian food meets health intelligence. Making healthy eating simple, delicious, and accessible.</p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-gray-600 hover:text-red-600 transition text-lg"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="text-gray-600 hover:text-red-600 transition text-lg"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="text-gray-600 hover:text-red-600 transition text-lg"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="text-gray-600 hover:text-red-600 transition text-lg"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="font-bold text-lg mb-6 text-gray-800">Explore</h4>
+                    <ul class="space-y-3">
+                        <li><a href="homepage.html" class="text-gray-600 hover:text-red-600 transition underline-animate">Home</a></li>
+                        <li><a href="#menu" class="text-gray-600 hover:text-red-600 transition underline-animate">Menu</a></li>
+                        <li><a href="#about" class="text-gray-600 hover:text-red-600 transition underline-animate">About</a></li>
+                        <li><a href="#contact" class="text-gray-600 hover:text-red-600 transition underline-animate">Contact</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold text-lg mb-6 text-gray-800">Company</h4>
+                    <ul class="space-y-3">
+                        <li><a href="#" class="text-gray-600 hover:text-red-600 transition underline-animate">About Us</a></li>
+                        <li><a href="#" class="text-gray-600 hover:text-red-600 transition underline-animate">Careers</a></li>
+                        <li><a href="#" class="text-gray-600 hover:text-red-600 transition underline-animate">Blog</a></li>
+                        <li><a href="#" class="text-gray-600 hover:text-red-600 transition underline-animate">Press</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold text-lg mb-6 text-gray-800">Get Help</h4>
+                    <ul class="space-y-3">
+                        <li><a href="#" class="text-gray-600 hover:text-red-600 transition underline-animate">FAQ</a></li>
+                        <li><a href="#" class="text-gray-600 hover:text-red-600 transition underline-animate">Contact</a></li>
+                        <li><a href="#" class="text-gray-600 hover:text-red-600 transition underline-animate">Privacy</a></li>
+                        <li><a href="#" class="text-gray-600 hover:text-red-600 transition underline-animate">Terms</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-amber-200 mt-12 pt-8 text-center text-gray-500">
+                <p>© 2023 NutriOrder. All rights reserved. | Designed with <i class="fas fa-heart text-red-500"></i> for your health</p>
+            </div>
         </div>
     </footer>
 
@@ -1020,8 +1235,8 @@
                 const li = document.createElement('li');
                 li.className = 'flex items-start';
                 li.innerHTML = `
-                    <span class="inline-block w-5 h-5 bg-purple-600 text-white text-center rounded-full mr-2 mt-0.5">✓</span>
-                    <span class="text-gray-300">${ingredient}</span>
+                    <span class="inline-block w-5 h-5 bg-red-600 text-white text-center rounded-full mr-2 mt-0.5">✓</span>
+                    <span class="text-gray-600">${ingredient}</span>
                 `;
                 ingredientsList.appendChild(li);
             });
@@ -1033,7 +1248,7 @@
                 const div = document.createElement('div');
                 div.className = 'recipe-step flex items-start';
                 div.innerHTML = `
-                    <span class="text-gray-300">${instruction}</span>
+                    <span class="text-gray-600">${instruction}</span>
                 `;
                 instructionsContainer.appendChild(div);
             });
@@ -1047,27 +1262,60 @@
         }
 
         // Initialize page
-        document.addEventListener('DOMContentLoaded', loadRecipe);
-
-        // Theme toggle functionality
-        const themeToggle = document.getElementById('theme-toggle');
-        const html = document.documentElement;
-
-        // Check for saved user preference or use system preference
-        if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-            html.classList.add('dark');
-        } else {
-            html.classList.remove('dark');
-        }
-
-        // Toggle theme
-        themeToggle.addEventListener('click', () => {
-            html.classList.toggle('dark');
-            localStorage.setItem('theme', html.classList.contains('dark') ? 'dark' : 'light');
-        });
-
-        // Add smooth transition to all links
         document.addEventListener('DOMContentLoaded', function() {
+            loadRecipe();
+            
+            // Check if user is logged in
+            const userData = JSON.parse(localStorage.getItem('userData'));
+            
+            if (userData) {
+                // Show profile section and update with user data
+                const profileSection = document.getElementById('profile-section');
+                const profileName = document.getElementById('profile-name');
+                const profileButton = document.getElementById('profile-button');
+                
+                // Show the profile section that was hidden by default
+                profileSection.classList.remove('hidden');
+                
+                // Set the profile name
+                profileName.textContent = userData.displayName || userData.email || 'User';
+                
+                // Replace font awesome icon with profile picture if available
+                if (userData.photoURL) {
+                    // Remove the existing font awesome icon
+                    const iconElement = profileButton.querySelector('.fas.fa-user-circle');
+                    if (iconElement) {
+                        iconElement.remove();
+                    }
+                    
+                    // Create profile picture element
+                    const profilePic = document.createElement('img');
+                    profilePic.src = userData.photoURL;
+                    profilePic.alt = 'Profile';
+                    profilePic.className = 'h-8 w-8 rounded-full object-cover mr-2';
+                    
+                    // Add it to the beginning of the profile button
+                    profileButton.prepend(profilePic);
+                }
+                
+                // Set up dropdown toggle
+                profileButton.addEventListener('click', function() {
+                    const dropdown = document.getElementById('profile-dropdown');
+                    dropdown.classList.toggle('hidden');
+                });
+                
+                // Close dropdown when clicking outside
+                document.addEventListener('click', function(event) {
+                    const dropdown = document.getElementById('profile-dropdown');
+                    const profileButton = document.getElementById('profile-button');
+                    
+                    if (!profileButton.contains(event.target) && !dropdown.contains(event.target)) {
+                        dropdown.classList.add('hidden');
+                    }
+                });
+            }
+            
+            // Add smooth transition to all links
             document.querySelectorAll('a').forEach(link => {
                 link.addEventListener('click', function(e) {
                     // Don't apply to:
@@ -1091,6 +1339,15 @@
                 });
             });
         });
+
+        // Toggle cart visibility
+        function toggleCart() {
+            const cartSidebar = document.getElementById('cart-sidebar');
+            const cartOverlay = document.getElementById('cart-overlay');
+            
+            cartSidebar.classList.toggle('translate-x-full');
+            cartOverlay.classList.toggle('hidden');
+        }
     </script>
 </body>
 </html>

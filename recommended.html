@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Recommended Foods - NutriOrder</title>
+    <title>Recommended Foods - NutriOrder | Traditional Indian Healthy Foods</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         /* Page transition animations */
         body {
@@ -30,16 +31,16 @@
         }
 
         ::-webkit-scrollbar-track {
-            background: #1a202c;
+            background: #f1f1f1;
         }
 
         ::-webkit-scrollbar-thumb {
-            background: #4a5568;
+            background: #e11d48;
             border-radius: 4px;
         }
 
         ::-webkit-scrollbar-thumb:hover {
-            background: #718096;
+            background: #be123c;
         }
 
         /* Animation for hover effects */
@@ -49,7 +50,35 @@
 
         /* Custom glow effect */
         .glow {
-            box-shadow: 0 0 15px rgba(139, 92, 246, 0.5);
+            box-shadow: 0 0 15px rgba(225, 29, 72, 0.3);
+        }
+
+        /* Pulse animation for CTA */
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        /* Gradient text */
+        .gradient-text {
+            background: linear-gradient(90deg, #e11d48, #f59e0b);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        /* Floating animation */
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .floating {
+            animation: float 6s ease-in-out infinite;
         }
 
         /* Responsive tweaks */
@@ -63,12 +92,131 @@
             }
         }
 
+        /* Custom card hover effect */
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(225, 29, 72, 0.15);
+        }
+
+        /* Custom border animation */
+        .border-animate {
+            position: relative;
+        }
+
+        .border-animate::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 0.5rem;
+            padding: 2px;
+            background: linear-gradient(45deg, #e11d48, #f59e0b);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .border-animate:hover::before {
+            opacity: 1;
+        }
+
+        /* Custom underline animation */
+        .underline-animate {
+            position: relative;
+        }
+
+        .underline-animate::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -2px;
+            left: 0;
+            background: linear-gradient(90deg, #e11d48, #f59e0b);
+            transition: width 0.3s ease;
+        }
+
+        .underline-animate:hover::after {
+            width: 100%;
+        }
+
+        /* Custom blob background */
+        @keyframes animate-blob {
+            0% {
+                transform: translate(0px, 0px) scale(1);
+            }
+            33% {
+                transform: translate(30px, -50px) scale(1.1);
+            }
+            66% {
+                transform: translate(-20px, 20px) scale(0.9);
+            }
+            100% {
+                transform: translate(0px, 0px) scale(1);
+            }
+        }
+
+        .animate-blob {
+            animation: animate-blob 7s infinite;
+        }
+
+        .animation-delay-2000 {
+            animation-delay: 2s;
+        }
+
+        .animation-delay-4000 {
+            animation-delay: 4s;
+        }
+
+        /* Indian pattern overlay */
+        .indian-pattern {
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23e11d48' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            opacity: 0.1;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        /* Special heading font */
+        .heading-font {
+            font-family: 'Playfair Display', serif;
+        }
+
+        /* Custom button shine effect */
+        .btn-shine:hover {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-shine:hover::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -60%;
+            width: 40%;
+            height: 200%;
+            background: rgba(255, 255, 255, 0.2);
+            transform: rotate(30deg);
+            animation: shine 1.5s ease;
+        }
+
+        @keyframes shine {
+            100% {
+                left: 120%;
+            }
+        }
+
         /* Match score indicator */
         .match-score {
             position: absolute;
             top: 10px;
             right: 10px;
-            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+            background: linear-gradient(135deg, #e11d48, #f59e0b);
             color: white;
             width: 40px;
             height: 40px;
@@ -77,7 +225,7 @@
             align-items: center;
             justify-content: center;
             font-weight: bold;
-            box-shadow: 0 0 10px rgba(139, 92, 246, 0.5);
+            box-shadow: 0 0 10px rgba(225, 29, 72, 0.5);
         }
 
         .match-score-text {
@@ -132,105 +280,113 @@
     </script>
     <script>
         tailwind.config = {
-            darkMode: 'class',
             theme: {
                 extend: {
                     colors: {
-                        primary: '#8b5cf6',
-                        secondary: '#7c3aed',
-                        dark: '#1f2937',
-                        light: '#f3f4f6'
+                        primary: '#e11d48',
+                        secondary: '#be123c',
+                        accent: '#f59e0b',
+                        light: '#fff7ed',
+                        dark: '#1f2937'
+                    },
+                    animation: {
+                        'click': 'click 300ms ease-out',
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    },
+                    keyframes: {
+                        click: {
+                            '0%, 100%': { transform: 'scale(1)' },
+                            '50%': { transform: 'scale(0.95)' },
+                        }
                     }
                 }
             }
         }
     </script>
 </head>
-<body class="bg-gray-900 text-gray-100 min-h-screen">
-    <!-- Header/Navigation -->
-    <header class="sticky top-0 z-50 bg-gray-800 shadow-md">
-        <div class="container mx-auto flex flex-wrap p-5 flex-col md:flex-row items-center">
-            <a href="index.html" class="flex title-font font-medium items-center text-white mb-4 md:mb-0">
-                <i class="fas fa-utensils text-purple-500 text-2xl mr-2"></i>
-                <span class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-600">NutriOrder</span>
-            </a>
-            <nav class="md:ml-auto flex flex-wrap items-center text-base justify-center">
-                <a href="homepage.html" class="mr-5 hover:text-purple-400 transition">Home</a>
-                <a href="recommended.html" class="mr-5 font-semibold text-purple-400 transition">Recommended</a>
-                <a href="restaurants.html" class="mr-5 hover:text-purple-400 transition">Restaurants</a>
-                <a href="index.html#contact" class="mr-5 hover:text-purple-400 transition">Contact</a>
-            </nav>
-            <button onclick="toggleCart()" class="inline-flex items-center bg-purple-600 text-white border-0 py-2 px-4 focus:outline-none hover:bg-purple-700 rounded-lg transition mt-4 md:mt-0">
-                <i class="fas fa-shopping-cart mr-2"></i> Cart
-                <span id="cart-count" class="ml-2 bg-white text-purple-600 rounded-full w-6 h-6 flex items-center justify-center">0</span>
-            </button>
+<body class="bg-amber-50 text-gray-800 min-h-screen">
+    <!-- Navigation -->
+    <nav class="bg-white/90 backdrop-blur-md py-4 px-6 shadow-sm sticky top-0 z-50 border-b border-amber-200">
+        <div class="container mx-auto flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <i class="fas fa-utensils text-red-600 text-2xl"></i>
+                <span class="text-xl font-bold gradient-text heading-font">NutriOrder</span>
+            </div>
+            <div class="hidden md:flex space-x-6">
+                <a href="homepage.html" class="hover:text-red-600 transition underline-animate">Home</a>
+                <a href="recommended.html" class="hover:text-red-600 transition underline-animate font-semibold text-red-600">Recommended</a>
+                <a href="restaurants.html" class="hover:text-red-600 transition underline-animate">Restaurants</a>
+                <a href="index.html#contact" class="hover:text-red-600 transition underline-animate">Contact</a>
+            </div>
+            <div class="flex items-center space-x-4">
+                <a href="retailer-login.html" class="flex items-center space-x-2 bg-amber-100 hover:bg-amber-200 px-4 py-2 rounded-full transition border-animate">
+                    <i class="fas fa-store text-red-600"></i>
+                    <span class="text-gray-700">Retailer Login</span>
+                </a>
+                <div id="profile-section" class="hidden relative">
+                    <button id="profile-button" class="flex items-center space-x-2 bg-amber-100 hover:bg-amber-200 px-4 py-2 rounded-full transition border-animate">
+                        <i class="fas fa-user-circle text-red-600"></i>
+                        <span id="profile-name" class="text-gray-700"></span>
+                    </button>
+                    <div id="profile-dropdown" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 hidden border border-amber-200 backdrop-blur-sm">
+                        <a href="homepage.html" class="block px-4 py-2 text-sm hover:bg-amber-50 transition text-gray-700">Dashboard</a>
+                        <a href="orders.html" class="block px-4 py-2 text-sm hover:bg-amber-50 transition text-gray-700">My Orders</a>
+                        <a href="settings.html" class="block px-4 py-2 text-sm hover:bg-amber-50 transition text-gray-700">Settings</a>
+                        <a href="#" onclick="logout()" class="block px-4 py-2 text-sm hover:bg-amber-50 transition text-gray-700">Sign out</a>
+                    </div>
+                </div>
+                <button onclick="toggleCart()" class="flex items-center space-x-2 bg-gradient-to-r from-red-600 to-amber-600 hover:from-red-700 hover:to-amber-700 px-4 py-2 rounded-full transition shadow-lg relative group text-white btn-shine">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span id="cart-count" class="bg-white text-red-600 rounded-full w-6 h-6 flex items-center justify-center font-bold">0</span>
+                    <span class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity" id="cart-hover-count">0</span>
+                </button>
+            </div>
         </div>
-    </header>
+    </nav>
 
-    <!-- Shopping Cart Sidebar -->
-    <div id="cart-sidebar" class="fixed top-0 right-0 h-full w-80 bg-gray-800 shadow-lg transform translate-x-full transition-transform duration-300 ease-in-out z-50 overflow-y-auto">
-        <div class="p-4 border-b border-gray-700 flex justify-between items-center">
-            <h3 class="text-lg font-semibold text-white">Your Order</h3>
-            <button onclick="toggleCart()" class="text-gray-400 hover:text-white">
-                <i class="fas fa-times"></i>
-            </button>
+    <!-- Hero Section -->
+    <section class="relative bg-gradient-to-br from-amber-50 to-red-50 py-16 px-6 overflow-hidden">
+        <div class="indian-pattern"></div>
+        <div class="absolute inset-0 opacity-60">
+            <div class="absolute top-0 left-0 w-64 h-64 bg-red-200 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob"></div>
+            <div class="absolute top-0 right-0 w-64 h-64 bg-amber-200 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-2000"></div>
+            <div class="absolute bottom-0 left-1/2 w-64 h-64 bg-pink-200 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-4000"></div>
         </div>
-        <div id="cart-items" class="p-4">
-            <!-- Cart items will be added here dynamically -->
-            <p class="text-gray-400 text-center py-8">Your cart is empty</p>
+        <div class="container mx-auto text-center relative z-10">
+            <h1 class="text-4xl md:text-5xl font-bold mb-4 leading-tight heading-font">
+                Personalized <span class="gradient-text">Food Recommendations</span>
+            </h1>
+            <p class="text-lg md:text-xl mb-8 max-w-3xl mx-auto text-gray-600">
+                Based on your health profile and dietary preferences. Enjoy authentic Indian flavors tailored just for you.
+            </p>
         </div>
-        <div class="p-4 border-t border-gray-700">
-            <div class="flex justify-between mb-2 text-white">
-                <span>Subtotal:</span>
-                <span id="cart-subtotal">₹0.00</span>
-            </div>
-            <div class="flex justify-between mb-4 text-white">
-                <span>Delivery:</span>
-                <span>₹30.00</span>
-            </div>
-            <div class="flex justify-between font-bold text-lg text-white">
-                <span>Total:</span>
-                <span id="cart-total">₹30.00</span>
-            </div>
-            <button class="w-full bg-purple-600 text-white py-2 rounded-lg mt-4 hover:bg-purple-700 transition">
-                Checkout
-            </button>
-        </div>
-    </div>
-    <div id="cart-overlay" class="hidden fixed inset-0 bg-black bg-opacity-50 z-40" onclick="toggleCart()"></div>
+        <div class="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-amber-50 to-transparent"></div>
+    </section>
 
-    <!-- Recommended Foods Section -->
-    <section class="text-gray-300 body-font py-12">
-        <div class="container px-5 mx-auto">
-            <div class="flex flex-col text-center w-full mb-12">
-                <h1 class="text-3xl font-bold title-font mb-4 text-white">Foods Recommended For You</h1>
-                <p class="lg:w-2/3 mx-auto leading-relaxed">Based on your preferences and dietary needs</p>
-            </div>
-            
-            <!-- User Preferences Summary -->
-            <div class="mb-8 bg-gray-800 p-6 rounded-lg shadow">
-                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+    <!-- User Preferences Summary -->
+    <section class="py-12 px-6 bg-white">
+        <div class="container mx-auto max-w-5xl">
+            <div class="bg-white p-8 rounded-xl shadow-md border border-amber-100">
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
                     <div>
-                        <h2 class="text-lg font-semibold text-white mb-2">Your Dietary Profile</h2>
+                        <h2 class="text-2xl font-bold mb-2 heading-font">Your <span class="gradient-text">Dietary Profile</span></h2>
                         <div id="health-recommendation-tags" class="flex flex-wrap gap-2">
                             <!-- Health tags will be added here dynamically -->
                         </div>
                     </div>
-                    <a href="preferences.html" class="text-purple-400 hover:text-purple-300 text-sm font-medium flex items-center">
-                        <i class="fas fa-edit mr-1"></i> Edit Preferences
+                    <a href="preferences.html" class="text-red-600 hover:text-red-500 font-medium flex items-center underline-animate">
+                        <i class="fas fa-edit mr-2"></i> Edit Preferences
                     </a>
                 </div>
-            </div>
-            
-            <!-- Search and Filters -->
-            <div class="mb-8 bg-gray-800 p-6 rounded-lg shadow">
-                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                
+                <!-- Search and Filters -->
+                <div class="flex flex-col md:flex-row md:items-center gap-4">
                     <div class="relative flex-grow">
-                        <input type="text" id="food-search" placeholder="Search recommended foods..." class="w-full bg-gray-700 rounded border border-gray-600 focus:border-purple-500 focus:bg-gray-600 focus:ring-2 focus:ring-purple-900 text-base outline-none text-white py-2 px-4 pl-10 leading-8 transition-colors duration-200 ease-in-out">
+                        <input type="text" id="food-search" placeholder="Search recommended foods..." class="w-full bg-amber-50 rounded border border-amber-300 focus:border-red-500 focus:bg-white focus:ring-2 focus:ring-red-200 text-base outline-none text-gray-700 py-2 px-4 pl-10 leading-8 transition-colors duration-200 ease-in-out">
                         <i class="fas fa-search absolute left-3 top-3.5 text-gray-400"></i>
                     </div>
-                    <div class="flex flex-wrap gap-3">
-                        <select id="cuisine-filter" class="bg-gray-700 rounded border border-gray-600 focus:border-purple-500 focus:bg-gray-600 focus:ring-2 focus:ring-purple-900 text-base outline-none text-white py-2 px-3 leading-8 transition-colors duration-200 ease-in-out">
+                    <div class="flex flex-wrap gap-2">
+                        <select id="cuisine-filter" class="bg-amber-50 rounded border border-amber-300 focus:border-red-500 focus:bg-white focus:ring-2 focus:ring-red-200 text-base outline-none text-gray-700 py-2 px-3 leading-8 transition-colors duration-200 ease-in-out">
                             <option value="">All Cuisines</option>
                             <option value="north indian">North Indian</option>
                             <option value="south indian">South Indian</option>
@@ -238,188 +394,134 @@
                             <option value="continental">Continental</option>
                             <option value="street food">Street Food</option>
                         </select>
-                        <select id="diet-filter" class="bg-gray-700 rounded border border-gray-600 focus:border-purple-500 focus:bg-gray-600 focus:ring-2 focus:ring-purple-900 text-base outline-none text-white py-2 px-3 leading-8 transition-colors duration-200 ease-in-out">
+                        <select id="diet-filter" class="bg-amber-50 rounded border border-amber-300 focus:border-red-500 focus:bg-white focus:ring-2 focus:ring-red-200 text-base outline-none text-gray-700 py-2 px-3 leading-8 transition-colors duration-200 ease-in-out">
                             <option value="">All Diets</option>
                             <option value="vegetarian">Vegetarian</option>
                             <option value="vegan">Vegan</option>
                             <option value="gluten-free">Gluten-Free</option>
                             <option value="jain">Jain</option>
                         </select>
-                        <button id="reset-filters" class="text-gray-300 hover:text-purple-400 border border-gray-600 py-2 px-4 rounded-lg transition">
+                        <button id="reset-filters" class="text-gray-700 hover:text-red-600 border border-amber-300 py-2 px-4 rounded-lg transition">
                             Reset
                         </button>
                     </div>
                 </div>
             </div>
-            
-            <!-- Personalized Recommendations -->
-            <div class="mb-8">
-                <h2 class="text-xl font-bold title-font mb-6 text-white flex items-center">
-                    <i class="fas fa-heart text-purple-400 mr-2"></i> Best Matches For You
-                </h2>
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" id="recommended-foods">
-                    <!-- Foods will be loaded dynamically -->
-                </div>
+        </div>
+    </section>
+
+    <!-- Recommended Foods Section -->
+    <section class="py-12 px-6 bg-amber-50">
+        <div class="container mx-auto">
+            <div class="text-center mb-12">
+                <span class="text-red-600 font-semibold">PERSONALIZED FOR YOU</span>
+                <h2 class="text-3xl md:text-4xl font-bold mt-2 heading-font">Your <span class="gradient-text">Recommended Foods</span></h2>
+                <p class="text-gray-600 max-w-2xl mx-auto mt-4">These dishes are specially selected based on your health profile and dietary preferences.</p>
             </div>
             
-            <!-- View All Restaurants Button -->
-            <div class="text-center mt-8">
-                <a href="restaurants.html" class="inline-flex text-white bg-purple-600 border-0 py-3 px-6 focus:outline-none hover:bg-purple-700 rounded-lg text-lg transition">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8" id="recommended-foods">
+                <!-- Foods will be loaded dynamically -->
+            </div>
+            
+            <div class="text-center mt-12">
+                <a href="restaurants.html" class="inline-flex text-white bg-gradient-to-r from-red-600 to-amber-600 hover:from-red-700 hover:to-amber-700 border-0 py-3 px-6 focus:outline-none rounded-lg text-lg transition shadow-lg btn-shine">
                     <i class="fas fa-utensils mr-2"></i> View All Restaurants
                 </a>
             </div>
         </div>
     </section>
 
-    <!-- Footer -->
-    <footer class="text-gray-400 body-font bg-gray-800">
-        <div class="container px-5 py-8 mx-auto flex items-center sm:flex-row flex-col">
-            <a href="index.html" class="flex title-font font-medium items-center md:justify-start justify-center text-white">
-                <i class="fas fa-utensils text-purple-500 text-2xl mr-2"></i>
-                <span class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-600">NutriOrder</span>
+    <!-- Shopping Cart Sidebar -->
+    <div id="cart-sidebar" class="fixed top-0 right-0 h-full w-96 bg-white shadow-xl transform translate-x-full transition-transform duration-300 ease-in-out z-50 overflow-y-auto border-l border-amber-200">
+        <div class="p-6 border-b border-amber-200 flex justify-between items-center bg-white">
+            <h3 class="text-xl font-semibold text-gray-800 flex items-center">
+                <i class="fas fa-shopping-cart mr-2 text-red-600"></i> Your Order
+            </h3>
+            <button onclick="toggleCart()" class="text-gray-500 hover:text-gray-700 text-xl">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div id="cart-items" class="p-6">
+            <!-- Cart items will be added here dynamically -->
+            <div class="text-center py-12">
+                <i class="fas fa-shopping-cart text-4xl text-gray-400 mb-4"></i>
+                <p class="text-gray-500">Your cart is empty</p>
+                <button onclick="toggleCart()" class="mt-4 text-red-600 hover:text-red-500 underline">
+                    Browse our menu
+                </button>
+            </div>
+        </div>
+        <div class="p-6 border-t border-amber-200 bg-white">
+            <div class="flex justify-between mb-3 text-gray-700">
+                <span>Subtotal:</span>
+                <span id="cart-subtotal">₹0.00</span>
+            </div>
+            <div class="flex justify-between mb-3 text-gray-700">
+                <span>Delivery Fee:</span>
+                <span>₹30.00</span>
+            </div>
+            <div class="flex justify-between mb-6 text-lg font-bold text-gray-800">
+                <span>Total:</span>
+                <span id="cart-total">₹30.00</span>
+            </div>
+            <a href="checkout.html" class="w-full bg-gradient-to-r from-red-600 to-amber-600 text-white py-3 rounded-lg hover:from-red-700 hover:to-amber-700 transition flex items-center justify-center shadow-lg btn-shine">
+                <i class="fas fa-credit-card mr-2"></i> Proceed to Checkout
             </a>
-            <p class="text-sm text-gray-400 sm:ml-4 sm:pl-4 sm:border-l-2 sm:border-gray-700 sm:py-2 sm:mt-0 mt-4">© 2023 NutriOrder —
-                <a href="#" class="text-gray-500 ml-1" rel="noopener noreferrer" target="_blank">All Rights Reserved</a>
-            </p>
-            <span class="inline-flex sm:ml-auto sm:mt-0 mt-4 justify-center sm:justify-start">
-                <a href="#" class="text-gray-400 hover:text-purple-400">
-                    <i class="fab fa-facebook-f"></i>
-                </a>
-                <a href="#" class="ml-3 text-gray-400 hover:text-purple-400">
-                    <i class="fab fa-twitter"></i>
-                </a>
-                <a href="#" class="ml-3 text-gray-400 hover:text-purple-400">
-                    <i class="fab fa-instagram"></i>
-                </a>
-            </span>
+        </div>
+    </div>
+    <div id="cart-overlay" class="hidden fixed inset-0 bg-black bg-opacity-50 z-40 backdrop-blur-sm" onclick="toggleCart()"></div>
+
+    <!-- Footer -->
+    <footer class="bg-white py-16 px-6 border-t border-amber-200">
+        <div class="container mx-auto">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-12">
+                <div>
+                    <h3 class="text-xl font-bold mb-6 flex items-center heading-font">
+                        <i class="fas fa-utensils text-red-500 mr-3"></i> NutriOrder
+                    </h3>
+                    <p class="text-gray-600 mb-4">Where traditional Indian food meets health intelligence. Making healthy eating simple, delicious, and accessible.</p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-gray-600 hover:text-red-600 transition text-lg"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="text-gray-600 hover:text-red-600 transition text-lg"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="text-gray-600 hover:text-red-600 transition text-lg"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="text-gray-600 hover:text-red-600 transition text-lg"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="font-bold text-lg mb-6 text-gray-800">Explore</h4>
+                    <ul class="space-y-3">
+                        <li><a href="homepage.html" class="text-gray-600 hover:text-red-600 transition underline-animate">Home</a></li>
+                        <li><a href="recommended.html" class="text-gray-600 hover:text-red-600 transition underline-animate">Recommended</a></li>
+                        <li><a href="restaurants.html" class="text-gray-600 hover:text-red-600 transition underline-animate">Restaurants</a></li>
+                        <li><a href="index.html#contact" class="text-gray-600 hover:text-red-600 transition underline-animate">Contact</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold text-lg mb-6 text-gray-800">Company</h4>
+                    <ul class="space-y-3">
+                        <li><a href="#" class="text-gray-600 hover:text-red-600 transition underline-animate">About Us</a></li>
+                        <li><a href="#" class="text-gray-600 hover:text-red-600 transition underline-animate">Careers</a></li>
+                        <li><a href="#" class="text-gray-600 hover:text-red-600 transition underline-animate">Blog</a></li>
+                        <li><a href="#" class="text-gray-600 hover:text-red-600 transition underline-animate">Press</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold text-lg mb-6 text-gray-800">Get Help</h4>
+                    <ul class="space-y-3">
+                        <li><a href="#" class="text-gray-600 hover:text-red-600 transition underline-animate">FAQ</a></li>
+                        <li><a href="#" class="text-gray-600 hover:text-red-600 transition underline-animate">Contact</a></li>
+                        <li><a href="#" class="text-gray-600 hover:text-red-600 transition underline-animate">Privacy</a></li>
+                        <li><a href="#" class="text-gray-600 hover:text-red-600 transition underline-animate">Terms</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-amber-200 mt-12 pt-8 text-center text-gray-500">
+                <p>© 2023 NutriOrder. All rights reserved. | Designed with <i class="fas fa-heart text-red-500"></i> for your health</p>
+            </div>
         </div>
     </footer>
 
     <script>
-        // Theme toggle functionality
-        const themeToggle = document.getElementById('theme-toggle');
-        const html = document.documentElement;
-
-        // Check for saved user preference or use system preference
-        if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-            html.classList.add('dark');
-        } else {
-            html.classList.remove('dark');
-        }
-
-        // Toggle theme
-        themeToggle.addEventListener('click', () => {
-            html.classList.toggle('dark');
-            localStorage.setItem('theme', html.classList.contains('dark') ? 'dark' : 'light');
-        });
-
-        // Shopping cart functionality
-        let cart = JSON.parse(localStorage.getItem('cart')) || [];
-        
-        function saveCart() {
-            localStorage.setItem('cart', JSON.stringify(cart));
-        }
-        
-        function toggleCart() {
-            const cartSidebar = document.getElementById('cart-sidebar');
-            const cartOverlay = document.getElementById('cart-overlay');
-            
-            cartSidebar.classList.toggle('translate-x-full');
-            cartOverlay.classList.toggle('hidden');
-        }
-        
-        function updateCart() {
-            const cartItemsContainer = document.getElementById('cart-items');
-            const cartCount = document.getElementById('cart-count');
-            const cartSubtotal = document.getElementById('cart-subtotal');
-            const cartTotal = document.getElementById('cart-total');
-            
-            // Update cart count
-            const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
-            cartCount.textContent = totalItems;
-            
-            // Update cart items
-            if (cart.length === 0) {
-                cartItemsContainer.innerHTML = '<p class="text-gray-400 text-center py-8">Your cart is empty</p>';
-            } else {
-                cartItemsContainer.innerHTML = '';
-                cart.forEach(item => {
-                    const cartItem = document.createElement('div');
-                    cartItem.className = 'flex justify-between items-center mb-4 pb-4 border-b border-gray-700';
-                    cartItem.innerHTML = `
-                        <div class="flex items-center">
-                            <img src="${item.image}" alt="${item.name}" class="w-12 h-12 object-cover rounded">
-                            <div class="ml-3">
-                                <h3 class="text-sm font-medium text-white">${item.name}</h3>
-                                <p class="text-xs text-gray-400">₹${item.price.toFixed(2)} x ${item.quantity}</p>
-                            </div>
-                        </div>
-                        <div class="flex items-center">
-                            <span class="text-sm font-medium text-white">₹${(item.price * item.quantity).toFixed(2)}</span>
-                            <button onclick="removeFromCart(${item.id})" class="ml-2 text-red-400 hover:text-red-300">
-                                <i class="fas fa-times"></i>
-                            </button>
-                        </div>
-                    `;
-                    cartItemsContainer.appendChild(cartItem);
-                });
-            }
-            
-            // Update totals
-            const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-            const deliveryFee = 30; // 30 INR delivery fee
-            const total = subtotal + deliveryFee;
-            
-            cartSubtotal.textContent = `₹${subtotal.toFixed(2)}`;
-            cartTotal.textContent = `₹${total.toFixed(2)}`;
-            
-            // Save cart to localStorage
-            saveCart();
-        }
-        
-        function addToCart(itemId) {
-            const item = foodDatabase.find(i => i.id === itemId);
-            const existingItem = cart.find(i => i.id === itemId);
-            
-            if (existingItem) {
-                existingItem.quantity += 1;
-            } else {
-                cart.push({...item, quantity: 1});
-            }
-            
-            updateCart();
-            showAddedToCartMessage(item.name);
-        }
-        
-        function removeFromCart(itemId) {
-            const itemIndex = cart.findIndex(i => i.id === itemId);
-            
-            if (itemIndex !== -1) {
-                if (cart[itemIndex].quantity > 1) {
-                    cart[itemIndex].quantity -= 1;
-                } else {
-                    cart.splice(itemIndex, 1);
-                }
-                
-                updateCart();
-            }
-        }
-        
-        function showAddedToCartMessage(itemName) {
-            const notification = document.createElement('div');
-            notification.className = 'fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg flex items-center';
-            notification.innerHTML = `
-                <i class="fas fa-check-circle mr-2"></i>
-                ${itemName} added to cart!
-            `;
-            document.body.appendChild(notification);
-            
-            setTimeout(() => {
-                notification.classList.add('opacity-0', 'transition-opacity', 'duration-300');
-                setTimeout(() => notification.remove(), 300);
-            }, 2000);
-        }
-
         // Get user preferences from localStorage (set in preferences form)
         function getUserPreferences() {
             // Use the preferences loaded from Firebase if available
@@ -451,7 +553,7 @@
             if (preferences.health_condition && preferences.health_condition.length > 0) {
                 preferences.health_condition.forEach(condition => {
                     const tag = document.createElement('div');
-                    tag.className = 'bg-blue-900 text-blue-200 text-sm font-medium px-3 py-1 rounded-full flex items-center';
+                    tag.className = 'bg-red-100 text-red-800 text-sm font-medium px-3 py-1 rounded-full flex items-center';
                     tag.innerHTML = `<i class="fas fa-info-circle mr-1"></i> ${getConditionDisplayName(condition)}`;
                     tagsContainer.appendChild(tag);
                 });
@@ -461,7 +563,7 @@
             if (preferences.diet && preferences.diet.length > 0) {
                 preferences.diet.forEach(diet => {
                     const tag = document.createElement('div');
-                    tag.className = 'bg-green-900 text-green-200 text-sm font-medium px-3 py-1 rounded-full flex items-center';
+                    tag.className = 'bg-amber-100 text-amber-800 text-sm font-medium px-3 py-1 rounded-full flex items-center';
                     tag.innerHTML = `<i class="fas fa-leaf mr-1"></i> ${diet.charAt(0).toUpperCase() + diet.slice(1)}`;
                     tagsContainer.appendChild(tag);
                 });
@@ -470,7 +572,7 @@
             // Show fitness goal if set
             if (preferences.fitness_goal && preferences.fitness_goal !== 'none') {
                 const tag = document.createElement('div');
-                tag.className = 'bg-purple-900 text-purple-200 text-sm font-medium px-3 py-1 rounded-full flex items-center';
+                tag.className = 'bg-green-100 text-green-800 text-sm font-medium px-3 py-1 rounded-full flex items-center';
                 tag.innerHTML = `<i class="fas fa-dumbbell mr-1"></i> ${getFitnessGoalDisplayName(preferences.fitness_goal)}`;
                 tagsContainer.appendChild(tag);
             }
@@ -478,12 +580,12 @@
             // Show weight information if available
             if (preferences.current_weight && preferences.target_weight) {
                 const tag = document.createElement('div');
-                tag.className = 'bg-yellow-900 text-yellow-200 text-sm font-medium px-3 py-1 rounded-full flex items-center';
+                tag.className = 'bg-blue-100 text-blue-800 text-sm font-medium px-3 py-1 rounded-full flex items-center';
                 tag.innerHTML = `<i class="fas fa-weight-scale mr-1"></i> ${preferences.current_weight}kg → ${preferences.target_weight}kg`;
                 tagsContainer.appendChild(tag);
             } else if (preferences.current_weight) {
                 const tag = document.createElement('div');
-                tag.className = 'bg-yellow-900 text-yellow-200 text-sm font-medium px-3 py-1 rounded-full flex items-center';
+                tag.className = 'bg-blue-100 text-blue-800 text-sm font-medium px-3 py-1 rounded-full flex items-center';
                 tag.innerHTML = `<i class="fas fa-weight-scale mr-1"></i> ${preferences.current_weight}kg`;
                 tagsContainer.appendChild(tag);
             }
@@ -491,7 +593,7 @@
             // If no preferences set, show a message
             if (tagsContainer.children.length === 0) {
                 const message = document.createElement('div');
-                message.className = 'text-gray-400 text-sm';
+                message.className = 'text-gray-500 text-sm';
                 message.textContent = 'No specific preferences set. Showing general recommendations.';
                 tagsContainer.appendChild(message);
             }
@@ -720,7 +822,7 @@
                 image: "https://images.unsplash.com/photo-1519996521439-0408c916b631?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
                 cuisine: "north indian",
                 diet: ["vegetarian"],
-                health_benefits: [],
+                health_benefits: ["heart-disease"],
                 fitness_goals: ["muscle-gain", "endurance"],
                 meal_pref: ["high-protein", "balanced"],
                 calories: 380,
@@ -1261,10 +1363,10 @@
             if (foods.length === 0) {
                 container.innerHTML = `
                     <div class="col-span-full text-center py-12">
-                        <i class="fas fa-utensils text-4xl text-gray-500 mb-4"></i>
-                        <h3 class="text-lg font-medium text-white">No specific recommendations found</h3>
-                        <p class="mt-2 text-gray-400">We couldn't find foods matching all your preferences. Try adjusting your filters or updating your preferences.</p>
-                        <a href="preferences.html" class="mt-4 inline-flex text-white bg-purple-600 border-0 py-2 px-4 focus:outline-none hover:bg-purple-700 rounded-lg text-sm transition">
+                        <i class="fas fa-utensils text-4xl text-gray-400 mb-4"></i>
+                        <h3 class="text-lg font-medium text-gray-800">No specific recommendations found</h3>
+                        <p class="mt-2 text-gray-500">We couldn't find foods matching all your preferences. Try adjusting your filters or updating your preferences.</p>
+                        <a href="preferences.html" class="mt-4 inline-flex text-white bg-gradient-to-r from-red-600 to-amber-600 border-0 py-2 px-4 focus:outline-none hover:from-red-700 hover:to-amber-700 rounded-lg text-sm transition shadow-lg btn-shine">
                             Update Preferences
                         </a>
                     </div>
@@ -1274,7 +1376,7 @@
             
             foods.forEach(food => {
                 const foodItem = document.createElement('div');
-                foodItem.className = 'bg-gray-800 rounded-lg shadow overflow-hidden hover:shadow-lg transition hover:-translate-y-1';
+                foodItem.className = 'bg-white rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-all duration-300 card-hover border-animate h-full flex flex-col';
                 foodItem.dataset.cuisine = food.cuisine;
                 foodItem.dataset.diets = food.diet ? food.diet.join(' ') : '';
                 
@@ -1282,7 +1384,7 @@
                 let healthTags = '';
                 if (food.health_benefits && food.health_benefits.length > 0) {
                     healthTags = food.health_benefits.map(benefit => 
-                        `<span class="inline-block bg-blue-900 text-blue-200 text-xs font-medium px-2 py-0.5 rounded mr-1 mb-1">${getConditionDisplayName(benefit)}</span>`
+                        `<span class="inline-block bg-red-100 text-red-800 text-xs font-medium px-2 py-0.5 rounded mr-1 mb-1">${getConditionDisplayName(benefit)}</span>`
                     ).join('');
                 }
                 
@@ -1290,7 +1392,7 @@
                 let dietTags = '';
                 if (food.diet && food.diet.length > 0) {
                     dietTags = food.diet.map(diet => 
-                        `<span class="inline-block bg-green-900 text-green-200 text-xs font-medium px-2 py-0.5 rounded mr-1 mb-1">${diet.charAt(0).toUpperCase() + diet.slice(1)}</span>`
+                        `<span class="inline-block bg-amber-100 text-amber-800 text-xs font-medium px-2 py-0.5 rounded mr-1 mb-1">${diet.charAt(0).toUpperCase() + diet.slice(1)}</span>`
                     ).join('');
                 }
                 
@@ -1298,9 +1400,9 @@
                 let matchTooltip = '';
                 if (food.matchReasons && food.matchReasons.length > 0) {
                     matchTooltip = `
-                        <div class="absolute z-10 invisible group-hover:visible bg-gray-700 text-white text-xs rounded p-2 bottom-full mb-2 w-48">
+                        <div class="absolute z-10 invisible group-hover:visible bg-white text-gray-800 text-xs rounded p-2 bottom-full mb-2 w-48 border border-amber-200 shadow-lg">
                             ${food.matchReasons.map(reason => `<div class="mb-1 last:mb-0">✓ ${reason}</div>`).join('')}
-                            <div class="text-purple-300 font-semibold">${food.matchPercentage}% match</div>
+                            <div class="text-red-500 font-semibold">${food.matchPercentage}% match</div>
                         </div>
                     `;
                 }
@@ -1308,36 +1410,38 @@
                 foodItem.innerHTML = `
                     <div class="relative group">
                         <img class="w-full h-48 object-cover" src="${food.image}" alt="${food.name}">
-                        ${food.diet && food.diet.includes('vegetarian') ? '<div class="absolute top-2 left-2 bg-green-900 text-green-200 text-xs font-semibold px-2.5 py-0.5 rounded">VEGETARIAN</div>' : ''}
+                        ${food.diet && food.diet.includes('vegetarian') ? '<div class="absolute top-2 left-2 bg-green-100 text-green-800 text-xs font-semibold px-2.5 py-0.5 rounded">VEGETARIAN</div>' : ''}
                         <div class="match-score">
                             ${food.matchPercentage || '80'}%
                             <div class="match-score-text">match</div>
                         </div>
                     </div>
-                    <div class="p-4">
+                    <div class="p-6 flex-grow">
                         <div class="flex justify-between items-start">
                             <div>
-                                <h3 class="text-lg font-semibold text-white">${food.name}</h3>
-                                <p class="text-sm text-gray-400">${food.category}</p>
+                                <h3 class="text-lg font-semibold text-gray-800">${food.name}</h3>
+                                <p class="text-sm text-gray-500">${food.category}</p>
                             </div>
                             <div class="flex items-center">
                                 <i class="fas fa-star text-yellow-400 mr-1"></i>
-                                <span class="text-white">${food.rating}</span>
+                                <span class="text-gray-800">${food.rating}</span>
                             </div>
                         </div>
                         <div class="mt-2 text-xs">
                             ${healthTags}
                             ${dietTags}
                         </div>
-                        <p class="mt-2 text-sm text-gray-300">${food.description}</p>
-                        <div class="mt-4 flex justify-between items-center">
-                            <span class="text-lg font-bold text-white">₹${food.price.toFixed(2)}</span>
+                        <p class="mt-2 text-sm text-gray-600">${food.description}</p>
+                    </div>
+                    <div class="p-6 pt-0 mt-auto">
+                        <div class="flex justify-between items-center">
+                            <span class="text-lg font-bold text-gray-800">₹${food.price.toFixed(2)}</span>
                             <div class="flex space-x-2 relative">
                                 ${matchTooltip}
-                                <button onclick="showRecipe(${food.id})" class="text-purple-400 border border-purple-400 py-1 px-3 focus:outline-none hover:bg-purple-600 hover:text-white rounded text-sm transition">
+                                <button onclick="showRecipe(${food.id})" class="text-red-600 border border-red-600 py-2 px-4 focus:outline-none hover:bg-red-600 hover:text-white rounded-lg text-sm transition btn-shine">
                                     View Recipe
                                 </button>
-                                <button onclick="addToCart(${food.id})" class="text-white bg-purple-600 border-0 py-1 px-3 focus:outline-none hover:bg-purple-700 rounded text-sm transition">
+                                <button onclick="addToCart(${food.id})" class="text-white bg-gradient-to-r from-red-600 to-amber-600 border-0 py-2 px-4 focus:outline-none hover:from-red-700 hover:to-amber-700 rounded-lg text-sm transition shadow-lg btn-shine">
                                     Add to Cart
                                 </button>
                             </div>
@@ -1363,23 +1467,134 @@
             window.location.href = 'recipe.html?id=' + itemId;
         }
 
-        // Initialize page
-        document.addEventListener('DOMContentLoaded', function() {
-            // Display user's dietary profile
-            displayHealthTags();
+        // Shopping cart functionality
+        let cart = JSON.parse(localStorage.getItem('cart')) || [];
+        
+        function saveCart() {
+            localStorage.setItem('cart', JSON.stringify(cart));
+        }
+        
+        function toggleCart() {
+            const cartSidebar = document.getElementById('cart-sidebar');
+            const cartOverlay = document.getElementById('cart-overlay');
             
-            // Load recommended foods based on preferences
-            loadRecommendedFoods();
+            cartSidebar.classList.toggle('translate-x-full');
+            cartOverlay.classList.toggle('hidden');
+        }
+        
+        function updateCart() {
+            const cartItemsContainer = document.getElementById('cart-items');
+            const cartCount = document.getElementById('cart-count');
+            const cartHoverCount = document.getElementById('cart-hover-count');
+            const cartSubtotal = document.getElementById('cart-subtotal');
+            const cartTotal = document.getElementById('cart-total');
             
-            // Initialize cart from localStorage
+            // Update cart count
+            const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+            cartCount.textContent = totalItems;
+            cartHoverCount.textContent = totalItems;
+            
+            // Update cart items
+            if (cart.length === 0) {
+                cartItemsContainer.innerHTML = `
+                    <div class="text-center py-12">
+                        <i class="fas fa-shopping-cart text-4xl text-gray-400 mb-4"></i>
+                        <p class="text-gray-500">Your cart is empty</p>
+                        <button onclick="toggleCart()" class="mt-4 text-red-600 hover:text-red-500 underline">
+                            Browse our menu
+                        </button>
+                    </div>
+                `;
+            } else {
+                cartItemsContainer.innerHTML = '';
+                cart.forEach(item => {
+                    const cartItem = document.createElement('div');
+                    cartItem.className = 'flex justify-between items-center mb-4 pb-4 border-b border-amber-200';
+                    cartItem.innerHTML = `
+                        <div class="flex items-center">
+                            <img src="${item.image}" alt="${item.name}" class="w-16 h-16 object-cover rounded-lg">
+                            <div class="ml-4">
+                                <h3 class="text-sm font-medium text-gray-800">${item.name}</h3>
+                                <p class="text-xs text-gray-600">₹${item.price.toFixed(2)} x ${item.quantity}</p>
+                                <div class="flex items-center mt-1">
+                                    <button onclick="decreaseQuantity(${item.id})" class="text-gray-500 hover:text-red-600 text-xs">
+                                        <i class="fas fa-minus"></i>
+                                    </button>
+                                    <span class="mx-2 text-sm">${item.quantity}</span>
+                                    <button onclick="increaseQuantity(${item.id})" class="text-gray-500 hover:text-red-600 text-xs">
+                                        <i class="fas fa-plus"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center">
+                            <span class="text-sm font-medium text-gray-800">₹${(item.price * item.quantity).toFixed(2)}</span>
+                            <button onclick="removeFromCart(${item.id})" class="ml-4 text-red-500 hover:text-red-600">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    `;
+                    cartItemsContainer.appendChild(cartItem);
+                });
+            }
+            
+            // Update totals
+            const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const deliveryFee = 30; // 30 INR delivery fee
+            const total = subtotal + deliveryFee;
+            
+            cartSubtotal.textContent = `₹${subtotal.toFixed(2)}`;
+            cartTotal.textContent = `₹${total.toFixed(2)}`;
+            
+            // Save cart to localStorage
+            saveCart();
+        }
+        
+        function addToCart(itemId) {
+            const item = foodDatabase.find(i => i.id === itemId);
+            const existingItem = cart.find(i => i.id === itemId);
+            
+            if (existingItem) {
+                existingItem.quantity += 1;
+            } else {
+                cart.push({...item, quantity: 1});
+            }
+            
             updateCart();
+            showAddedToCartMessage(item.name);
+        }
+        
+        function removeFromCart(itemId) {
+            const itemIndex = cart.findIndex(i => i.id === itemId);
             
-            // Add event listeners for filters
-            document.getElementById('cuisine-filter').addEventListener('change', filterFoods);
-            document.getElementById('diet-filter').addEventListener('change', filterFoods);
-            document.getElementById('food-search').addEventListener('input', filterFoods);
-            document.getElementById('reset-filters').addEventListener('click', resetFilters);
-        });
+            if (itemIndex !== -1) {
+                if (cart[itemIndex].quantity > 1) {
+                    cart[itemIndex].quantity -= 1;
+                } else {
+                    cart.splice(itemIndex, 1);
+                }
+                
+                updateCart();
+            }
+        }
+        
+        function showAddedToCartMessage(itemName) {
+            const notification = document.createElement('div');
+            notification.className = 'fixed bottom-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg flex items-center z-50 animate-bounce';
+            notification.innerHTML = `
+                <i class="fas fa-check-circle mr-3 text-xl"></i>
+                <div>
+                    <p class="font-bold">Added to cart!</p>
+                    <p class="text-sm">${itemName}</p>
+                </div>
+            `;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.classList.add('opacity-0', 'transition-opacity', 'duration-300');
+                setTimeout(() => notification.remove(), 300);
+            }, 2000);
+        }
 
         // Filter foods based on search and filters
         function filterFoods() {
@@ -1417,8 +1632,74 @@
             filterFoods();
         }
 
-        // Add smooth transition to all links
+        // Initialize page
         document.addEventListener('DOMContentLoaded', function() {
+            // Check if user is logged in
+            const userData = JSON.parse(localStorage.getItem('userData'));
+            
+            if (userData) {
+                // Show profile section and update with user data
+                const profileSection = document.getElementById('profile-section');
+                const profileName = document.getElementById('profile-name');
+                const profileButton = document.getElementById('profile-button');
+                
+                // Show the profile section that was hidden by default
+                profileSection.classList.remove('hidden');
+                
+                // Set the profile name
+                profileName.textContent = userData.displayName || userData.email || 'User';
+                
+                // Replace font awesome icon with profile picture if available
+                if (userData.photoURL) {
+                    // Remove the existing font awesome icon
+                    const iconElement = profileButton.querySelector('.fas.fa-user-circle');
+                    if (iconElement) {
+                        iconElement.remove();
+                    }
+                    
+                    // Create profile picture element
+                    const profilePic = document.createElement('img');
+                    profilePic.src = userData.photoURL;
+                    profilePic.alt = 'Profile';
+                    profilePic.className = 'h-8 w-8 rounded-full object-cover mr-2';
+                    
+                    // Add it to the beginning of the profile button
+                    profileButton.prepend(profilePic);
+                }
+                
+                // Set up dropdown toggle
+                profileButton.addEventListener('click', function() {
+                    const dropdown = document.getElementById('profile-dropdown');
+                    dropdown.classList.toggle('hidden');
+                });
+                
+                // Close dropdown when clicking outside
+                document.addEventListener('click', function(event) {
+                    const dropdown = document.getElementById('profile-dropdown');
+                    const profileButton = document.getElementById('profile-button');
+                    
+                    if (!profileButton.contains(event.target) && !dropdown.contains(event.target)) {
+                        dropdown.classList.add('hidden');
+                    }
+                });
+            }
+            
+            // Display user's dietary profile
+            displayHealthTags();
+            
+            // Load recommended foods based on preferences
+            loadRecommendedFoods();
+            
+            // Initialize cart from localStorage
+            updateCart();
+            
+            // Add event listeners for filters
+            document.getElementById('cuisine-filter').addEventListener('change', filterFoods);
+            document.getElementById('diet-filter').addEventListener('change', filterFoods);
+            document.getElementById('food-search').addEventListener('input', filterFoods);
+            document.getElementById('reset-filters').addEventListener('click', resetFilters);
+            
+            // Add smooth transition to all links
             document.querySelectorAll('a').forEach(link => {
                 link.addEventListener('click', function(e) {
                     // Don't apply to:
@@ -1442,6 +1723,16 @@
                 });
             });
         });
+
+        // Logout function
+        window.logout = async function() {
+            try {
+                await signOut(auth);
+                window.location.href = 'index.html';
+            } catch (error) {
+                console.error('Logout error:', error);
+            }
+        };
     </script>
 </body>
 </html>

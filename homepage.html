@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Homepage - NutriOrder</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         /* Page transition animations */
         body {
@@ -30,16 +31,16 @@
         }
 
         ::-webkit-scrollbar-track {
-            background: #1a202c;
+            background: #f1f1f1;
         }
 
         ::-webkit-scrollbar-thumb {
-            background: #4a5568;
+            background: #e11d48;
             border-radius: 4px;
         }
 
         ::-webkit-scrollbar-thumb:hover {
-            background: #718096;
+            background: #be123c;
         }
 
         /* Animation for hover effects */
@@ -49,18 +50,85 @@
 
         /* Custom glow effect */
         .glow {
-            box-shadow: 0 0 15px rgba(139, 92, 246, 0.5);
+            box-shadow: 0 0 15px rgba(225, 29, 72, 0.3);
         }
 
-        /* Responsive tweaks */
-        @media (max-width: 768px) {
-            .hero-title {
-                font-size: 2.5rem;
-            }
-            
-            .hero-subtitle {
-                font-size: 1.1rem;
-            }
+        /* Pulse animation for CTA */
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        /* Gradient text */
+        .gradient-text {
+            background: linear-gradient(90deg, #e11d48, #f59e0b);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        /* Floating animation */
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .floating {
+            animation: float 6s ease-in-out infinite;
+        }
+
+        /* Custom card hover effect */
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(225, 29, 72, 0.15);
+        }
+
+        /* Custom border animation */
+        .border-animate {
+            position: relative;
+        }
+
+        .border-animate::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 0.5rem;
+            padding: 2px;
+            background: linear-gradient(45deg, #e11d48, #f59e0b);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .border-animate:hover::before {
+            opacity: 1;
+        }
+
+        /* Custom underline animation */
+        .underline-animate {
+            position: relative;
+        }
+
+        .underline-animate::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -2px;
+            left: 0;
+            background: linear-gradient(90deg, #e11d48, #f59e0b);
+            transition: width 0.3s ease;
+        }
+
+        .underline-animate:hover::after {
+            width: 100%;
         }
 
         /* Food card animation */
@@ -92,7 +160,7 @@
 
         /* Shimmer effect for loading */
         .shimmer {
-            background: linear-gradient(90deg, #2d3748 0%, #4a5568 50%, #2d3748 100%);
+            background: linear-gradient(90deg, #fff7ed 0%, #ffedd5 50%, #fff7ed 100%);
             background-size: 200% 100%;
             animation: shimmer 1.5s infinite;
         }
@@ -103,6 +171,47 @@
             }
             100% {
                 background-position: 200% 0;
+            }
+        }
+
+        /* Indian pattern overlay */
+        .indian-pattern {
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23e11d48' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            opacity: 0.1;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        /* Special heading font */
+        .heading-font {
+            font-family: 'Playfair Display', serif;
+        }
+
+        /* Custom button shine effect */
+        .btn-shine:hover {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-shine:hover::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -60%;
+            width: 40%;
+            height: 200%;
+            background: rgba(255, 255, 255, 0.2);
+            transform: rotate(30deg);
+            animation: shine 1.5s ease;
+        }
+
+        @keyframes shine {
+            100% {
+                left: 120%;
             }
         }
     </style>
@@ -143,10 +252,6 @@
                 getDoc(userDocRef).then((doc) => {
                     if (doc.exists() && doc.data().preferences) {
                         localStorage.setItem('userPreferences', JSON.stringify(doc.data().preferences));
-                        // Refresh recommendations when preferences are loaded
-                        if (window.updateRecommendations) {
-                            window.updateRecommendations();
-                        }
                     }
                 });
             }
@@ -176,17 +281,14 @@
     </script>
     <script>
         tailwind.config = {
-            darkMode: 'class',
             theme: {
                 extend: {
                     colors: {
-                        primary: '#8b5cf6',
-                        secondary: '#7c3aed',
-                        dark: '#1f2937',
-                        light: '#f3f4f6',
-                        success: '#10b981',
-                        warning: '#f59e0b',
-                        danger: '#ef4444'
+                        primary: '#e11d48',
+                        secondary: '#be123c',
+                        accent: '#f59e0b',
+                        light: '#fff7ed',
+                        dark: '#1f2937'
                     },
                     animation: {
                         'click': 'click 300ms ease-out',
@@ -203,139 +305,109 @@
         }
     </script>
 </head>
-<body class="bg-gray-900 text-gray-100 min-h-screen">
-    <!-- Header/Navigation -->
-    <header class="sticky top-0 z-50 bg-gray-800 shadow-md">
-        <div class="container mx-auto flex flex-wrap p-5 flex-col md:flex-row items-center">
-            <a href="index.html" class="flex title-font font-medium items-center text-white mb-4 md:mb-0">
-                <i class="fas fa-utensils text-purple-500 text-2xl mr-2"></i>
-                <span class="ml-3 text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-600">NutriOrder</span>
-            </a>
-            <nav class="md:ml-auto flex flex-wrap items-center text-base justify-center">
-                <a href="homepage.html" class="mr-5 hover:text-purple-400 transition">Home</a>
-                <a href="recommended.html" class="mr-5 hover:text-purple-400 transition">Recommended</a>
-                <a href="restaurants.html" class="mr-5 hover:text-purple-400 transition">Restaurants</a>
-            </nav>
-            <button id="theme-toggle" class="p-2 rounded-lg focus:outline-none text-gray-300 hover:bg-gray-700 mr-4">
-                <i class="fas fa-moon dark:hidden"></i>
-                <i class="fas fa-sun hidden dark:block"></i>
-            </button>
-            <button onclick="toggleCart()" class="inline-flex items-center bg-purple-600 text-white border-0 py-2 px-4 focus:outline-none hover:bg-purple-700 rounded-lg transition mr-4">
-                <i class="fas fa-shopping-cart mr-2"></i> Cart
-                <span id="cart-count" class="ml-2 bg-white text-purple-600 rounded-full w-6 h-6 flex items-center justify-center">0</span>
-            </button>
-            <div class="relative">
-                <button id="profile-button" class="inline-flex items-center bg-gray-700 text-white border-0 py-2 px-4 focus:outline-none hover:bg-gray-600 rounded-lg transition">
-                    <i class="fas fa-user-circle mr-2"></i> <span id="profile-name"></span>
+<body class="bg-amber-50 text-gray-800 min-h-screen">
+    <!-- Navigation -->
+    <nav class="bg-white/90 backdrop-blur-md py-4 px-6 shadow-sm sticky top-0 z-50 border-b border-amber-200">
+        <div class="container mx-auto flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <i class="fas fa-utensils text-red-600 text-2xl"></i>
+                <span class="text-xl font-bold gradient-text heading-font">NutriOrder</span>
+            </div>
+            <div class="hidden md:flex space-x-6">
+                <a href="homepage.html" class="hover:text-red-600 transition underline-animate">Home</a>
+                <a href="recommended.html" class="hover:text-red-600 transition underline-animate">Recommended</a>
+                <a href="restaurants.html" class="hover:text-red-600 transition underline-animate">Restaurants</a>
+            </div>
+            <div class="flex items-center space-x-4">
+                <button id="theme-toggle" class="p-2 rounded-lg focus:outline-none text-gray-600 hover:bg-amber-100 mr-2">
+                    <i class="fas fa-moon"></i>
                 </button>
-                <div id="profile-dropdown" class="absolute right-0 mt-2 w-48 bg-gray-800 rounded-md shadow-lg py-1 z-50 hidden border border-gray-700">
-                    <a href="dashboard.html" class="block px-4 py-2 text-sm hover:bg-gray-700">Dashboard</a>
-                    <a href="orders.html" class="block px-4 py-2 text-sm hover:bg-gray-700">My Orders</a>
-                    <a href="settings.html" class="block px-4 py-2 text-sm hover:bg-gray-700">Settings</a>
-                    <a href="#" onclick="logout()" class="block px-4 py-2 text-sm hover:bg-gray-700">Sign out</a>
-                </div>
-            </div>
-        </div>
-    </header>
-
-    <!-- Shopping Cart Sidebar -->
-    <div id="cart-sidebar" class="fixed top-0 right-0 h-full w-80 bg-gray-800 shadow-lg transform translate-x-full transition-transform duration-300 ease-in-out z-50 overflow-y-auto border-l border-gray-700">
-        <div class="p-4 border-b border-gray-700 flex justify-between items-center">
-            <h3 class="text-lg font-semibold text-white">Your Order</h3>
-            <button onclick="toggleCart()" class="text-gray-400 hover:text-white">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-        <div id="cart-items" class="p-4">
-            <!-- Cart items will be added here dynamically -->
-            <p class="text-gray-400 text-center py-8">Your cart is empty</p>
-        </div>
-        <div class="p-4 border-t border-gray-700">
-            <div class="flex justify-between mb-2 text-white">
-                <span>Subtotal:</span>
-                <span id="cart-subtotal">₹0.00</span>
-            </div>
-            <div class="flex justify-between mb-4 text-white">
-                <span>Delivery:</span>
-                <span>₹30.00</span>
-            </div>
-            <div class="flex justify-between font-bold text-lg text-white">
-                <span>Total:</span>
-                <span id="cart-total">₹30.00</span>
-            </div>
-            <a href="checkout.html" class="w-full bg-purple-600 text-white py-2 rounded-lg mt-4 hover:bg-purple-700 transition flex items-center justify-center">
-                Checkout
-            </a>
-        </div>
-    </div>
-    <div id="cart-overlay" class="hidden fixed inset-0 bg-black bg-opacity-50 z-40" onclick="toggleCart()"></div>
-
-    <!-- Hero Banner -->
-    <div class="relative bg-gray-800 overflow-hidden">
-        <div class="max-w-7xl mx-auto">
-            <div class="relative z-10 pb-8 bg-gray-800 sm:pb-16 md:pb-20 lg:max-w-2xl lg:w-full lg:pb-28 xl:pb-32">
-                <div class="pt-10 sm:pt-16 lg:pt-8 lg:pb-14 lg:overflow-hidden">
-                    <div class="mt-10 mx-auto max-w-7xl px-4 sm:mt-12 sm:px-6 md:mt-16 lg:mt-20 lg:px-8 xl:mt-28">
-                        <div class="sm:text-center lg:text-left">
-                            <h1 class="text-4xl tracking-tight font-extrabold text-white sm:text-5xl md:text-6xl">
-                                <span class="block">Healthy food,</span>
-                                <span class="block text-purple-400">delivered to you</span>
-                            </h1>
-                            <p class="mt-3 text-base text-gray-300 sm:mt-5 sm:text-lg sm:max-w-xl sm:mx-auto md:mt-5 md:text-xl lg:mx-0">
-                                Nutritious meals tailored to your dietary needs and health goals. Order from top-rated healthy restaurants near you.
-                            </p>
-                            <div class="mt-5 sm:mt-8 sm:flex sm:justify-center lg:justify-start">
-                                <div class="rounded-md shadow">
-                                    <a href="#food-section" class="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 md:py-4 md:text-lg md:px-10">
-                                        Order Now
-                                    </a>
-                                </div>
-                                <div class="mt-3 sm:mt-0 sm:ml-3">
-                                    <a href="#restaurants" class="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-purple-300 bg-gray-700 hover:bg-gray-600 md:py-4 md:text-lg md:px-10">
-                                        View Restaurants
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
+                <button onclick="toggleCart()" class="flex items-center space-x-2 bg-gradient-to-r from-red-600 to-amber-600 hover:from-red-700 hover:to-amber-700 px-4 py-2 rounded-full transition shadow-lg relative group text-white btn-shine">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span id="cart-count" class="bg-white text-red-600 rounded-full w-6 h-6 flex items-center justify-center font-bold">0</span>
+                    <span class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity" id="cart-hover-count">0</span>
+                </button>
+                <div class="relative">
+                    <button id="profile-button" class="flex items-center space-x-2 bg-amber-100 hover:bg-amber-200 px-4 py-2 rounded-full transition border-animate">
+                        <i class="fas fa-user-circle text-red-600"></i>
+                        <span id="profile-name" class="text-gray-700"></span>
+                        <i class="fas fa-chevron-down text-xs text-gray-600"></i>
+                    </button>
+                    <div id="profile-dropdown" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 hidden border border-amber-200 backdrop-blur-sm">
+                        <a href="dashboard.html" class="block px-4 py-2 text-sm hover:bg-amber-50 transition text-gray-700">Dashboard</a>
+                        <a href="orders.html" class="block px-4 py-2 text-sm hover:bg-amber-50 transition text-gray-700">My Orders</a>
+                        <a href="settings.html" class="block px-4 py-2 text-sm hover:bg-amber-50 transition text-gray-700">Settings</a>
+                        <a href="#" onclick="logout()" class="block px-4 py-2 text-sm hover:bg-amber-50 transition text-gray-700">Sign out</a>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="lg:absolute lg:inset-y-0 lg:right-0 lg:w-1/2">
-            <img class="h-56 w-full object-cover sm:h-72 md:h-96 lg:w-full lg:h-full" src="https://images.unsplash.com/photo-1490645935967-10de6ba17061?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80" alt="Healthy food">
+    </nav>
+
+    <!-- Hero Banner -->
+    <section class="relative bg-gradient-to-br from-amber-50 to-red-50 py-24 px-6 overflow-hidden">
+        <div class="indian-pattern"></div>
+        <div class="absolute inset-0 opacity-60">
+            <div class="absolute top-0 left-0 w-64 h-64 bg-red-200 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob"></div>
+            <div class="absolute top-0 right-0 w-64 h-64 bg-amber-200 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-2000"></div>
+            <div class="absolute bottom-0 left-1/2 w-64 h-64 bg-pink-200 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-4000"></div>
         </div>
-    </div>
+        <div class="container mx-auto text-center relative z-10">
+            <h1 class="text-4xl md:text-6xl font-bold mb-6 leading-tight heading-font">
+                Healthy food, <span class="gradient-text">delivered to you</span>
+            </h1>
+            <p class="text-xl md:text-2xl mb-8 max-w-3xl mx-auto text-gray-600">
+                Nutritious meals tailored to your dietary needs and health goals. Order from top-rated healthy restaurants near you.
+            </p>
+            <div class="flex flex-col md:flex-row justify-center gap-4">
+                <a href="#food-section">
+                    <button class="bg-gradient-to-r from-red-600 to-amber-600 hover:from-red-700 hover:to-amber-700 text-white px-8 py-4 rounded-full font-bold transition transform hover:scale-105 shadow-lg pulse btn-shine">
+                        Order Now <i class="fas fa-arrow-right ml-2"></i>
+                    </button>
+                </a>
+                <a href="#restaurants">
+                    <button class="bg-white hover:bg-amber-100 text-gray-800 px-8 py-4 rounded-full font-bold transition transform hover:scale-105 shadow-lg border border-amber-200">
+                        View Restaurants <i class="fas fa-store ml-2"></i>
+                    </button>
+                </a>
+            </div>
+        </div>
+        <div class="absolute top-1/2 right-10 transform -translate-y-1/2 floating hidden lg:block">
+            <img src="https://images.unsplash.com/photo-1490645935967-10de6ba17061?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80" alt="Healthy food" class="w-72 h-72 object-cover rounded-xl shadow-2xl border-4 border-white">
+        </div>
+        <div class="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-amber-50 to-transparent"></div>
+    </section>
 
     <!-- Food Categories -->
-    <div class="bg-gray-800 py-6 px-4">
+    <div class="bg-white py-6 px-4 shadow-sm">
         <div class="max-w-7xl mx-auto">
-            <h2 class="text-xl font-bold text-white mb-4">Food Categories</h2>
+            <h2 class="text-xl font-bold text-gray-800 mb-4 heading-font">Food Categories</h2>
             <div class="flex space-x-4 overflow-x-auto pb-4 scroll-snap-x">
-                <button onclick="filterByCategory('all')" class="category-btn flex-shrink-0 px-4 py-2 bg-purple-600 text-white rounded-full font-medium scroll-snap-item">
+                <button onclick="filterByCategory('all')" class="category-btn flex-shrink-0 px-4 py-2 bg-gradient-to-r from-red-600 to-amber-600 text-white rounded-full font-medium scroll-snap-item btn-shine">
                     All Items
                 </button>
-                <button onclick="filterByCategory('indian')" class="category-btn flex-shrink-0 px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-full font-medium scroll-snap-item">
+                <button onclick="filterByCategory('indian')" class="category-btn flex-shrink-0 px-4 py-2 bg-amber-100 hover:bg-amber-200 text-gray-700 rounded-full font-medium scroll-snap-item border-animate">
                     Indian
                 </button>
-                <button onclick="filterByCategory('north indian')" class="category-btn flex-shrink-0 px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-full font-medium scroll-snap-item">
+                <button onclick="filterByCategory('north indian')" class="category-btn flex-shrink-0 px-4 py-2 bg-amber-100 hover:bg-amber-200 text-gray-700 rounded-full font-medium scroll-snap-item border-animate">
                     North Indian
                 </button>
-                <button onclick="filterByCategory('south indian')" class="category-btn flex-shrink-0 px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-full font-medium scroll-snap-item">
+                <button onclick="filterByCategory('south indian')" class="category-btn flex-shrink-0 px-4 py-2 bg-amber-100 hover:bg-amber-200 text-gray-700 rounded-full font-medium scroll-snap-item border-animate">
                     South Indian
                 </button>
-                <button onclick="filterByCategory('vegetarian')" class="category-btn flex-shrink-0 px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-full font-medium scroll-snap-item">
+                <button onclick="filterByCategory('vegetarian')" class="category-btn flex-shrink-0 px-4 py-2 bg-amber-100 hover:bg-amber-200 text-gray-700 rounded-full font-medium scroll-snap-item border-animate">
                     Vegetarian
                 </button>
-                <button onclick="filterByCategory('vegan')" class="category-btn flex-shrink-0 px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-full font-medium scroll-snap-item">
+                <button onclick="filterByCategory('vegan')" class="category-btn flex-shrink-0 px-4 py-2 bg-amber-100 hover:bg-amber-200 text-gray-700 rounded-full font-medium scroll-snap-item border-animate">
                     Vegan
                 </button>
-                <button onclick="filterByCategory('high-protein')" class="category-btn flex-shrink-0 px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-full font-medium scroll-snap-item">
+                <button onclick="filterByCategory('high-protein')" class="category-btn flex-shrink-0 px-4 py-2 bg-amber-100 hover:bg-amber-200 text-gray-700 rounded-full font-medium scroll-snap-item border-animate">
                     High Protein
                 </button>
-                <button onclick="filterByCategory('low-carb')" class="category-btn flex-shrink-0 px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-full font-medium scroll-snap-item">
+                <button onclick="filterByCategory('low-carb')" class="category-btn flex-shrink-0 px-4 py-2 bg-amber-100 hover:bg-amber-200 text-gray-700 rounded-full font-medium scroll-snap-item border-animate">
                     Low Carb
                 </button>
-                <button onclick="filterByCategory('keto')" class="category-btn flex-shrink-0 px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-full font-medium scroll-snap-item">
+                <button onclick="filterByCategory('keto')" class="category-btn flex-shrink-0 px-4 py-2 bg-amber-100 hover:bg-amber-200 text-gray-700 rounded-full font-medium scroll-snap-item border-animate">
                     Keto
                 </button>
             </div>
@@ -343,13 +415,13 @@
     </div>
 
     <!-- Food Section -->
-    <section id="food-section" class="py-8 px-4 bg-gray-900">
+    <section id="food-section" class="py-12 px-6 bg-amber-50">
         <div class="max-w-7xl mx-auto">
-            <div class="flex flex-col md:flex-row justify-between items-center mb-6">
-                <h2 class="text-2xl font-bold text-white mb-4 md:mb-0">Recommended For You</h2>
+            <div class="flex flex-col md:flex-row justify-between items-center mb-8">
+                <h2 class="text-3xl font-bold text-gray-800 mb-4 md:mb-0 heading-font">Our <span class="gradient-text">Menu</span></h2>
                 <div class="flex items-center space-x-4">
                     <div class="relative">
-                        <select id="sort-by" class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-purple-500 focus:border-purple-500 block w-full p-2.5">
+                        <select id="sort-by" class="bg-white border border-amber-300 text-gray-800 text-sm rounded-lg focus:ring-red-500 focus:border-red-500 block w-full p-2.5">
                             <option value="recommended">Recommended</option>
                             <option value="rating">Rating</option>
                             <option value="price-low">Price: Low to High</option>
@@ -358,72 +430,72 @@
                             <option value="calories-high">Calories: High to Low</option>
                         </select>
                     </div>
-                    <button id="filter-btn" class="flex items-center text-white bg-gray-700 hover:bg-gray-600 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm px-4 py-2.5">
-                        <i class="fas fa-filter mr-2"></i> Filters
+                    <button id="filter-btn" class="flex items-center text-gray-800 bg-white hover:bg-amber-100 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-4 py-2.5 border border-amber-300">
+                        <i class="fas fa-filter mr-2 text-red-600"></i> Filters
                     </button>
                 </div>
             </div>
 
             <!-- Filter Panel (Hidden by default) -->
-            <div id="filter-panel" class="hidden bg-gray-800 rounded-lg p-4 mb-6">
+            <div id="filter-panel" class="hidden bg-white rounded-lg p-6 mb-8 shadow-md border border-amber-200">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div>
-                        <h3 class="font-medium text-white mb-2">Dietary Preferences</h3>
+                        <h3 class="font-medium text-gray-800 mb-3 heading-font">Dietary Preferences</h3>
                         <div class="space-y-2">
                             <label class="flex items-center">
-                                <input type="checkbox" class="diet-filter" value="vegetarian" checked>
-                                <span class="ml-2 text-gray-300">Vegetarian</span>
+                                <input type="checkbox" class="diet-filter rounded text-red-600 focus:ring-red-500" value="vegetarian" checked>
+                                <span class="ml-2 text-gray-700">Vegetarian</span>
                             </label>
                             <label class="flex items-center">
-                                <input type="checkbox" class="diet-filter" value="vegan" checked>
-                                <span class="ml-2 text-gray-300">Vegan</span>
+                                <input type="checkbox" class="diet-filter rounded text-red-600 focus:ring-red-500" value="vegan" checked>
+                                <span class="ml-2 text-gray-700">Vegan</span>
                             </label>
                             <label class="flex items-center">
-                                <input type="checkbox" class="diet-filter" value="gluten-free" checked>
-                                <span class="ml-2 text-gray-300">Gluten-Free</span>
+                                <input type="checkbox" class="diet-filter rounded text-red-600 focus:ring-red-500" value="gluten-free" checked>
+                                <span class="ml-2 text-gray-700">Gluten-Free</span>
                             </label>
                             <label class="flex items-center">
-                                <input type="checkbox" class="diet-filter" value="jain" checked>
-                                <span class="ml-2 text-gray-300">Jain</span>
+                                <input type="checkbox" class="diet-filter rounded text-red-600 focus:ring-red-500" value="jain" checked>
+                                <span class="ml-2 text-gray-700">Jain</span>
                             </label>
                         </div>
                     </div>
                     <div>
-                        <h3 class="font-medium text-white mb-2">Meal Type</h3>
+                        <h3 class="font-medium text-gray-800 mb-3 heading-font">Meal Type</h3>
                         <div class="space-y-2">
                             <label class="flex items-center">
-                                <input type="checkbox" class="meal-filter" value="breakfast" checked>
-                                <span class="ml-2 text-gray-300">Breakfast</span>
+                                <input type="checkbox" class="meal-filter rounded text-red-600 focus:ring-red-500" value="breakfast" checked>
+                                <span class="ml-2 text-gray-700">Breakfast</span>
                             </label>
                             <label class="flex items-center">
-                                <input type="checkbox" class="meal-filter" value="lunch" checked>
-                                <span class="ml-2 text-gray-300">Lunch</span>
+                                <input type="checkbox" class="meal-filter rounded text-red-600 focus:ring-red-500" value="lunch" checked>
+                                <span class="ml-2 text-gray-700">Lunch</span>
                             </label>
                             <label class="flex items-center">
-                                <input type="checkbox" class="meal-filter" value="dinner" checked>
-                                <span class="ml-2 text-gray-300">Dinner</span>
+                                <input type="checkbox" class="meal-filter rounded text-red-600 focus:ring-red-500" value="dinner" checked>
+                                <span class="ml-2 text-gray-700">Dinner</span>
                             </label>
                             <label class="flex items-center">
-                                <input type="checkbox" class="meal-filter" value="snacks" checked>
-                                <span class="ml-2 text-gray-300">Snacks</span>
+                                <input type="checkbox" class="meal-filter rounded text-red-600 focus:ring-red-500" value="snacks" checked>
+                                <span class="ml-2 text-gray-700">Snacks</span>
                             </label>
                         </div>
                     </div>
                     <div>
-                        <h3 class="font-medium text-white mb-2">Nutrition</h3>
+                        <h3 class="font-medium text-gray-800 mb-3 heading-font">Nutrition</h3>
                         <div class="space-y-4">
                             <div>
-                                <label class="block text-sm font-medium text-gray-300 mb-1">Max Calories</label>
-                                <input type="range" id="calorie-range" min="100" max="1000" value="1000" class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer">
-                                <div class="flex justify-between text-xs text-gray-400">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Max Calories</label>
+                                <input type="range" id="calorie-range" min="100" max="1000" value="1000" class="w-full h-2 bg-amber-200 rounded-lg appearance-none cursor-pointer">
+                                <div class="flex justify-between text-xs text-gray-500">
                                     <span>100</span>
                                     <span id="calorie-value">1000</span>
                                 </div>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-300 mb-1">Min Protein (g)</label>
-                                <input type="range" id="protein-range" min="0" max="50" value="0" class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer">
-                                <div class="flex justify-between text-xs text-gray-400">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Min Protein (g)</label>
+                                <input type="range" id="protein-range" min="0" max="50" value="0" class="w-full h-2 bg-amber-200 rounded-lg appearance-none cursor-pointer">
+                                <div class="flex justify-between text-xs text-gray-500">
                                     <span>0</span>
                                     <span id="protein-value">50</span>
                                 </div>
@@ -431,11 +503,11 @@
                         </div>
                     </div>
                 </div>
-                <div class="mt-4 flex justify-end space-x-3">
-                    <button id="reset-filters-btn" class="px-4 py-2 text-sm font-medium text-gray-300 bg-gray-700 rounded-lg hover:bg-gray-600">
+                <div class="mt-6 flex justify-end space-x-3">
+                    <button id="reset-filters-btn" class="px-4 py-2 text-sm font-medium text-gray-700 bg-amber-100 rounded-lg hover:bg-amber-200 border border-amber-300">
                         Reset
                     </button>
-                    <button id="apply-filters-btn" class="px-4 py-2 text-sm font-medium text-white bg-purple-600 rounded-lg hover:bg-purple-700">
+                    <button id="apply-filters-btn" class="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-red-600 to-amber-600 rounded-lg hover:from-red-700 hover:to-amber-700 shadow btn-shine">
                         Apply Filters
                     </button>
                 </div>
@@ -449,73 +521,73 @@
             <!-- Loading State -->
             <div id="loading-state" class="hidden grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 <!-- Loading skeletons -->
-                <div class="bg-gray-800 rounded-lg overflow-hidden shadow animate-pulse">
-                    <div class="h-48 bg-gray-700"></div>
+                <div class="bg-white rounded-lg overflow-hidden shadow animate-pulse border border-amber-200">
+                    <div class="h-48 bg-amber-100"></div>
                     <div class="p-4">
-                        <div class="h-4 bg-gray-700 rounded w-3/4 mb-2"></div>
-                        <div class="h-3 bg-gray-700 rounded w-1/2 mb-4"></div>
+                        <div class="h-4 bg-amber-100 rounded w-3/4 mb-2"></div>
+                        <div class="h-3 bg-amber-100 rounded w-1/2 mb-4"></div>
                         <div class="grid grid-cols-3 gap-2 mb-4">
-                            <div class="h-2 bg-gray-700 rounded"></div>
-                            <div class="h-2 bg-gray-700 rounded"></div>
-                            <div class="h-2 bg-gray-700 rounded"></div>
+                            <div class="h-2 bg-amber-100 rounded"></div>
+                            <div class="h-2 bg-amber-100 rounded"></div>
+                            <div class="h-2 bg-amber-100 rounded"></div>
                         </div>
-                        <div class="h-8 bg-gray-700 rounded w-full"></div>
+                        <div class="h-8 bg-amber-100 rounded w-full"></div>
                     </div>
                 </div>
-                <div class="bg-gray-800 rounded-lg overflow-hidden shadow animate-pulse">
-                    <div class="h-48 bg-gray-700"></div>
+                <div class="bg-white rounded-lg overflow-hidden shadow animate-pulse border border-amber-200">
+                    <div class="h-48 bg-amber-100"></div>
                     <div class="p-4">
-                        <div class="h-4 bg-gray-700 rounded w-3/4 mb-2"></div>
-                        <div class="h-3 bg-gray-700 rounded w-1/2 mb-4"></div>
+                        <div class="h-4 bg-amber-100 rounded w-3/4 mb-2"></div>
+                        <div class="h-3 bg-amber-100 rounded w-1/2 mb-4"></div>
                         <div class="grid grid-cols-3 gap-2 mb-4">
-                            <div class="h-2 bg-gray-700 rounded"></div>
-                            <div class="h-2 bg-gray-700 rounded"></div>
-                            <div class="h-2 bg-gray-700 rounded"></div>
+                            <div class="h-2 bg-amber-100 rounded"></div>
+                            <div class="h-2 bg-amber-100 rounded"></div>
+                            <div class="h-2 bg-amber-100 rounded"></div>
                         </div>
-                        <div class="h-8 bg-gray-700 rounded w-full"></div>
+                        <div class="h-8 bg-amber-100 rounded w-full"></div>
                     </div>
                 </div>
-                <div class="bg-gray-800 rounded-lg overflow-hidden shadow animate-pulse">
-                    <div class="h-48 bg-gray-700"></div>
+                <div class="bg-white rounded-lg overflow-hidden shadow animate-pulse border border-amber-200">
+                    <div class="h-48 bg-amber-100"></div>
                     <div class="p-4">
-                        <div class="h-4 bg-gray-700 rounded w-3/4 mb-2"></div>
-                        <div class="h-3 bg-gray-700 rounded w-1/2 mb-4"></div>
+                        <div class="h-4 bg-amber-100 rounded w-3/4 mb-2"></div>
+                        <div class="h-3 bg-amber-100 rounded w-1/2 mb-4"></div>
                         <div class="grid grid-cols-3 gap-2 mb-4">
-                            <div class="h-2 bg-gray-700 rounded"></div>
-                            <div class="h-2 bg-gray-700 rounded"></div>
-                            <div class="h-2 bg-gray-700 rounded"></div>
+                            <div class="h-2 bg-amber-100 rounded"></div>
+                            <div class="h-2 bg-amber-100 rounded"></div>
+                            <div class="h-2 bg-amber-100 rounded"></div>
                         </div>
-                        <div class="h-8 bg-gray-700 rounded w-full"></div>
+                        <div class="h-8 bg-amber-100 rounded w-full"></div>
                     </div>
                 </div>
-                <div class="bg-gray-800 rounded-lg overflow-hidden shadow animate-pulse">
-                    <div class="h-48 bg-gray-700"></div>
+                <div class="bg-white rounded-lg overflow-hidden shadow animate-pulse border border-amber-200">
+                    <div class="h-48 bg-amber-100"></div>
                     <div class="p-4">
-                        <div class="h-4 bg-gray-700 rounded w-3/4 mb-2"></div>
-                        <div class="h-3 bg-gray-700 rounded w-1/2 mb-4"></div>
+                        <div class="h-4 bg-amber-100 rounded w-3/4 mb-2"></div>
+                        <div class="h-3 bg-amber-100 rounded w-1/2 mb-4"></div>
                         <div class="grid grid-cols-3 gap-2 mb-4">
-                            <div class="h-2 bg-gray-700 rounded"></div>
-                            <div class="h-2 bg-gray-700 rounded"></div>
-                            <div class="h-2 bg-gray-700 rounded"></div>
+                            <div class="h-2 bg-amber-100 rounded"></div>
+                            <div class="h-2 bg-amber-100 rounded"></div>
+                            <div class="h-2 bg-amber-100 rounded"></div>
                         </div>
-                        <div class="h-8 bg-gray-700 rounded w-full"></div>
+                        <div class="h-8 bg-amber-100 rounded w-full"></div>
                     </div>
                 </div>
             </div>
 
             <!-- No Results State -->
             <div id="no-results" class="hidden text-center py-12">
-                <i class="fas fa-utensils text-4xl text-gray-600 mb-4"></i>
-                <h3 class="text-xl font-medium text-gray-300 mb-2">No matching items found</h3>
+                <i class="fas fa-utensils text-4xl text-gray-400 mb-4"></i>
+                <h3 class="text-xl font-medium text-gray-700 mb-2 heading-font">No matching items found</h3>
                 <p class="text-gray-500 mb-4">Try adjusting your filters or search for something else</p>
-                <button id="reset-all-filters" class="px-4 py-2 text-sm font-medium text-white bg-purple-600 rounded-lg hover:bg-purple-700">
+                <button id="reset-all-filters" class="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-red-600 to-amber-600 rounded-lg hover:from-red-700 hover:to-amber-700 shadow btn-shine">
                     Reset All Filters
                 </button>
             </div>
 
             <!-- Load More Button -->
             <div class="mt-8 text-center">
-                <button id="load-more" class="px-6 py-3 text-white bg-purple-600 rounded-lg hover:bg-purple-700 font-medium">
+                <button id="load-more" class="px-6 py-3 text-white bg-gradient-to-r from-red-600 to-amber-600 rounded-lg hover:from-red-700 hover:to-amber-700 font-medium shadow-lg btn-shine">
                     Load More
                 </button>
             </div>
@@ -523,69 +595,207 @@
     </section>
 
     <!-- Popular Restaurants Section -->
-    <section id="restaurants" class="py-12 px-4 bg-gray-800">
+    <section id="restaurants" class="py-16 px-6 bg-white">
         <div class="max-w-7xl mx-auto">
-            <h2 class="text-2xl font-bold text-white mb-6">Popular Restaurants Near You</h2>
+            <div class="text-center mb-12">
+                <span class="text-red-600 font-semibold">OUR PARTNERS</span>
+                <h2 class="text-3xl font-bold mt-2 heading-font">Popular <span class="gradient-text">Restaurants</span></h2>
+                <p class="text-gray-600 max-w-2xl mx-auto mt-4">We partner with the best healthy restaurants to bring you nutritious meals</p>
+            </div>
             
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="restaurants-grid">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8" id="restaurants-grid">
                 <!-- Restaurants will be loaded here dynamically -->
             </div>
         </div>
     </section>
 
     <!-- Health Tips Section -->
-    <section class="py-12 px-4 bg-gray-900">
+    <section class="py-16 px-6 bg-amber-50">
         <div class="max-w-7xl mx-auto">
-            <h2 class="text-2xl font-bold text-white mb-6">Health Tips For You</h2>
+            <div class="text-center mb-12">
+                <span class="text-red-600 font-semibold">HEALTH TIPS</span>
+                <h2 class="text-3xl font-bold mt-2 heading-font">Healthy <span class="gradient-text">Eating Tips</span></h2>
+                <p class="text-gray-600 max-w-2xl mx-auto mt-4">Tips for maintaining a healthy diet and lifestyle</p>
+            </div>
             
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="health-tips">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8" id="health-tips">
                 <!-- Health tips will be loaded here dynamically -->
             </div>
         </div>
     </section>
 
     <!-- Footer -->
-    <footer class="text-gray-300 body-font bg-gray-800">
-        <div class="container px-5 py-8 mx-auto flex items-center sm:flex-row flex-col">
-            <a href="index.html" class="flex title-font font-medium items-center md:justify-start justify-center text-white">
-                <i class="fas fa-utensils text-purple-500 text-2xl mr-2"></i>
-                <span class="ml-3 text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-600">NutriOrder</span>
-            </a>
-            <p class="text-sm text-gray-400 sm:ml-4 sm:pl-4 sm:border-l-2 sm:border-gray-700 sm:py-2 sm:mt-0 mt-4">© 2023 NutriOrder —
-                <a href="#" class="text-gray-300 ml-1" rel="noopener noreferrer" target="_blank">All Rights Reserved</a>
-            </p>
-            <span class="inline-flex sm:ml-auto sm:mt-0 mt-4 justify-center sm:justify-start">
-                <a href="#" class="text-gray-400 hover:text-purple-400">
-                    <i class="fab fa-facebook-f"></i>
-                </a>
-                <a href="#" class="ml-3 text-gray-400 hover:text-purple-400">
-                    <i class="fab fa-twitter"></i>
-                </a>
-                <a href="#" class="ml-3 text-gray-400 hover:text-purple-400">
-                    <i class="fab fa-instagram"></i>
-                </a>
-            </span>
+    <footer class="bg-white py-16 px-6 border-t border-amber-200">
+        <div class="container mx-auto">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-12">
+                <div>
+                    <h3 class="text-xl font-bold mb-6 flex items-center heading-font">
+                        <i class="fas fa-utensils text-red-500 mr-3"></i> NutriOrder
+                    </h3>
+                    <p class="text-gray-600 mb-4">Where traditional Indian food meets health intelligence. Making healthy eating simple, delicious, and accessible.</p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-gray-600 hover:text-red-600 transition text-lg"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="text-gray-600 hover:text-red-600 transition text-lg"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="text-gray-600 hover:text-red-600 transition text-lg"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="text-gray-600 hover:text-red-600 transition text-lg"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="font-bold text-lg mb-6 text-gray-800 heading-font">Explore</h4>
+                    <ul class="space-y-3">
+                        <li><a href="homepage.html" class="text-gray-600 hover:text-red-600 transition underline-animate">Home</a></li>
+                        <li><a href="recommended.html" class="text-gray-600 hover:text-red-600 transition underline-animate">Recommended</a></li>
+                        <li><a href="restaurants.html" class="text-gray-600 hover:text-red-600 transition underline-animate">Restaurants</a></li>
+                        <li><a href="#contact" class="text-gray-600 hover:text-red-600 transition underline-animate">Contact</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold text-lg mb-6 text-gray-800 heading-font">Company</h4>
+                    <ul class="space-y-3">
+                        <li><a href="#" class="text-gray-600 hover:text-red-600 transition underline-animate">About Us</a></li>
+                        <li><a href="#" class="text-gray-600 hover:text-red-600 transition underline-animate">Careers</a></li>
+                        <li><a href="#" class="text-gray-600 hover:text-red-600 transition underline-animate">Blog</a></li>
+                        <li><a href="#" class="text-gray-600 hover:text-red-600 transition underline-animate">Press</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold text-lg mb-6 text-gray-800 heading-font">Get Help</h4>
+                    <ul class="space-y-3">
+                        <li><a href="#" class="text-gray-600 hover:text-red-600 transition underline-animate">FAQ</a></li>
+                        <li><a href="#" class="text-gray-600 hover:text-red-600 transition underline-animate">Contact</a></li>
+                        <li><a href="#" class="text-gray-600 hover:text-red-600 transition underline-animate">Privacy</a></li>
+                        <li><a href="#" class="text-gray-600 hover:text-red-600 transition underline-animate">Terms</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-amber-200 mt-12 pt-8 text-center text-gray-500">
+                <p>© 2023 NutriOrder. All rights reserved. | Designed with <i class="fas fa-heart text-red-500"></i> for your health</p>
+            </div>
         </div>
     </footer>
+
+    <!-- Shopping Cart Sidebar -->
+    <div id="cart-sidebar" class="fixed top-0 right-0 h-full w-96 bg-white shadow-xl transform translate-x-full transition-transform duration-300 ease-in-out z-50 overflow-y-auto border-l border-amber-200">
+        <div class="p-6 border-b border-amber-200 flex justify-between items-center bg-white">
+            <h3 class="text-xl font-semibold text-gray-800 flex items-center">
+                <i class="fas fa-shopping-cart mr-2 text-red-600"></i> Your Order
+            </h3>
+            <button onclick="toggleCart()" class="text-gray-500 hover:text-gray-700 text-xl">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div id="cart-items" class="p-6">
+            <!-- Cart items will be added here dynamically -->
+            <div class="text-center py-12">
+                <i class="fas fa-shopping-cart text-4xl text-gray-400 mb-4"></i>
+                <p class="text-gray-500">Your cart is empty</p>
+                <button onclick="toggleCart()" class="mt-4 text-red-600 hover:text-red-500 underline">
+                    Browse our menu
+                </button>
+            </div>
+        </div>
+        <div class="p-6 border-t border-amber-200 bg-white">
+            <div class="flex justify-between mb-3 text-gray-700">
+                <span>Subtotal:</span>
+                <span id="cart-subtotal">₹0.00</span>
+            </div>
+            <div class="flex justify-between mb-3 text-gray-700">
+                <span>Delivery Fee:</span>
+                <span>₹30.00</span>
+            </div>
+            <div class="flex justify-between mb-6 text-lg font-bold text-gray-800">
+                <span>Total:</span>
+                <span id="cart-total">₹30.00</span>
+            </div>
+            <a href="checkout.html" class="w-full bg-gradient-to-r from-red-600 to-amber-600 text-white py-3 rounded-lg hover:from-red-700 hover:to-amber-700 transition flex items-center justify-center shadow-lg btn-shine">
+                <i class="fas fa-credit-card mr-2"></i> Proceed to Checkout
+            </a>
+        </div>
+    </div>
+    <div id="cart-overlay" class="hidden fixed inset-0 bg-black bg-opacity-50 z-40 backdrop-blur-sm" onclick="toggleCart()"></div>
 
     <!-- Restaurant Menu Modal -->
     <div id="restaurant-menu-modal" class="hidden fixed inset-0 bg-black bg-opacity-75 z-50 overflow-y-auto">
         <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            <div class="inline-block align-bottom bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
+            <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full border border-amber-200">
                 <div class="px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                     <div class="flex justify-between items-center mb-4">
-                        <h3 id="restaurant-menu-title" class="text-lg leading-6 font-medium text-white"></h3>
-                        <button onclick="hideRestaurantMenu()" class="text-gray-400 hover:text-white">
+                        <h3 id="restaurant-menu-title" class="text-lg leading-6 font-medium text-gray-800 heading-font"></h3>
+                        <button onclick="hideRestaurantMenu()" class="text-gray-500 hover:text-gray-700">
                             <i class="fas fa-times"></i>
                         </button>
                     </div>
-                    <p id="restaurant-menu-description" class="text-sm text-gray-300 mb-4"></p>
+                    <p id="restaurant-menu-description" class="text-sm text-gray-600 mb-4"></p>
                     <div id="restaurant-menu-items" class="grid gap-4">
                         <!-- Menu items will be loaded here -->
                     </div>
                 </div>
                 <div class="px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                    <button onclick="hideRestaurantMenu()" type="button" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-purple-600 text-base font-medium text-white hover:bg-purple-700 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm">
+                    <button onclick="hideRestaurantMenu()" type="button" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-gradient-to-r from-red-600 to-amber-600 text-base font-medium text-white hover:from-red-700 hover:to-amber-700 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm btn-shine">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recipe Modal -->
+    <div id="recipe-modal" class="hidden fixed inset-0 bg-black bg-opacity-75 z-50 overflow-y-auto">
+        <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full border border-amber-200">
+                <div class="px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 id="recipe-title" class="text-lg leading-6 font-medium text-gray-800 heading-font"></h3>
+                        <div>
+                            <a href="recipe.html" class="mr-4 inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-gradient-to-r from-green-600 to-blue-600 text-base font-medium text-white hover:from-green-700 hover:to-blue-700 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm btn-shine">
+                                View Full Recipe
+                            </a>
+                            <button onclick="hideRecipe()" class="text-gray-500 hover:text-gray-700">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="flex flex-col md:flex-row gap-4 mb-4">
+                        <img id="recipe-image" src="" alt="" class="w-full md:w-1/2 h-48 object-cover rounded-lg">
+                        <div>
+                            <div class="grid grid-cols-3 gap-2 text-center mb-4">
+                                <div class="bg-amber-100 p-2 rounded">
+                                    <div class="font-medium" id="recipe-calories"></div>
+                                    <div class="text-gray-500 text-sm">CALORIES</div>
+                                </div>
+                                <div class="bg-amber-100 p-2 rounded">
+                                    <div class="font-medium" id="recipe-protein"></div>
+                                    <div class="text-gray-500 text-sm">PROTEIN</div>
+                                </div>
+                                <div class="bg-amber-100 p-2 rounded">
+                                    <div class="font-medium" id="recipe-carbs"></div>
+                                    <div class="text-gray-500 text-sm">CARBS</div>
+                                </div>
+                            </div>
+                            <div class="flex flex-wrap gap-2">
+                                <span id="recipe-cuisine" class="text-xs bg-amber-100 text-amber-800 px-2 py-1 rounded"></span>
+                                <span id="recipe-type" class="text-xs bg-amber-100 text-amber-800 px-2 py-1 rounded"></span>
+                                <span id="recipe-diet" class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <h4 class="font-medium text-gray-800 mb-2 heading-font">Description</h4>
+                        <p id="recipe-description" class="text-sm text-gray-600"></p>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <h4 class="font-medium text-gray-800 mb-2 heading-font">Ingredients</h4>
+                            <ul id="recipe-ingredients" class="text-sm text-gray-600 list-disc pl-5"></ul>
+                        </div>
+                        <div>
+                            <h4 class="font-medium text-gray-800 mb-2 heading-font">Instructions</h4>
+                            <ol id="recipe-instructions" class="text-sm text-gray-600 list-decimal pl-5"></ol>
+                        </div>
+                    </div>
+                </div>
+                <div class="px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                    <button onclick="hideRecipe()" type="button" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-gradient-to-r from-red-600 to-amber-600 text-base font-medium text-white hover:from-red-700 hover:to-amber-700 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm btn-shine">
                         Close
                     </button>
                 </div>
@@ -594,151 +804,6 @@
     </div>
 
     <script>
-        // Theme toggle functionality
-        const themeToggle = document.getElementById('theme-toggle');
-        const html = document.documentElement;
-
-        // Check for saved user preference or use system preference
-        if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-            html.classList.add('dark');
-        } else {
-            html.classList.remove('dark');
-        }
-
-        // Toggle theme
-        themeToggle.addEventListener('click', () => {
-            html.classList.toggle('dark');
-            localStorage.setItem('theme', html.classList.contains('dark') ? 'dark' : 'light');
-        });
-
-        // Profile dropdown functionality
-        const profileButton = document.getElementById('profile-button');
-        const profileDropdown = document.getElementById('profile-dropdown');
-
-        if (profileButton) {
-            profileButton.addEventListener('click', (e) => {
-                e.stopPropagation();
-                profileDropdown.classList.toggle('hidden');
-            });
-            
-            // Close dropdown when clicking outside
-            document.addEventListener('click', function() {
-                profileDropdown.classList.add('hidden');
-            });
-        }
-
-        // Shopping cart functionality
-        let cart = JSON.parse(localStorage.getItem('cart')) || [];
-        let currentRecipeId = null;
-        
-        // Toggle cart visibility
-        function toggleCart() {
-            const cartSidebar = document.getElementById('cart-sidebar');
-            const cartOverlay = document.getElementById('cart-overlay');
-            
-            cartSidebar.classList.toggle('translate-x-full');
-            cartOverlay.classList.toggle('hidden');
-        }
-        
-        // Save cart to localStorage
-        function saveCart() {
-            localStorage.setItem('cart', JSON.stringify(cart));
-            updateCart();
-        }
-        
-        // Update cart UI
-        function updateCart() {
-            const cartItemsContainer = document.getElementById('cart-items');
-            const cartCount = document.getElementById('cart-count');
-            const cartSubtotal = document.getElementById('cart-subtotal');
-            const cartTotal = document.getElementById('cart-total');
-            
-            // Update cart count
-            const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
-            cartCount.textContent = totalItems;
-            
-            // Update cart items
-            if (cart.length === 0) {
-                cartItemsContainer.innerHTML = '<p class="text-gray-400 text-center py-8">Your cart is empty</p>';
-            } else {
-                cartItemsContainer.innerHTML = '';
-                cart.forEach(item => {
-                    const cartItem = document.createElement('div');
-                    cartItem.className = 'flex justify-between items-center mb-4 pb-4 border-b border-gray-700';
-                    cartItem.innerHTML = `
-                        <div class="flex items-center">
-                            <img src="${item.image}" alt="${item.name}" class="w-12 h-12 object-cover rounded">
-                            <div class="ml-3">
-                                <h3 class="text-sm font-medium text-white">${item.name}</h3>
-                                <p class="text-xs text-gray-400">₹${item.price.toFixed(2)} x ${item.quantity}</p>
-                            </div>
-                        </div>
-                        <div class="flex items-center">
-                            <span class="text-sm font-medium text-white">₹${(item.price * item.quantity).toFixed(2)}</span>
-                            <button onclick="removeFromCart(${item.id})" class="ml-2 text-red-400 hover:text-red-300">
-                                <i class="fas fa-times"></i>
-                            </button>
-                        </div>
-                    `;
-                    cartItemsContainer.appendChild(cartItem);
-                });
-            }
-            
-            // Update totals
-            const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-            const deliveryFee = 30; // 30 INR delivery fee
-            const total = subtotal + deliveryFee;
-            
-            cartSubtotal.textContent = `₹${subtotal.toFixed(2)}`;
-            cartTotal.textContent = `₹${total.toFixed(2)}`;
-        }
-
-        // Add item to cart
-        function addToCart(itemId) {
-            const item = foodItems.find(i => i.id === itemId);
-            const existingItem = cart.find(i => i.id === itemId);
-            
-            if (existingItem) {
-                existingItem.quantity += 1;
-            } else {
-                cart.push({...item, quantity: 1});
-            }
-            
-            saveCart();
-            showAddedToCartMessage(item.name);
-        }
-
-        // Remove item from cart
-        function removeFromCart(itemId) {
-            const itemIndex = cart.findIndex(i => i.id === itemId);
-            
-            if (itemIndex !== -1) {
-                if (cart[itemIndex].quantity > 1) {
-                    cart[itemIndex].quantity -= 1;
-                } else {
-                    cart.splice(itemIndex, 1);
-                }
-                
-                saveCart();
-            }
-        }
-
-        // Show notification when item is added to cart
-        function showAddedToCartMessage(itemName) {
-            const notification = document.createElement('div');
-            notification.className = 'fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg flex items-center';
-            notification.innerHTML = `
-                <i class="fas fa-check-circle mr-2"></i>
-                ${itemName} added to cart!
-            `;
-            document.body.appendChild(notification);
-            
-            setTimeout(() => {
-                notification.classList.add('opacity-0', 'transition-opacity', 'duration-300');
-                setTimeout(() => notification.remove(), 300);
-            }, 2000);
-        }
-
         // Food items database (expanded with more items)
         const foodItems = [
             // Vegetarian Indian dishes
@@ -760,7 +825,38 @@
                 servings: "2 servings",
                 rating: 4.5,
                 type: "lunch",
-                cuisine: "north indian"
+                cuisine: "north indian",
+                ingredients: [
+                    "250g fresh spinach (palak)",
+                    "200g paneer (cottage cheese), cubed",
+                    "1 onion, finely chopped",
+                    "2 tomatoes, pureed",
+                    "2 cloves garlic, minced",
+                    "1 inch ginger, grated",
+                    "1 green chili, chopped",
+                    "1 tsp cumin seeds",
+                    "1 tsp turmeric powder",
+                    "1 tsp coriander powder",
+                    "1/2 tsp garam masala",
+                    "1/2 tsp red chili powder",
+                    "2 tbsp oil",
+                    "Salt to taste",
+                    "1/4 cup fresh cream (optional)"
+                ],
+                instructions: [
+                    "Blanch the spinach leaves in boiling water for 2 minutes, then transfer to ice water to retain color.",
+                    "Blend the spinach into a smooth puree and set aside.",
+                    "Heat oil in a pan, add cumin seeds and let them splutter.",
+                    "Add chopped onions and sauté until golden brown.",
+                    "Add ginger, garlic and green chili, sauté for 30 seconds.",
+                    "Add tomato puree and cook until oil separates.",
+                    "Add all dry spices (turmeric, coriander, red chili, garam masala) and salt.",
+                    "Cook the masala for 2-3 minutes until fragrant.",
+                    "Add the spinach puree and mix well. Cook for 5 minutes.",
+                    "Add paneer cubes and gently mix. Cook for another 2-3 minutes.",
+                    "Add fresh cream if using, mix gently and turn off heat.",
+                    "Serve hot with roti or rice."
+                ]
             },
             {
                 id: 2,
@@ -780,7 +876,37 @@
                 servings: "2 servings",
                 rating: 4.2,
                 type: "lunch",
-                cuisine: "indian"
+                cuisine: "indian",
+                ingredients: [
+                    "1 cup chana dal (split chickpeas), soaked for 30 mins",
+                    "1 medium bottle gourd (lauki/doodhi), peeled and cubed",
+                    "1 onion, finely chopped",
+                    "2 tomatoes, chopped",
+                    "2 cloves garlic, minced",
+                    "1 inch ginger, grated",
+                    "1 green chili, chopped",
+                    "1 tsp cumin seeds",
+                    "1/2 tsp turmeric powder",
+                    "1 tsp coriander powder",
+                    "1/2 tsp garam masala",
+                    "1/2 tsp red chili powder",
+                    "2 tbsp oil",
+                    "Salt to taste",
+                    "Fresh coriander leaves for garnish"
+                ],
+                instructions: [
+                    "Pressure cook the soaked chana dal with 2 cups water for 3-4 whistles until soft.",
+                    "Heat oil in a pan, add cumin seeds and let them splutter.",
+                    "Add chopped onions and sauté until translucent.",
+                    "Add ginger, garlic and green chili, sauté for 30 seconds.",
+                    "Add chopped tomatoes and cook until soft and mushy.",
+                    "Add all dry spices (turmeric, coriander, red chili, garam masala) and salt.",
+                    "Cook the masala for 2-3 minutes until fragrant.",
+                    "Add the bottle gourd cubes and mix well. Cook covered for 5 minutes.",
+                    "Add the cooked chana dal along with its water and mix well.",
+                    "Simmer for 10-12 minutes until the bottle gourd is cooked and flavors blend.",
+                    "Garnish with fresh coriander leaves and serve hot with rice or roti."
+                ]
             },
             {
                 id: 3,
@@ -800,7 +926,30 @@
                 servings: "2 servings",
                 rating: 4.3,
                 type: "breakfast",
-                cuisine: "indian"
+                cuisine: "indian",
+                ingredients: [
+                    "1 cup yellow moong dal (split yellow lentils)",
+                    "1/4 cup rice (optional, for crispiness)",
+                    "1 inch ginger",
+                    "1-2 green chilies",
+                    "1/2 tsp cumin seeds",
+                    "1/4 tsp asafoetida (hing)",
+                    "Salt to taste",
+                    "Water as needed",
+                    "Oil for cooking",
+                    "Optional fillings: grated paneer, chopped onions, grated carrots"
+                ],
+                instructions: [
+                    "Soak moong dal and rice (if using) together for 4-5 hours or overnight.",
+                    "Drain the water and blend with ginger, green chilies, cumin seeds, hing and salt to a smooth batter.",
+                    "Add water as needed to make a pouring consistency batter.",
+                    "Heat a non-stick tawa or griddle and grease lightly with oil.",
+                    "Pour a ladleful of batter and spread in circular motion to make thin pancakes.",
+                    "If using fillings, sprinkle them on top now.",
+                    "Drizzle some oil around the edges and cook on medium flame until golden.",
+                    "Flip carefully and cook the other side until crisp.",
+                    "Serve hot with green chutney or yogurt."
+                ]
             },
             // Vegan Indian dishes
             {
@@ -821,7 +970,35 @@
                 servings: "2 servings",
                 rating: 4.1,
                 type: "dinner",
-                cuisine: "north indian"
+                cuisine: "north indian",
+                ingredients: [
+                    "1 large eggplant (baingan/brinjal)",
+                    "2 tbsp mustard oil",
+                    "1 onion, finely chopped",
+                    "2 tomatoes, finely chopped",
+                    "3 cloves garlic, minced",
+                    "1 inch ginger, grated",
+                    "1 green chili, chopped",
+                    "1/2 tsp turmeric powder",
+                    "1 tsp coriander powder",
+                    "1/2 tsp garam masala",
+                    "1/2 tsp red chili powder",
+                    "Salt to taste",
+                    "Fresh coriander leaves for garnish"
+                ],
+                instructions: [
+                    "Wash and pat dry the eggplant. Apply some oil all over it.",
+                    "Roast the eggplant directly on flame or in oven at 200°C for 25-30 minutes until charred and soft inside.",
+                    "Let it cool, then peel off the charred skin and mash the pulp well.",
+                    "Heat mustard oil in a pan until smoking point, then reduce heat.",
+                    "Add chopped onions and sauté until golden brown.",
+                    "Add ginger, garlic and green chili, sauté for 30 seconds.",
+                    "Add chopped tomatoes and cook until soft and mushy.",
+                    "Add all dry spices (turmeric, coriander, red chili, garam masala) and salt.",
+                    "Cook the masala for 2-3 minutes until fragrant.",
+                    "Add the mashed eggplant and mix well. Cook for 5-7 minutes.",
+                    "Garnish with fresh coriander leaves and serve hot with roti or rice."
+                ]
             },
             // Gluten-free Indian dishes
             {
@@ -842,7 +1019,31 @@
                 servings: "2 servings",
                 rating: 4.7,
                 type: "dinner",
-                cuisine: "indian"
+                cuisine: "indian",
+                ingredients: [
+                    "500g firm fish fillets (like salmon or basa), cut into cubes",
+                    "1/2 cup thick yogurt",
+                    "1 tbsp ginger-garlic paste",
+                    "1 tbsp lemon juice",
+                    "1 tsp turmeric powder",
+                    "1 tsp red chili powder",
+                    "1 tsp coriander powder",
+                    "1 tsp cumin powder",
+                    "1/2 tsp garam masala",
+                    "1/2 tsp chaat masala",
+                    "1 tbsp mustard oil",
+                    "Salt to taste",
+                    "Lemon wedges and onion rings for serving"
+                ],
+                instructions: [
+                    "Wash and pat dry the fish pieces thoroughly.",
+                    "In a bowl, mix yogurt with all spices, ginger-garlic paste, lemon juice and mustard oil.",
+                    "Add the fish pieces to this marinade and coat well. Cover and refrigerate for at least 1 hour.",
+                    "Preheat oven to 200°C or prepare grill.",
+                    "Thread the marinated fish pieces onto skewers.",
+                    "Grill in oven for 10-12 minutes or on barbecue until fish is cooked through and slightly charred.",
+                    "Sprinkle chaat masala and serve hot with lemon wedges and onion rings."
+                ]
             },
             // Keto Indian dishes
             {
@@ -863,7 +1064,33 @@
                 servings: "2 servings",
                 rating: 4.6,
                 type: "dinner",
-                cuisine: "north indian"
+                cuisine: "north indian",
+                ingredients: [
+                    "500g boneless chicken, cut into pieces",
+                    "1/2 cup plain yogurt (unsweetened)",
+                    "1 tbsp ginger-garlic paste",
+                    "1 tsp turmeric powder",
+                    "1 tsp red chili powder",
+                    "1 tsp garam masala",
+                    "2 tbsp butter",
+                    "1 tbsp oil",
+                    "1 onion, finely chopped",
+                    "1 cup tomato puree",
+                    "1/2 cup heavy cream",
+                    "1 tsp kasuri methi (dried fenugreek leaves)",
+                    "Salt to taste",
+                    "Fresh coriander for garnish"
+                ],
+                instructions: [
+                    "Marinate chicken with yogurt, ginger-garlic paste, turmeric, red chili powder and salt for 1 hour.",
+                    "Heat oil in a pan and sear the chicken pieces until lightly browned. Remove and set aside.",
+                    "In the same pan, add butter and sauté onions until golden.",
+                    "Add tomato puree and cook until oil separates.",
+                    "Add garam masala and cook for 2 minutes.",
+                    "Add the seared chicken pieces and mix well. Cook for 5 minutes.",
+                    "Add heavy cream and kasuri methi. Simmer for 5-7 minutes.",
+                    "Garnish with fresh coriander and serve hot with cauliflower rice."
+                ]
             },
             // Low-carb Indian dishes
             {
@@ -884,7 +1111,33 @@
                 servings: "1 serving",
                 rating: 4.4,
                 type: "lunch",
-                cuisine: "indian"
+                cuisine: "indian",
+                ingredients: [
+                    "200g boneless chicken breast",
+                    "1 tbsp yogurt",
+                    "1 tsp ginger-garlic paste",
+                    "1/2 tsp turmeric powder",
+                    "1 tsp red chili powder",
+                    "1/2 tsp garam masala",
+                    "1 tsp lemon juice",
+                    "Salt to taste",
+                    "2 cups mixed salad greens",
+                    "1/2 cucumber, sliced",
+                    "1/2 bell pepper, sliced",
+                    "1/4 red onion, thinly sliced",
+                    "10-12 cherry tomatoes, halved",
+                    "2 tbsp mint chutney (made with mint, coriander, green chili, lemon juice)",
+                    "1 tsp olive oil"
+                ],
+                instructions: [
+                    "Marinate chicken with yogurt, ginger-garlic paste, turmeric, red chili powder, garam masala, lemon juice and salt for 30 minutes.",
+                    "Grill the chicken on a pan or barbecue until cooked through (about 5-6 minutes per side).",
+                    "Let it rest for 5 minutes, then slice into strips.",
+                    "In a large bowl, combine all salad vegetables.",
+                    "Add the sliced grilled chicken on top.",
+                    "Drizzle with mint chutney and olive oil.",
+                    "Toss gently and serve immediately."
+                ]
             },
             // High-protein Indian dishes
             {
@@ -905,7 +1158,35 @@
                 servings: "2 servings",
                 rating: 4.0,
                 type: "lunch",
-                cuisine: "indian"
+                cuisine: "indian",
+                ingredients: [
+                    "1 cup soya chunks",
+                    "1 onion, finely chopped",
+                    "2 tomatoes, pureed",
+                    "2 cloves garlic, minced",
+                    "1 inch ginger, grated",
+                    "1 green chili, chopped",
+                    "1 tsp cumin seeds",
+                    "1/2 tsp turmeric powder",
+                    "1 tsp coriander powder",
+                    "1/2 tsp garam masala",
+                    "1/2 tsp red chili powder",
+                    "2 tbsp oil",
+                    "Salt to taste",
+                    "Fresh coriander leaves for garnish"
+                ],
+                instructions: [
+                    "Soak soya chunks in hot water for 15 minutes, then squeeze out water and rinse.",
+                    "Heat oil in a pan, add cumin seeds and let them splutter.",
+                    "Add chopped onions and sauté until golden brown.",
+                    "Add ginger, garlic and green chili, sauté for 30 seconds.",
+                    "Add tomato puree and cook until oil separates.",
+                    "Add all dry spices (turmeric, coriander, red chili, garam masala) and salt.",
+                    "Cook the masala for 2-3 minutes until fragrant.",
+                    "Add the soya chunks and mix well. Cook for 5 minutes.",
+                    "Add 1/2 cup water, cover and simmer for 10 minutes.",
+                    "Garnish with fresh coriander leaves and serve hot with roti or rice."
+                ]
             },
             // South Indian dishes
             {
@@ -926,7 +1207,26 @@
                 servings: "2 servings",
                 rating: 4.3,
                 type: "breakfast",
-                cuisine: "south indian"
+                cuisine: "south indian",
+                ingredients: [
+                    "1 cup ragi (finger millet) flour",
+                    "1/4 cup rice flour",
+                    "1/4 cup urad dal flour",
+                    "1/2 tsp fenugreek seeds powder",
+                    "Salt to taste",
+                    "Water as needed",
+                    "Oil for cooking"
+                ],
+                instructions: [
+                    "Mix all flours and fenugreek powder in a bowl.",
+                    "Add water gradually to make a smooth batter of pouring consistency.",
+                    "Add salt and mix well. Let it rest for 15-20 minutes.",
+                    "Heat a non-stick tawa or griddle and grease lightly with oil.",
+                    "Pour a ladleful of batter and spread in circular motion to make thin dosa.",
+                    "Drizzle some oil around the edges and cook on medium flame until crisp.",
+                    "Flip and cook the other side for 30 seconds.",
+                    "Serve hot with coconut chutney or sambar."
+                ]
             },
             // North Indian dishes
             {
@@ -947,7 +1247,30 @@
                 servings: "4 pieces",
                 rating: 4.2,
                 type: "snacks",
-                cuisine: "north indian"
+                cuisine: "north indian",
+                ingredients: [
+                    "2 cups hung curd (yogurt drained for 4-5 hours)",
+                    "1/2 cup crumbled paneer",
+                    "2 tbsp besan (gram flour), roasted",
+                    "1 tbsp cornflour",
+                    "1 inch ginger, grated",
+                    "1 green chili, finely chopped",
+                    "1/2 tsp cumin powder",
+                    "1/2 tsp garam masala",
+                    "1/4 tsp black pepper powder",
+                    "Salt to taste",
+                    "Oil for shallow frying",
+                    "Fresh coriander leaves for garnish"
+                ],
+                instructions: [
+                    "In a bowl, mix hung curd, crumbled paneer, roasted besan and cornflour.",
+                    "Add ginger, green chili, all spices and salt. Mix well to form a dough-like mixture.",
+                    "Divide into equal portions and shape into flat round kebabs.",
+                    "Heat oil in a non-stick pan on medium heat.",
+                    "Gently place the kebabs and shallow fry until golden brown on both sides.",
+                    "Drain on paper towels to remove excess oil.",
+                    "Garnish with fresh coriander leaves and serve hot with mint chutney."
+                ]
             },
             // Additional healthy Indian foods
             {
@@ -968,7 +1291,31 @@
                 servings: "2 pieces",
                 rating: 4.1,
                 type: "breakfast",
-                cuisine: "indian"
+                cuisine: "indian",
+                ingredients: [
+                    "1 cup whole wheat flour",
+                    "1/4 cup besan (gram flour)",
+                    "1 cup fresh fenugreek leaves (methi), finely chopped",
+                    "1/2 tsp turmeric powder",
+                    "1/2 tsp red chili powder",
+                    "1/2 tsp cumin-coriander powder",
+                    "1/2 tsp sesame seeds",
+                    "1 tbsp yogurt",
+                    "1 tbsp oil",
+                    "Salt to taste",
+                    "Water as needed",
+                    "Oil for cooking"
+                ],
+                instructions: [
+                    "In a bowl, mix both flours, chopped fenugreek leaves and all spices.",
+                    "Add yogurt, 1 tbsp oil and salt. Mix well.",
+                    "Add water gradually to make a soft dough. Knead for 5 minutes.",
+                    "Cover and let it rest for 15-20 minutes.",
+                    "Divide into equal portions and roll into thin circles.",
+                    "Heat a tawa/griddle and cook each thepla on medium heat.",
+                    "Apply oil on both sides and cook until golden spots appear.",
+                    "Serve hot with yogurt or pickle."
+                ]
             },
             {
                 id: 12,
@@ -988,7 +1335,36 @@
                 servings: "1 serving",
                 rating: 4.4,
                 type: "breakfast",
-                cuisine: "indian"
+                cuisine: "indian",
+                ingredients: [
+                    "1/2 cup steel-cut oats",
+                    "1.5 cups water",
+                    "1/2 onion, finely chopped",
+                    "1/2 tomato, finely chopped",
+                    "1/4 cup mixed vegetables (carrots, peas, beans)",
+                    "1 green chili, chopped",
+                    "1/2 inch ginger, grated",
+                    "1/2 tsp mustard seeds",
+                    "1/2 tsp cumin seeds",
+                    "1/4 tsp turmeric powder",
+                    "1/2 tsp garam masala",
+                    "1 tsp oil",
+                    "Salt to taste",
+                    "Fresh coriander for garnish",
+                    "Lemon wedges for serving"
+                ],
+                instructions: [
+                    "Dry roast oats in a pan for 2-3 minutes until fragrant. Remove and set aside.",
+                    "Heat oil in the same pan, add mustard and cumin seeds. Let them splutter.",
+                    "Add chopped onions and sauté until translucent.",
+                    "Add ginger, green chili and sauté for 30 seconds.",
+                    "Add chopped tomatoes and cook until soft.",
+                    "Add mixed vegetables and sauté for 2 minutes.",
+                    "Add turmeric, garam masala and salt. Mix well.",
+                    "Add water and bring to a boil.",
+                    "Add roasted oats, stir well and simmer for 8-10 minutes until oats are cooked.",
+                    "Garnish with fresh coriander and serve hot with lemon wedges."
+                ]
             },
             {
                 id: 13,
@@ -1008,7 +1384,27 @@
                 servings: "1 serving",
                 rating: 4.5,
                 type: "snacks",
-                cuisine: "indian"
+                cuisine: "indian",
+                ingredients: [
+                    "1 cup mixed sprouts (moong, chana, matki)",
+                    "1/2 cucumber, diced",
+                    "1 tomato, diced",
+                    "1/4 red onion, finely chopped",
+                    "1 green chili, finely chopped",
+                    "1/2 inch ginger, grated",
+                    "Juice of 1 lemon",
+                    "1/2 tsp roasted cumin powder",
+                    "1/2 tsp chaat masala",
+                    "Salt to taste",
+                    "Fresh coriander leaves for garnish"
+                ],
+                instructions: [
+                    "Steam the sprouts for 2-3 minutes or blanch in hot water. Drain well.",
+                    "In a large bowl, combine sprouts with all chopped vegetables.",
+                    "Add green chili, ginger, lemon juice and all spices.",
+                    "Toss gently to combine all ingredients.",
+                    "Garnish with fresh coriander leaves and serve immediately."
+                ]
             },
             {
                 id: 14,
@@ -1028,7 +1424,34 @@
                 servings: "2 servings",
                 rating: 4.0,
                 type: "dinner",
-                cuisine: "indian"
+                cuisine: "indian",
+                ingredients: [
+                    "1/2 cup bajra (pearl millet), soaked for 4-6 hours",
+                    "1/4 cup moong dal (split yellow lentils)",
+                    "1/2 cup mixed vegetables (carrots, beans, peas)",
+                    "1 onion, finely chopped",
+                    "1 tomato, chopped",
+                    "1 green chili, chopped",
+                    "1 inch ginger, grated",
+                    "1/2 tsp turmeric powder",
+                    "1 tsp cumin seeds",
+                    "1/2 tsp garam masala",
+                    "1 tbsp ghee",
+                    "Salt to taste",
+                    "Fresh coriander for garnish"
+                ],
+                instructions: [
+                    "Drain the soaked bajra and rinse well.",
+                    "Heat ghee in a pressure cooker, add cumin seeds and let them splutter.",
+                    "Add chopped onions and sauté until translucent.",
+                    "Add ginger, green chili and sauté for 30 seconds.",
+                    "Add chopped tomatoes and cook until soft.",
+                    "Add all vegetables, turmeric, garam masala and salt. Mix well.",
+                    "Add drained bajra and moong dal. Mix everything together.",
+                    "Add 3 cups water, stir well and pressure cook for 3-4 whistles.",
+                    "Let pressure release naturally, then open and fluff gently.",
+                    "Garnish with fresh coriander and serve hot with yogurt."
+                ]
             },
             {
                 id: 15,
@@ -1048,7 +1471,37 @@
                 servings: "2 servings",
                 rating: 4.3,
                 type: "lunch",
-                cuisine: "north indian"
+                cuisine: "north indian",
+                ingredients: [
+                    "1 cup cooked chickpeas (or canned)",
+                    "2 cups fresh spinach, chopped",
+                    "1 onion, finely chopped",
+                    "2 tomatoes, pureed",
+                    "2 cloves garlic, minced",
+                    "1 inch ginger, grated",
+                    "1 green chili, chopped",
+                    "1 tsp cumin seeds",
+                    "1/2 tsp turmeric powder",
+                    "1 tsp coriander powder",
+                    "1/2 tsp garam masala",
+                    "1/2 tsp red chili powder",
+                    "2 tbsp oil",
+                    "Salt to taste",
+                    "1/2 tsp kasuri methi (dried fenugreek leaves)"
+                ],
+                instructions: [
+                    "Heat oil in a pan, add cumin seeds and let them splutter.",
+                    "Add chopped onions and sauté until golden brown.",
+                    "Add ginger, garlic and green chili, sauté for 30 seconds.",
+                    "Add tomato puree and cook until oil separates.",
+                    "Add all dry spices (turmeric, coriander, red chili, garam masala) and salt.",
+                    "Cook the masala for 2-3 minutes until fragrant.",
+                    "Add chopped spinach and cook until wilted.",
+                    "Add cooked chickpeas and mix well. Add 1/2 cup water if needed.",
+                    "Simmer for 10 minutes until flavors blend.",
+                    "Crush kasuri methi between palms and sprinkle on top.",
+                    "Serve hot with roti or rice."
+                ]
             },
             {
                 id: 16,
@@ -1068,7 +1521,36 @@
                 servings: "2 servings",
                 rating: 4.2,
                 type: "lunch",
-                cuisine: "indian"
+                cuisine: "indian",
+                ingredients: [
+                    "4 eggs, hard boiled and peeled",
+                    "1 onion, finely chopped",
+                    "2 tomatoes, pureed",
+                    "2 cloves garlic, minced",
+                    "1 inch ginger, grated",
+                    "1 green chili, chopped",
+                    "1 tsp cumin seeds",
+                    "1/2 tsp turmeric powder",
+                    "1 tsp coriander powder",
+                    "1/2 tsp garam masala",
+                    "1/2 tsp red chili powder",
+                    "1/4 tsp garam masala",
+                    "2 tbsp oil",
+                    "Salt to taste",
+                    "Fresh coriander for garnish"
+                ],
+                instructions: [
+                    "Make small slits on the boiled eggs and keep aside.",
+                    "Heat oil in a pan, add cumin seeds and let them splutter.",
+                    "Add chopped onions and sauté until golden brown.",
+                    "Add ginger, garlic and green chili, sauté for 30 seconds.",
+                    "Add tomato puree and cook until oil separates.",
+                    "Add all dry spices (turmeric, coriander, red chili, garam masala) and salt.",
+                    "Cook the masala for 2-3 minutes until fragrant.",
+                    "Add 1 cup water and bring to a simmer.",
+                    "Gently add the boiled eggs and simmer for 5-7 minutes.",
+                    "Garnish with fresh coriander and serve hot with rice or roti."
+                ]
             },
             {
                 id: 17,
@@ -1088,7 +1570,33 @@
                 servings: "2 servings",
                 rating: 4.1,
                 type: "dinner",
-                cuisine: "indian"
+                cuisine: "indian",
+                ingredients: [
+                    "250g button mushrooms, cleaned and quartered",
+                    "1 onion, finely chopped",
+                    "2 tomatoes, pureed",
+                    "2 cloves garlic, minced",
+                    "1 inch ginger, grated",
+                    "1 green chili, chopped",
+                    "1 tsp cumin seeds",
+                    "1/2 tsp turmeric powder",
+                    "1 tsp coriander powder",
+                    "1/2 tsp garam masala",
+                    "1/2 tsp red chili powder",
+                    "2 tbsp oil",
+                    "Salt to taste",
+                    "Fresh coriander for garnish"
+                ],
+                instructions: [
+                    "Heat oil in a pan, add cumin seeds and let them splutter.",
+                    "Add chopped onions and sauté until golden brown.",
+                    "Add ginger, garlic and green chili, sauté for 30 seconds.",
+                    "Add tomato puree and cook until oil separates.",
+                    "Add all dry spices (turmeric, coriander, red chili, garam masala) and salt.",
+                    "Cook the masala for 2-3 minutes until fragrant.",
+                    "Add mushrooms and mix well. Cook covered for 5-7 minutes.",
+                    "Garnish with fresh coriander and serve hot with roti or rice."
+                ]
             },
             {
                 id: 18,
@@ -1108,7 +1616,26 @@
                 servings: "2 servings",
                 rating: 4.0,
                 type: "snacks",
-                cuisine: "indian"
+                cuisine: "indian",
+                ingredients: [
+                    "1/2 cup moong dal (split yellow lentils)",
+                    "1/4 cup ghee",
+                    "1/4 cup jaggery, grated",
+                    "1/4 cup milk",
+                    "1/4 tsp cardamom powder",
+                    "10-12 cashews, chopped",
+                    "10-12 raisins"
+                ],
+                instructions: [
+                    "Soak moong dal for 2 hours, then drain and grind to coarse paste.",
+                    "Heat ghee in a heavy-bottomed pan, add the ground dal.",
+                    "Cook on medium heat, stirring continuously, until dal turns golden and fragrant.",
+                    "Add jaggery and mix well until melted.",
+                    "Add milk and cook until mixture thickens.",
+                    "Add cardamom powder, cashews and raisins. Mix well.",
+                    "Cook for another 2-3 minutes until halwa leaves sides of pan.",
+                    "Serve warm garnished with more nuts if desired."
+                ]
             },
             {
                 id: 19,
@@ -1128,7 +1655,38 @@
                 servings: "2 servings",
                 rating: 4.3,
                 type: "lunch",
-                cuisine: "north indian"
+                cuisine: "north indian",
+                ingredients: [
+                    "1 cup rajma (red kidney beans), soaked overnight",
+                    "1 onion, finely chopped",
+                    "2 tomatoes, pureed",
+                    "2 cloves garlic, minced",
+                    "1 inch ginger, grated",
+                    "1 green chili, chopped",
+                    "1 tsp cumin seeds",
+                    "1/2 tsp turmeric powder",
+                    "1 tsp coriander powder",
+                    "1/2 tsp garam masala",
+                    "1/2 tsp red chili powder",
+                    "1/4 tsp kasuri methi (dried fenugreek leaves)",
+                    "2 tbsp oil",
+                    "Salt to taste",
+                    "Fresh coriander for garnish",
+                    "1 cup brown rice, cooked"
+                ],
+                instructions: [
+                    "Pressure cook soaked rajma with 3 cups water for 4-5 whistles until soft.",
+                    "Heat oil in a pan, add cumin seeds and let them splutter.",
+                    "Add chopped onions and sauté until golden brown.",
+                    "Add ginger, garlic and green chili, sauté for 30 seconds.",
+                    "Add tomato puree and cook until oil separates.",
+                    "Add all dry spices (turmeric, coriander, red chili, garam masala) and salt.",
+                    "Cook the masala for 2-3 minutes until fragrant.",
+                    "Add cooked rajma along with its water. Mix well.",
+                    "Simmer for 15-20 minutes until gravy thickens.",
+                    "Crush kasuri methi between palms and sprinkle on top.",
+                    "Garnish with fresh coriander and serve hot with brown rice."
+                ]
             },
             {
                 id: 20,
@@ -1148,7 +1706,40 @@
                 servings: "4 pieces",
                 rating: 4.4,
                 type: "snacks",
-                cuisine: "indian"
+                cuisine: "indian",
+                ingredients: [
+                    "1 cup besan (gram flour)",
+                    "1 tbsp semolina (sooji)",
+                    "1 tsp ginger-green chili paste",
+                    "1/2 tsp turmeric powder",
+                    "1 tsp fruit salt (eno)",
+                    "1 tsp lemon juice",
+                    "1 tsp sugar",
+                    "Salt to taste",
+                    "Water as needed",
+                    "For tempering:",
+                    "1 tbsp oil",
+                    "1/2 tsp mustard seeds",
+                    "1/2 tsp sesame seeds",
+                    "2 green chilies, slit",
+                    "8-10 curry leaves",
+                    "2 tbsp water",
+                    "1 tsp sugar",
+                    "Fresh coriander for garnish",
+                    "Grated coconut for garnish"
+                ],
+                instructions: [
+                    "Mix besan, semolina, ginger-chili paste, turmeric, lemon juice, sugar and salt.",
+                    "Add water gradually to make a smooth batter of pouring consistency.",
+                    "Grease a steaming plate or thali and keep ready.",
+                    "Just before steaming, add fruit salt to batter and mix gently.",
+                    "Pour immediately into greased plate and steam for 12-15 minutes.",
+                    "Check with toothpick - if it comes out clean, dhokla is done.",
+                    "For tempering: Heat oil, add mustard seeds, sesame seeds, green chilies and curry leaves.",
+                    "Add water and sugar, let it simmer for 30 seconds.",
+                    "Pour this tempering evenly over steamed dhokla.",
+                    "Garnish with coriander and coconut. Cut into squares and serve."
+                ]
             },
             // Additional items to reach 30
             {
@@ -1169,7 +1760,37 @@
                 servings: "2 servings",
                 rating: 4.2,
                 type: "breakfast",
-                cuisine: "south indian"
+                cuisine: "south indian",
+                ingredients: [
+                    "1/2 cup quinoa, rinsed well",
+                    "1.5 cups water",
+                    "1/2 onion, finely chopped",
+                    "1/2 carrot, finely diced",
+                    "1/4 cup green peas",
+                    "1 green chili, slit",
+                    "1/2 inch ginger, grated",
+                    "1/2 tsp mustard seeds",
+                    "1/2 tsp urad dal",
+                    "1/2 tsp chana dal",
+                    "8-10 curry leaves",
+                    "1/4 tsp turmeric powder",
+                    "1 tbsp oil",
+                    "Salt to taste",
+                    "Fresh coriander for garnish",
+                    "Lemon wedges for serving"
+                ],
+                instructions: [
+                    "Dry roast quinoa in a pan for 2-3 minutes until fragrant. Remove and set aside.",
+                    "Heat oil in the same pan, add mustard seeds, urad dal and chana dal.",
+                    "When dals turn golden, add curry leaves, chopped onions and sauté until translucent.",
+                    "Add ginger, green chili and sauté for 30 seconds.",
+                    "Add diced carrots and peas. Sauté for 2 minutes.",
+                    "Add turmeric powder and salt. Mix well.",
+                    "Add water and bring to a boil.",
+                    "Add roasted quinoa, stir well and simmer covered for 15 minutes.",
+                    "Fluff gently with fork and let it sit covered for 5 minutes.",
+                    "Garnish with fresh coriander and serve hot with lemon wedges."
+                ]
             },
             {
                 id: 22,
@@ -1189,7 +1810,28 @@
                 servings: "2 pieces",
                 rating: 4.1,
                 type: "breakfast",
-                cuisine: "north indian"
+                cuisine: "north indian",
+                ingredients: [
+                    "1 cup whole wheat flour",
+                    "1 ripe avocado",
+                    "1/2 onion, finely chopped",
+                    "1 green chili, finely chopped",
+                    "1/2 tsp cumin powder",
+                    "1/2 tsp coriander powder",
+                    "1/4 tsp turmeric powder",
+                    "1/2 tsp lemon juice",
+                    "Salt to taste",
+                    "Ghee or oil for cooking"
+                ],
+                instructions: [
+                    "Mash the avocado flesh in a bowl.",
+                    "Add chopped onion, green chili, all spices, lemon juice and salt. Mix well.",
+                    "Knead wheat flour with water to make soft dough. Divide into equal portions.",
+                    "Take one portion, roll into small circle, place avocado stuffing in center.",
+                    "Bring edges together to seal, then gently roll into paratha.",
+                    "Heat tawa/griddle and cook paratha on both sides with ghee/oil until golden.",
+                    "Serve hot with yogurt or pickle."
+                ]
             },
             {
                 id: 23,
@@ -1209,7 +1851,32 @@
                 servings: "1 serving",
                 rating: 4.3,
                 type: "snacks",
-                cuisine: "indian"
+                cuisine: "indian",
+                ingredients: [
+                    "1 medium sweet potato, peeled and cubed",
+                    "1 tsp oil",
+                    "1/4 tsp turmeric powder",
+                    "1/2 tsp chaat masala",
+                    "1/4 tsp red chili powder",
+                    "1/4 tsp roasted cumin powder",
+                    "Salt to taste",
+                    "2 tbsp green chutney (mint-coriander)",
+                    "2 tbsp tamarind chutney",
+                    "1/4 cup sev (gram flour noodles)",
+                    "1 tbsp chopped onions",
+                    "1 tbsp chopped tomatoes",
+                    "Fresh coriander for garnish",
+                    "Lemon wedges for serving"
+                ],
+                instructions: [
+                    "Preheat oven to 200°C. Toss sweet potato cubes with oil, turmeric and salt.",
+                    "Roast for 20-25 minutes until tender and slightly caramelized.",
+                    "Let it cool slightly, then transfer to serving bowl.",
+                    "Sprinkle chaat masala, red chili powder and cumin powder.",
+                    "Drizzle both chutneys over the top.",
+                    "Add chopped onions, tomatoes and sev.",
+                    "Garnish with fresh coriander and serve with lemon wedges."
+                ]
             },
             {
                 id: 24,
@@ -1229,7 +1896,30 @@
                 servings: "2 servings",
                 rating: 4.6,
                 type: "dinner",
-                cuisine: "north indian"
+                cuisine: "north indian",
+                ingredients: [
+                    "250g paneer, cut into cubes",
+                    "1/2 cup thick yogurt",
+                    "1 tbsp ginger-garlic paste",
+                    "1 tbsp lemon juice",
+                    "1/2 tsp turmeric powder",
+                    "1 tsp red chili powder",
+                    "1 tsp coriander powder",
+                    "1/2 tsp garam masala",
+                    "1/2 tsp chaat masala",
+                    "1 tbsp oil",
+                    "Salt to taste",
+                    "1 bell pepper, cut into squares",
+                    "1 onion, cut into squares",
+                    "Lemon wedges for serving"
+                ],
+                instructions: [
+                    "In a bowl, mix yogurt with all spices, ginger-garlic paste, lemon juice and oil.",
+                    "Add paneer cubes and mix gently to coat. Marinate for at least 30 minutes.",
+                    "Thread paneer, bell pepper and onion alternately onto skewers.",
+                    "Grill on barbecue or in oven at 200°C for 10-12 minutes, turning occasionally.",
+                    "Sprinkle chaat masala and serve hot with lemon wedges."
+                ]
             },
             {
                 id: 25,
@@ -1249,7 +1939,35 @@
                 servings: "2 servings",
                 rating: 4.2,
                 type: "dinner",
-                cuisine: "indian"
+                cuisine: "indian",
+                ingredients: [
+                    "1/2 cup foxtail millet (kangni/korra)",
+                    "1/4 cup moong dal (split yellow lentils)",
+                    "1/2 tsp cumin seeds",
+                    "1/2 tsp mustard seeds",
+                    "1/4 tsp asafoetida (hing)",
+                    "1 onion, finely chopped",
+                    "1 tomato, chopped",
+                    "1 green chili, slit",
+                    "1 inch ginger, grated",
+                    "1/2 tsp turmeric powder",
+                    "1/2 tsp garam masala",
+                    "1 tbsp ghee",
+                    "Salt to taste",
+                    "Fresh coriander for garnish"
+                ],
+                instructions: [
+                    "Wash millet and dal together, soak for 15 minutes. Drain and set aside.",
+                    "Heat ghee in pressure cooker, add cumin and mustard seeds.",
+                    "When seeds splutter, add hing, chopped onions and sauté until translucent.",
+                    "Add ginger, green chili and sauté for 30 seconds.",
+                    "Add chopped tomatoes and cook until soft.",
+                    "Add turmeric, garam masala and salt. Mix well.",
+                    "Add drained millet and dal. Mix everything together.",
+                    "Add 3 cups water, stir well and pressure cook for 3 whistles.",
+                    "Let pressure release naturally, then open and fluff gently.",
+                    "Garnish with fresh coriander and serve hot with yogurt."
+                ]
             },
             {
                 id: 26,
@@ -1269,7 +1987,33 @@
                 servings: "2 servings",
                 rating: 4.3,
                 type: "breakfast",
-                cuisine: "indian"
+                cuisine: "indian",
+                ingredients: [
+                    "1 cup besan (gram flour)",
+                    "1/4 cup rice flour",
+                    "1 onion, finely chopped",
+                    "1 tomato, finely chopped",
+                    "1 green chili, finely chopped",
+                    "1/2 inch ginger, grated",
+                    "1/4 cup chopped coriander leaves",
+                    "1/2 tsp turmeric powder",
+                    "1/2 tsp red chili powder",
+                    "1/2 tsp cumin seeds",
+                    "1/2 tsp baking soda",
+                    "Salt to taste",
+                    "Water as needed",
+                    "Oil for cooking"
+                ],
+                instructions: [
+                    "Mix besan and rice flour in a bowl.",
+                    "Add all chopped vegetables, ginger, coriander and spices.",
+                    "Add water gradually to make a smooth batter of pouring consistency.",
+                    "Heat a non-stick tawa/griddle and grease lightly with oil.",
+                    "Pour a ladleful of batter and spread in circular motion to make thin chilla.",
+                    "Drizzle some oil around the edges and cook on medium flame until golden.",
+                    "Flip carefully and cook the other side until crisp.",
+                    "Serve hot with green chutney or ketchup."
+                ]
             },
             {
                 id: 27,
@@ -1289,7 +2033,36 @@
                 servings: "2 servings",
                 rating: 4.4,
                 type: "dinner",
-                cuisine: "north indian"
+                cuisine: "north indian",
+                ingredients: [
+                    "250g paneer, cut into cubes",
+                    "1 onion, finely chopped",
+                    "2 tomatoes, pureed",
+                    "1 capsicum (bell pepper), cubed",
+                    "2 cloves garlic, minced",
+                    "1 inch ginger, grated",
+                    "1 green chili, chopped",
+                    "1 tsp cumin seeds",
+                    "1/2 tsp turmeric powder",
+                    "1 tsp coriander powder",
+                    "1 tsp kadhai masala",
+                    "1/2 tsp garam masala",
+                    "1/2 tsp red chili powder",
+                    "2 tbsp oil",
+                    "Salt to taste",
+                    "Fresh coriander for garnish"
+                ],
+                instructions: [
+                    "Heat oil in a kadhai or pan, add cumin seeds and let them splutter.",
+                    "Add chopped onions and sauté until golden brown.",
+                    "Add ginger, garlic and green chili, sauté for 30 seconds.",
+                    "Add tomato puree and cook until oil separates.",
+                    "Add all dry spices (turmeric, coriander, kadhai masala, red chili, garam masala) and salt.",
+                    "Cook the masala for 2-3 minutes until fragrant.",
+                    "Add capsicum cubes and cook for 2 minutes.",
+                    "Add paneer cubes and mix gently. Cook for 3-4 minutes.",
+                    "Garnish with fresh coriander and serve hot with naan or roti."
+                ]
             },
             {
                 id: 28,
@@ -1309,7 +2082,34 @@
                 servings: "2 servings",
                 rating: 4.1,
                 type: "lunch",
-                cuisine: "indian"
+                cuisine: "indian",
+                ingredients: [
+                    "1 cup basmati rice, soaked for 30 minutes",
+                    "1 onion, thinly sliced",
+                    "1/2 cup mixed vegetables (carrots, beans, peas, cauliflower)",
+                    "2 cloves garlic, minced",
+                    "1 inch ginger, grated",
+                    "1 green chili, slit",
+                    "1 bay leaf",
+                    "2-3 cloves",
+                    "1 inch cinnamon stick",
+                    "1/2 tsp cumin seeds",
+                    "1/2 tsp garam masala",
+                    "1 tbsp ghee",
+                    "Salt to taste",
+                    "Fresh coriander for garnish"
+                ],
+                instructions: [
+                    "Drain soaked rice and set aside.",
+                    "Heat ghee in a pressure cooker, add whole spices (bay leaf, cloves, cinnamon, cumin seeds).",
+                    "When spices become fragrant, add sliced onions and sauté until golden.",
+                    "Add ginger, garlic and green chili, sauté for 30 seconds.",
+                    "Add mixed vegetables and sauté for 2 minutes.",
+                    "Add drained rice and gently mix without breaking grains.",
+                    "Add 2 cups water, garam masala and salt. Stir gently.",
+                    "Pressure cook for 2 whistles, then let pressure release naturally.",
+                    "Fluff gently with fork, garnish with fresh coriander and serve hot with raita."
+                ]
             },
             {
                 id: 29,
@@ -1329,7 +2129,37 @@
                 servings: "2 servings",
                 rating: 4.3,
                 type: "lunch",
-                cuisine: "indian"
+                cuisine: "indian",
+                ingredients: [
+                    "1 cup masoor dal (red lentils)",
+                    "1 onion, finely chopped",
+                    "2 tomatoes, chopped",
+                    "2 cloves garlic, minced",
+                    "1 inch ginger, grated",
+                    "1 green chili, chopped",
+                    "1 tsp cumin seeds",
+                    "1/2 tsp turmeric powder",
+                    "1 tsp coriander powder",
+                    "1/2 tsp garam masala",
+                    "1/2 tsp red chili powder",
+                    "2 tbsp oil",
+                    "Salt to taste",
+                    "Fresh coriander for garnish",
+                    "1 tsp lemon juice"
+                ],
+                instructions: [
+                    "Wash masoor dal thoroughly until water runs clear.",
+                    "Pressure cook dal with 2.5 cups water and turmeric for 3 whistles.",
+                    "Heat oil in a pan, add cumin seeds and let them splutter.",
+                    "Add chopped onions and sauté until golden brown.",
+                    "Add ginger, garlic and green chili, sauté for 30 seconds.",
+                    "Add chopped tomatoes and cook until soft and mushy.",
+                    "Add all dry spices (coriander, red chili, garam masala) and salt.",
+                    "Cook the masala for 2-3 minutes until fragrant.",
+                    "Add cooked dal and mix well. Simmer for 5-7 minutes.",
+                    "Add lemon juice and garnish with fresh coriander.",
+                    "Serve hot with rice or roti."
+                ]
             },
             {
                 id: 30,
@@ -1349,10 +2179,39 @@
                 servings: "2 servings",
                 rating: 4.5,
                 type: "breakfast",
-                cuisine: "south indian"
+                cuisine: "south indian",
+                ingredients: [
+                    "4 idlis (steamed rice cakes)",
+                    "1/2 cup toor dal (split pigeon peas)",
+                    "1/2 cup mixed vegetables (carrots, beans, pumpkin)",
+                    "1 onion, chopped",
+                    "1 tomato, chopped",
+                    "1 green chili, slit",
+                    "1/2 tsp mustard seeds",
+                    "1/2 tsp cumin seeds",
+                    "1/4 tsp asafoetida (hing)",
+                    "8-10 curry leaves",
+                    "1/2 tsp turmeric powder",
+                    "1 tsp sambar powder",
+                    "1 tbsp tamarind pulp",
+                    "2 tbsp oil",
+                    "Salt to taste",
+                    "Fresh coriander for garnish"
+                ],
+                instructions: [
+                    "Pressure cook toor dal with 1.5 cups water and turmeric until soft.",
+                    "Heat oil in a pan, add mustard seeds, cumin seeds and let them splutter.",
+                    "Add hing, curry leaves, green chili and sauté for 30 seconds.",
+                    "Add chopped onions and sauté until translucent.",
+                    "Add chopped tomatoes and cook until soft.",
+                    "Add mixed vegetables, sambar powder and salt. Mix well.",
+                    "Add 2 cups water and cook until vegetables are tender.",
+                    "Add cooked dal and tamarind pulp. Simmer for 5-7 minutes.",
+                    "Garnish with fresh coriander and serve hot with idlis and coconut chutney."
+                ]
             }
         ];
-
+    
         // Restaurants data
         const restaurants = [
             {
@@ -1392,253 +2251,12 @@
                 minOrder: "₹180"
             }
         ];
-
-        // Sample user preferences (will be overridden by actual user preferences from localStorage)
-        const defaultUserPreferences = {
-            diet: ["vegetarian", "gluten-free"], // User's dietary preferences
-            health_condition: [], // Any health conditions
-            fitness_goal: "weight-loss", // User's fitness goal
-            current_weight: 75, // in kg
-            target_weight: 70, // in kg
-            activity_level: "moderate", // Activity level
-            allergy: [], // Food allergies
-            meal_pref: ["high-protein", "low-carb"], // Meal preferences
-            cuisine_pref: ["north indian", "south indian"] // Cuisine preferences
-        };
-
-        // Enhanced recommendation algorithm
-        function recommendFoods() {
-            // Get user preferences from localStorage or use sample data
-            const userPrefs = JSON.parse(localStorage.getItem('userPreferences')) || defaultUserPreferences;
-            
-            // Filter out foods that contain any of the user's allergens
-            let filteredFoods = foodItems.filter(item => {
-                return !userPrefs.allergy.some(allergen => {
-                    // This would be more sophisticated in a real app with proper allergen mapping
-                    return item.name.toLowerCase().includes(allergen) || 
-                           item.description.toLowerCase().includes(allergen);
-                });
-            });
-        };
-            
-            // Score each food based on how well it matches user preferences
-            filteredFoods = filteredFoods.map(food => {
-                let score = food.healthScore; // Start with base health score
-                
-                // Dietary preferences matching (high weight)
-                const dietMatchScore = userPrefs.diet.reduce((sum, pref) => {
-                    return sum + (food.diet.includes(pref) ? 3 : 0);
-                }, 0);
-                
-                // Meal preferences matching (medium weight)
-                const mealPrefScore = userPrefs.meal_pref.reduce((sum, pref) => {
-                    return sum + (food.diet.includes(pref) ? 2 : 0);
-                }, 0);
-                
-                // Cuisine preferences matching (medium weight)
-                const cuisinePrefScore = userPrefs.cuisine_pref.reduce((sum, pref) => {
-                    return sum + (food.cuisine === pref) ? 2 : 0;
-                }, 0);
-                
-                // Fitness goal alignment (high weight)
-                let fitnessScore = 0;
-                switch(userPrefs.fitness_goal) {
-                    case 'weight-loss':
-                        // Lower calorie, higher protein foods
-                        fitnessScore = (food.calories < 400 ? 2 : 0) + 
-                                      (food.protein > 20 ? 1 : 0);
-                        break;
-                    case 'muscle-gain':
-                        // Higher protein foods
-                        fitnessScore = food.protein / 5; // 5g protein = 1 point
-                        break;
-                    case 'endurance':
-                        // Balanced carbs and protein
-                        fitnessScore = (food.carbs > 30 && food.carbs < 60 ? 2 : 0) + 
-                                      (food.protein > 15 ? 1 : 0);
-                        break;
-                    case 'maintenance':
-                        // Balanced macros
-                        const macroBalance = Math.abs(food.carbs - 40) + 
-                                             Math.abs(food.protein - 20) + 
-                                             Math.abs(food.fat - 15);
-                        fitnessScore = 5 - (macroBalance / 15); // Higher for better balance
-                        break;
-                }
-                
-                // Health condition considerations (very high weight)
-                let healthConditionScore = 0;
-                if (userPrefs.health_condition.includes('diabetes')) {
-                    // Lower glycemic index foods
-                    healthConditionScore += (food.carbs < 30 ? 5 : 0);
-                }
-                if (userPrefs.health_condition.includes('hypertension') || 
-                    userPrefs.health_condition.includes('heart-disease')) {
-                    // Lower sodium foods
-                    healthConditionScore += (food.fat < 15 ? 3 : 0);
-                }
-                if (userPrefs.health_condition.includes('cholesterol')) {
-                    // Lower saturated fat foods
-                    healthConditionScore += (food.fat < 10 ? 3 : 0);
-                }
-                
-                // Activity level adjustment
-                let activityScore = 0;
-                if (userPrefs.activity_level === 'sedentary') {
-                    activityScore = food.calories < 300 ? 1 : 0;
-                } else if (userPrefs.activity_level === 'active' || 
-                          userPrefs.activity_level === 'extreme') {
-                    activityScore = food.calories > 400 ? 1 : 0;
-                }
-                
-                // Calculate total score with weights
-                const totalScore = score + 
-                                  (dietMatchScore * 1.5) + 
-                                  (mealPrefScore * 1.2) + 
-                                  (cuisinePrefScore * 1.5) +
-                                  (fitnessScore * 2) + 
-                                  (healthConditionScore * 3) + 
-                                  activityScore;
-                
-                return {
-                    ...food,
-                    matchScore: totalScore
-                };
-            });
-            
-            // Sort by match score (descending) then by rating (descending)
-            filteredFoods.sort((a, b) => {
-                if (b.matchScore !== a.matchScore) {
-                    return b.matchScore - a.matchScore;
-                }
-                return b.rating - a.rating;
-            });
-            return filteredFoods;
-        
-        
-
-        // Enhanced restaurant recommendation algorithm
-        function recommendRestaurants() {
-            const userPrefs = JSON.parse(localStorage.getItem('userPreferences')) || defaultUserPreferences;
-            
-            // Score restaurants based on how well they match user preferences
-            const scoredRestaurants = restaurants.map(restaurant => {
-                let score = restaurant.rating * 2; // Base score from rating
-                
-                // Dietary preference matching
-                const dietMatchScore = userPrefs.diet.reduce((sum, pref) => {
-                    return sum + (restaurant.specialties.some(s => 
-                        s.toLowerCase().includes(pref.toLowerCase())) ? 2 : 0);
-                }, 0);
-                
-                // Meal preference matching
-                const mealPrefScore = userPrefs.meal_pref.reduce((sum, pref) => {
-                    return sum + (restaurant.specialties.some(s => 
-                        s.toLowerCase().includes(pref.toLowerCase())) ? 1.5 : 0);
-                },   0);
-                
-                // Fitness goal alignment
-                let fitnessScore = 0;
-                if (userPrefs.fitness_goal === 'weight-loss' && 
-                    restaurant.specialties.some(s => s.includes('Low-Calorie'))) {
-                    fitnessScore += 3;
-                }
-                if (userPrefs.fitness_goal === 'muscle-gain' && 
-                    restaurant.specialties.some(s => s.includes('High-Protein'))) {
-                    fitnessScore += 3;
-                }
-                
-                // Health condition considerations
-                let healthConditionScore = 0;
-                if ((userPrefs.health_condition.includes('diabetes') || 
-                     userPrefs.health_condition.includes('cholesterol')) && 
-                    restaurant.specialties.some(s => s.includes('Healthy'))) {
-                    healthConditionScore += 2;
-                }
-                
-                // Calculate total score
-                const totalScore = score + dietMatchScore + mealPrefScore + 
-                                   fitnessScore + healthConditionScore;
-                
-                return {
-                    ...restaurant,
-                    matchScore: totalScore
-                };
-            });
-            
-            // Sort by match score then by rating
-            scoredRestaurants.sort((a, b) => {
-                if (b.matchScore !== a.matchScore) {
-                    return b.matchScore - a.matchScore;
-                }
-                return b.rating - a.rating;
-            });
-            
-            return scoredRestaurants;
-        }
-
-        // Enhanced health tips based on user preferences
-        function getPersonalizedHealthTips() {
-            const userPrefs = JSON.parse(localStorage.getItem('userPreferences')) || defaultUserPreferences;
-            let tips = [];
-            
-            // General tips for everyone
-            tips.push({
-                title: "Stay Hydrated",
-                content: "Drink at least 8 glasses of water daily to support metabolism and overall health."
-            });
-            
-            // Tips based on dietary preferences
-            if (userPrefs.diet.includes('vegetarian')) {
-                tips.push({
-                    title: "Vegetarian Protein Sources",
-                    content: "Include a variety of plant proteins like lentils, beans, quinoa, and tofu to meet your protein needs."
-                });
-            }
-            if (userPrefs.diet.includes('gluten-free')) {
-                tips.push({
-                    title: "Gluten-Free Grains",
-                    content: "Try quinoa, buckwheat, and amaranth as nutritious gluten-free alternatives to wheat."
-                });
-            }
-            
-            // Tips based on fitness goals
-            if (userPrefs.fitness_goal === 'weight-loss') {
-                tips.push({
-                    title: "Weight Loss Strategy",
-                    content: "Focus on portion control and include protein with each meal to stay full longer."
-                });
-            }
-            if (userPrefs.fitness_goal === 'muscle-gain') {
-                tips.push({
-                    title: "Muscle Building Nutrition",
-                    content: "Consume protein-rich foods within 30 minutes after workouts for optimal muscle recovery."
-                });
-            }
-            
-            // Tips based on health conditions
-            if (userPrefs.health_condition.includes('diabetes')) {
-                tips.push({
-                    title: "Blood Sugar Management",
-                    content: "Pair carbohydrates with protein or healthy fats to slow glucose absorption."
-                });
-            }
-            if (userPrefs.health_condition.includes('hypertension')) {
-                tips.push({
-                    title: "Blood Pressure Control",
-                    content: "Reduce sodium intake and increase potassium-rich foods like bananas and spinach."
-                });
-            }
-            
-            // Randomly select 2 tips to display
-            return tips.sort(() => 0.5 - Math.random()).slice(0, 2);
-        }
-
+    
         // Function to display food items
         function displayFoods(foods, containerId = 'food-grid', limit = 8) {
             const container = document.getElementById(containerId);
             container.innerHTML = '';
-
+    
             if (foods.length === 0) {
                 document.getElementById('no-results').classList.remove('hidden');
                 document.getElementById('load-more').classList.add('hidden');
@@ -1646,77 +2264,59 @@
             } else {
                 document.getElementById('no-results').classList.add('hidden');
             }
-
+    
             // Show only limited items initially
             const foodsToShow = foods.slice(0, limit);
             
             foodsToShow.forEach((food, index) => {
                 const foodCard = document.createElement('div');
-                foodCard.className = 'food-card bg-gray-800 rounded-lg shadow overflow-hidden hover:shadow-lg transition transform hover:-translate-y-1';
+                foodCard.className = 'food-card bg-white p-6 rounded-xl hover:bg-amber-50 transition-all duration-300 card-hover border-animate shadow-md h-full flex flex-col';
                 foodCard.style.setProperty('--order', index);
                 
-                // Generate badges for dietary tags that match user preferences
-                const matchingDietTags = food.diet.filter(diet => 
-                    (defaultUserPreferences.diet.includes(diet) || 
-                    (defaultUserPreferences.meal_pref.includes(diet)
-                )));
-                const dietTags = matchingDietTags.length > 0 ? 
-                    `<div class="absolute top-2 left-2 flex flex-wrap gap-1">
-                        ${matchingDietTags.map(tag => `
-                            <span class="bg-green-900 text-green-200 text-xs font-semibold px-2 py-0.5 rounded">
-                                ${tag.toUpperCase()}
-                            </span>
-                        `).join('')}
-                    </div>` : '';
-                
                 foodCard.innerHTML = `
-                    <div class="relative">
-                        <img class="w-full h-48 object-cover" src="${food.image}" alt="${food.name}">
-                        ${matchingDietTags.length > 0 ? 
-                            `<div class="absolute top-2 left-2 flex flex-wrap gap-1">
-                                ${matchingDietTags.map(tag => `
-                                    <span class="bg-green-900 text-green-200 text-xs font-semibold px-2 py-0.5 rounded">
-                                        ${tag.toUpperCase()}
-                                    </span>
-                                `).join('')}
-                            </div>` : ''}
-                        <div class="absolute top-2 right-2 bg-purple-600 text-white text-xs font-semibold px-2.5 py-0.5 rounded">
-                            ${Math.round(food.matchScore)}/10 MATCH
+                    <div class="relative h-48 overflow-hidden rounded-lg mb-4">
+                        <img class="w-full h-full object-cover transition-transform duration-500 hover:scale-110" src="${food.image}" alt="${food.name}">
+                        <div class="absolute top-2 left-2 flex flex-wrap gap-1">
+                            ${food.diet.map(tag => `
+                                <span class="bg-green-100 text-green-800 text-xs font-semibold px-2 py-0.5 rounded">
+                                    ${tag.toUpperCase().replace('-', ' ')}
+                                </span>
+                            `).join('')}
                         </div>
                     </div>
-                    <div class="p-4">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <h3 class="text-lg font-semibold text-white">${food.name}</h3>
-                                <p class="text-sm text-gray-400">${food.cuisine ? food.cuisine.toUpperCase() : food.category} • ${food.type.toUpperCase()}</p>
-                            </div>
+                    <div class="flex-grow">
+                        <div class="flex justify-between items-start mb-2">
+                            <h3 class="text-lg font-bold text-gray-800">${food.name}</h3>
                             <div class="flex items-center">
                                 <i class="fas fa-star text-yellow-400 mr-1"></i>
-                                <span class="text-white">${food.rating.toFixed(1)}</span>
+                                <span class="text-gray-700">${food.rating.toFixed(1)}</span>
                             </div>
                         </div>
-                        <p class="mt-2 text-sm text-gray-300">${food.description}</p>
-                        <div class="mt-3 grid grid-cols-3 gap-2 text-xs text-center">
-                            <div class="bg-gray-700 p-1 rounded">
+                        <p class="text-sm text-gray-600 mb-4">${food.cuisine ? food.cuisine.toUpperCase() : food.category} • ${food.type.toUpperCase()}</p>
+                        <p class="text-sm text-gray-600 mb-4">${food.description}</p>
+                        <div class="grid grid-cols-3 gap-2 text-xs text-center mb-4">
+                            <div class="bg-amber-100 p-1 rounded">
                                 <div class="font-medium">${food.calories}</div>
-                                <div class="text-gray-400">CAL</div>
+                                <div class="text-gray-500">CAL</div>
                             </div>
-                            <div class="bg-gray-700 p-1 rounded">
+                            <div class="bg-amber-100 p-1 rounded">
                                 <div class="font-medium">${food.protein}g</div>
-                                <div class="text-gray-400">PRO</div>
+                                <div class="text-gray-500">PRO</div>
                             </div>
-                            <div class="bg-gray-700 p-1 rounded">
+                            <div class="bg-amber-100 p-1 rounded">
                                 <div class="font-medium">${food.carbs}g</div>
-                                <div class="text-gray-400">CARB</div>
+                                <div class="text-gray-500">CARB</div>
                             </div>
                         </div>
-                        <div class="mt-4 flex justify-between items-center">
-                            <span class="text-lg font-bold text-white">₹${food.price.toFixed(2)}</span>
+                    </div>
+                    <div class="mt-auto">
+                        <div class="flex justify-between items-center">
+                            <span class="text-lg font-bold text-gray-800">₹${food.price.toFixed(2)}</span>
                             <div class="flex space-x-2">
-                                <button onclick="showRecipe(${food.id})" class="text-purple-400 border border-purple-400 py-1 px-3 focus:outline-none hover:bg-purple-400 hover:text-white rounded text-sm transition">
+                                <button onclick="showRecipe(${food.id})" class="text-red-600 border border-red-600 py-1 px-3 focus:outline-none hover:bg-red-600 hover:text-white rounded text-sm transition">
                                     View Recipe
                                 </button>
-                                <button onclick="addToCart(${food.id})" class="text-white bg-purple-600 border-0 py-1 px-3 focus:outline-none hover:bg-purple-700 rounded text-sm transition">
+                                <button onclick="addToCart(${food.id})" class="text-white bg-gradient-to-r from-red-600 to-amber-600 border-0 py-1 px-3 focus:outline-none hover:from-red-700 hover:to-amber-700 rounded text-sm transition btn-shine">
                                     Add to Cart
                                 </button>
                             </div>
@@ -1725,7 +2325,7 @@
                 `;
                 container.appendChild(foodCard);
             });
-
+    
             // Show or hide load more button based on remaining items
             if (foods.length > limit) {
                 document.getElementById('load-more').classList.remove('hidden');
@@ -1736,51 +2336,51 @@
                 document.getElementById('load-more').classList.add('hidden');
             }
         }
-
+    
         // Function to display restaurants
         function displayRestaurants(restaurants, containerId = 'restaurants-grid') {
             const container = document.getElementById(containerId);
             container.innerHTML = '';
-
+    
             restaurants.forEach(restaurant => {
                 const restaurantCard = document.createElement('div');
-                restaurantCard.className = 'bg-gray-800 rounded-lg shadow overflow-hidden hover:shadow-lg transition transform hover:-translate-y-1';
+                restaurantCard.className = 'bg-white p-6 rounded-xl hover:bg-amber-50 transition-all duration-300 card-hover border-animate shadow-md';
                 restaurantCard.innerHTML = `
-                    <img class="w-full h-48 object-cover" src="${restaurant.image}" alt="${restaurant.name}">
-                    <div class="p-4">
-                        <h3 class="text-lg font-semibold text-white">${restaurant.name}</h3>
-                        <div class="flex items-center mt-2">
-                            <div class="flex text-yellow-400">
-                                ${Array(Math.floor(restaurant.rating)).fill().map(() => '<i class="fas fa-star"></i>').join('')}
-                                ${restaurant.rating % 1 >= 0.5 ? '<i class="fas fa-star-half-alt"></i>' : ''}
-                                ${Array(5 - Math.ceil(restaurant.rating)).fill().map(() => '<i class="far fa-star"></i>').join('')}
-                            </div>
-                            <span class="ml-2 text-sm text-gray-400">${restaurant.rating.toFixed(1)} (${restaurant.reviews} reviews)</span>
-                        </div>
-                        <div class="mt-2 flex flex-wrap gap-2">
-                            ${restaurant.specialties.map(spec => 
-                                `<span class="text-xs bg-purple-900 text-purple-300 px-2 py-1 rounded">${spec}</span>`
-                            ).join('')}
-                        </div>
-                        <p class="mt-2 text-sm text-gray-300">${restaurant.description}</p>
-                        <div class="mt-3 flex justify-between items-center text-sm text-gray-400">
-                            <span><i class="fas fa-clock mr-1"></i> ${restaurant.deliveryTime}</span>
-                            <span><i class="fas fa-shopping-bag mr-1"></i> Min. ${restaurant.minOrder}</span>
-                        </div>
-                        <button onclick="showRestaurantMenu(${restaurant.id})" class="mt-4 w-full bg-purple-600 text-white py-2 rounded-lg hover:bg-purple-700 transition">
-                            View Menu
-                        </button>
+                    <div class="relative h-48 overflow-hidden rounded-lg mb-4">
+                        <img class="w-full h-full object-cover transition-transform duration-500 hover:scale-110" src="${restaurant.image}" alt="${restaurant.name}">
                     </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-2 heading-font">${restaurant.name}</h3>
+                    <div class="flex items-center mb-3">
+                        <div class="flex text-yellow-400">
+                            ${Array(Math.floor(restaurant.rating)).fill().map(() => '<i class="fas fa-star"></i>').join('')}
+                            ${restaurant.rating % 1 >= 0.5 ? '<i class="fas fa-star-half-alt"></i>' : ''}
+                            ${Array(5 - Math.ceil(restaurant.rating)).fill().map(() => '<i class="far fa-star"></i>').join('')}
+                        </div>
+                        <span class="ml-2 text-sm text-gray-600">${restaurant.rating.toFixed(1)} (${restaurant.reviews} reviews)</span>
+                    </div>
+                    <div class="flex flex-wrap gap-2 mb-4">
+                        ${restaurant.specialties.map(spec => 
+                            `<span class="text-xs bg-amber-100 text-amber-800 px-2 py-1 rounded">${spec}</span>`
+                        ).join('')}
+                    </div>
+                    <p class="text-sm text-gray-600 mb-4">${restaurant.description}</p>
+                    <div class="flex justify-between items-center text-sm text-gray-500 mb-4">
+                        <span><i class="fas fa-clock mr-1"></i> ${restaurant.deliveryTime}</span>
+                        <span><i class="fas fa-shopping-bag mr-1"></i> Min. ${restaurant.minOrder}</span>
+                    </div>
+                    <button onclick="showRestaurantMenu(${restaurant.id})" class="w-full bg-gradient-to-r from-red-600 to-amber-600 text-white py-2 rounded-lg hover:from-red-700 hover:to-amber-700 transition shadow-lg btn-shine">
+                        View Menu
+                    </button>
                 `;
                 container.appendChild(restaurantCard);
             });
         }
-
+    
         // Function to get menu items for a specific restaurant
         function getRestaurantMenu(restaurantId) {
             return foodItems.filter(item => item.restaurantId === restaurantId);
         }
-
+    
         // Function to show restaurant menu
         function showRestaurantMenu(restaurantId) {
             const restaurant = restaurants.find(r => r.id === restaurantId);
@@ -1795,24 +2395,24 @@
             menuContainer.innerHTML = '';
             
             if (menuItems.length === 0) {
-                menuContainer.innerHTML = '<p class="text-gray-400 col-span-full text-center py-8">No menu items available for this restaurant.</p>';
+                menuContainer.innerHTML = '<p class="text-gray-500 col-span-full text-center py-8">No menu items available for this restaurant.</p>';
             } else {
                 menuItems.forEach(item => {
                     const menuItem = document.createElement('div');
-                    menuItem.className = 'bg-gray-700 p-4 rounded-lg shadow';
+                    menuItem.className = 'bg-amber-50 p-4 rounded-lg shadow border border-amber-200';
                     menuItem.innerHTML = `
                         <div class="flex items-start">
                             <img src="${item.image}" alt="${item.name}" class="w-16 h-16 object-cover rounded">
                             <div class="ml-3 flex-1">
-                                <h4 class="font-medium text-white">${item.name}</h4>
-                                <p class="text-sm text-gray-300">${item.description}</p>
+                                <h4 class="font-bold text-gray-800">${item.name}</h4>
+                                <p class="text-sm text-gray-600">${item.description}</p>
                                 <div class="mt-2 flex justify-between items-center">
-                                    <span class="text-purple-400 font-medium">₹${item.price.toFixed(2)}</span>
+                                    <span class="text-red-600 font-bold">₹${item.price.toFixed(2)}</span>
                                     <div class="flex space-x-2">
-                                        <button onclick="showRecipe(${item.id})" class="text-purple-400 text-sm hover:underline">
+                                        <button onclick="showRecipe(${item.id})" class="text-red-600 text-sm hover:underline">
                                             View Recipe
                                         </button>
-                                        <button onclick="addToCart(${item.id})" class="text-white bg-purple-600 text-sm py-1 px-3 rounded hover:bg-purple-700 transition">
+                                        <button onclick="addToCart(${item.id})" class="text-white bg-gradient-to-r from-red-600 to-amber-600 text-sm py-1 px-3 rounded hover:from-red-700 hover:to-amber-700 transition btn-shine">
                                             Add to Cart
                                         </button>
                                     </div>
@@ -1826,20 +2426,62 @@
             
             document.getElementById('restaurant-menu-modal').classList.remove('hidden');
         }
-
+    
+        // Function to show recipe details
+        function showRecipe(itemId) {
+            const item = foodItems.find(food => food.id === itemId);
+            if (!item) return;
+            
+            document.getElementById('recipe-title').textContent = item.name;
+            document.getElementById('recipe-image').src = item.image;
+            document.getElementById('recipe-image').alt = item.name;
+            document.getElementById('recipe-description').textContent = item.description;
+            document.getElementById('recipe-calories').textContent = item.calories;
+            document.getElementById('recipe-protein').textContent = `${item.protein}g`;
+            document.getElementById('recipe-carbs').textContent = `${item.carbs}g`;
+            
+            // Set cuisine, type and diet tags
+            document.getElementById('recipe-cuisine').textContent = item.cuisine ? item.cuisine.toUpperCase() : item.category;
+            document.getElementById('recipe-type').textContent = item.type.toUpperCase();
+            document.getElementById('recipe-diet').textContent = item.diet[0].toUpperCase().replace('-', ' ');
+            
+            // Set ingredients
+            const ingredientsList = document.getElementById('recipe-ingredients');
+            ingredientsList.innerHTML = '';
+            item.ingredients.forEach(ingredient => {
+                const li = document.createElement('li');
+                li.textContent = ingredient;
+                ingredientsList.appendChild(li);
+            });
+            
+            // Set instructions
+            const instructionsList = document.getElementById('recipe-instructions');
+            instructionsList.innerHTML = '';
+            item.instructions.forEach(instruction => {
+                const li = document.createElement('li');
+                li.textContent = instruction;
+                instructionsList.appendChild(li);
+            });
+            
+            document.getElementById('recipe-modal').classList.remove('hidden');
+        }
+    
+        // Function to hide recipe modal
+        function hideRecipe() {
+            document.getElementById('recipe-modal').classList.add('hidden');
+        }
+    
         // Function to hide restaurant menu
         function hideRestaurantMenu() {
             document.getElementById('restaurant-menu-modal').classList.add('hidden');
         }
-
+    
         // Filter foods by category
         function filterByCategory(category) {
-            const recommendedFoods = recommendFoods();
-            
             if (category === 'all') {
-                displayFoods(recommendedFoods);
+                displayFoods(foodItems);
             } else {
-                const filtered = recommendedFoods.filter(food => 
+                const filtered = foodItems.filter(food => 
                     food.diet.includes(category) || 
                     food.cuisine === category ||
                     food.type === category
@@ -1851,15 +2493,15 @@
             document.querySelectorAll('.category-btn').forEach(btn => {
                 if (btn.textContent.trim().toLowerCase() === category || 
                     (category === 'all' && btn.textContent.trim().toLowerCase() === 'all items')) {
-                    btn.classList.remove('bg-gray-700');
-                    btn.classList.add('bg-purple-600');
+                    btn.classList.remove('bg-amber-100');
+                    btn.classList.add('bg-gradient-to-r', 'from-red-600', 'to-amber-600', 'text-white');
                 } else {
-                    btn.classList.remove('bg-purple-600');
-                    btn.classList.add('bg-gray-700');
+                    btn.classList.remove('bg-gradient-to-r', 'from-red-600', 'to-amber-600', 'text-white');
+                    btn.classList.add('bg-amber-100', 'text-gray-700');
                 }
             });
         }
-
+    
         // Sort foods based on selected option
         function sortFoods(foods, sortBy) {
             switch(sortBy) {
@@ -1875,14 +2517,12 @@
                     return [...foods].sort((a, b) => b.calories - a.calories);
                 case 'recommended':
                 default:
-                    return [...foods].sort((a, b) => b.matchScore - a.matchScore);
+                    return [...foods];
             }
         }
-
+    
         // Apply filters to foods
         function applyFilters() {
-            const recommendedFoods = recommendFoods();
-            
             // Get filter values
             const sortBy = document.getElementById('sort-by').value;
             const maxCalories = parseInt(document.getElementById('calorie-range').value);
@@ -1893,7 +2533,7 @@
             const selectedMeals = Array.from(document.querySelectorAll('.meal-filter:checked')).map(el => el.value);
             
             // Apply filters
-            let filtered = recommendedFoods.filter(food => 
+            let filtered = foodItems.filter(food => 
                 food.calories <= maxCalories &&
                 food.protein >= minProtein
             );
@@ -1918,7 +2558,7 @@
             // Display results
             displayFoods(filtered);
         }
-
+    
         // Reset all filters
         function resetAllFilters() {
             // Reset form elements
@@ -1939,45 +2579,29 @@
             // Close filter panel if open
             document.getElementById('filter-panel').classList.add('hidden');
         }
-
-        // Function to update recommendations
-        window.updateRecommendations = function() {
-            // Show loading state
-            document.getElementById('loading-state').classList.remove('hidden');
-            document.getElementById('food-grid').classList.add('hidden');
-            
-            // Simulate loading delay (in real app, this would be API calls)
-            setTimeout(() => {
-                const recommendedFoods = recommendFoods();
-                const recommendedRestaurants = recommendRestaurants();
-                const healthTips = getPersonalizedHealthTips();
-                
-                // Display recommendations
-                displayFoods(recommendedFoods);
-                displayRestaurants(recommendedRestaurants);
-                
-                // Display health tips
-                const healthTipsContainer = document.getElementById('health-tips');
-                healthTipsContainer.innerHTML = '';
-                healthTips.forEach(tip => {
-                    const tipElement = document.createElement('div');
-                    tipElement.className = 'bg-gray-800 p-4 rounded-lg shadow';
-                    tipElement.innerHTML = `
-                        <h3 class="font-semibold text-lg text-white mb-2 flex items-center">
-                            <i class="fas fa-lightbulb text-purple-500 mr-2"></i>
-                            ${tip.title}
-                        </h3>
-                        <p class="text-gray-300">${tip.content}</p>
-                    `;
-                    healthTipsContainer.appendChild(tipElement);
-                });
-                
-                // Hide loading state
-                document.getElementById('loading-state').classList.add('hidden');
-                document.getElementById('food-grid').classList.remove('hidden');
-            }, 1000);
-        };
-
+    
+        // Function to get general health tips
+        function getHealthTips() {
+            return [
+                {
+                    title: "Balanced Diet",
+                    content: "Aim for a balanced diet that includes a variety of foods from all food groups to ensure you get all necessary nutrients."
+                },
+                {
+                    title: "Portion Control",
+                    content: "Be mindful of portion sizes to avoid overeating, even when consuming healthy foods."
+                },
+                {
+                    title: "Hydration",
+                    content: "Drink plenty of water throughout the day to stay hydrated and support overall health."
+                },
+                {
+                    title: "Whole Foods",
+                    content: "Choose whole, unprocessed foods over processed options whenever possible for better nutrition."
+                }
+            ];
+        }
+    
         // Initialize the page
         document.addEventListener('DOMContentLoaded', function() {
             // Initialize cart from localStorage
@@ -2019,18 +2643,56 @@
                 btn.addEventListener('click', function() {
                     // Remove active class from all buttons
                     document.querySelectorAll('.category-btn').forEach(b => {
-                        b.classList.remove('bg-purple-600');
-                        b.classList.add('bg-gray-700');
+                        b.classList.remove('bg-gradient-to-r', 'from-red-600', 'to-amber-600', 'text-white');
+                        b.classList.add('bg-amber-100', 'text-gray-700');
                     });
                     
                     // Add active class to clicked button
-                    this.classList.remove('bg-gray-700');
-                    this.classList.add('bg-purple-600');
+                    if (this.textContent.trim().toLowerCase() === 'all items') {
+                        this.classList.remove('bg-amber-100', 'text-gray-700');
+                        this.classList.add('bg-gradient-to-r', 'from-red-600', 'to-amber-600', 'text-white');
+                    }
                 });
             });
             
-            // Load initial recommendations
-            updateRecommendations();
+            // Profile dropdown toggle
+            const profileButton = document.getElementById('profile-button');
+            const profileDropdown = document.getElementById('profile-dropdown');
+            
+            profileButton.addEventListener('click', function(e) {
+                e.stopPropagation();
+                profileDropdown.classList.toggle('hidden');
+            });
+            
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function() {
+                profileDropdown.classList.add('hidden');
+            });
+            
+            // Prevent dropdown from closing when clicking inside it
+            profileDropdown.addEventListener('click', function(e) {
+                e.stopPropagation();
+            });
+            
+            // Load initial data
+            displayFoods(foodItems);
+            displayRestaurants(restaurants);
+            
+            // Display health tips
+            const healthTipsContainer = document.getElementById('health-tips');
+            healthTipsContainer.innerHTML = '';
+            getHealthTips().forEach(tip => {
+                const tipElement = document.createElement('div');
+                tipElement.className = 'bg-white p-6 rounded-xl hover:bg-amber-50 transition-all duration-300 card-hover border-animate shadow-md';
+                tipElement.innerHTML = `
+                    <h3 class="font-semibold text-lg text-gray-800 mb-3 flex items-center heading-font">
+                        <i class="fas fa-lightbulb text-red-600 mr-3"></i>
+                        ${tip.title}
+                    </h3>
+                    <p class="text-gray-600">${tip.content}</p>
+                `;
+                healthTipsContainer.appendChild(tipElement);
+            });
             
             // Check if user is logged in
             const userData = JSON.parse(localStorage.getItem('userData'));
@@ -2061,7 +2723,7 @@
                 }
             }
         });
-
+    
         // Add smooth transition to all links
         document.addEventListener('DOMContentLoaded', function() {
             document.querySelectorAll('a').forEach(link => {
@@ -2087,6 +2749,143 @@
                 });
             });
         });
+
+        // Shopping cart functions
+        function toggleCart() {
+            const cartSidebar = document.getElementById('cart-sidebar');
+            const cartOverlay = document.getElementById('cart-overlay');
+            
+            if (cartSidebar.classList.contains('translate-x-full')) {
+                cartSidebar.classList.remove('translate-x-full');
+                cartOverlay.classList.remove('hidden');
+            } else {
+                cartSidebar.classList.add('translate-x-full');
+                cartOverlay.classList.add('hidden');
+            }
+        }
+
+        function addToCart(itemId) {
+            const item = foodItems.find(food => food.id === itemId);
+            if (!item) return;
+            
+            let cart = JSON.parse(localStorage.getItem('cart')) || [];
+            const existingItem = cart.find(cartItem => cartItem.id === itemId);
+            
+            if (existingItem) {
+                existingItem.quantity += 1;
+            } else {
+                cart.push({
+                    ...item,
+                    quantity: 1
+                });
+            }
+            
+            localStorage.setItem('cart', JSON.stringify(cart));
+            updateCart();
+            
+            // Show added to cart animation
+            const addButton = event.target;
+            addButton.classList.add('animate-click');
+            setTimeout(() => {
+                addButton.classList.remove('animate-click');
+            }, 300);
+        }
+
+        function updateCart() {
+            const cart = JSON.parse(localStorage.getItem('cart')) || [];
+            const cartItemsContainer = document.getElementById('cart-items');
+            const cartCount = document.getElementById('cart-count');
+            const cartHoverCount = document.getElementById('cart-hover-count');
+            const cartSubtotal = document.getElementById('cart-subtotal');
+            const cartTotal = document.getElementById('cart-total');
+            
+            // Update cart count
+            const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+            cartCount.textContent = totalItems;
+            cartHoverCount.textContent = totalItems;
+            
+            // Update cart items display
+            if (cart.length === 0) {
+                cartItemsContainer.innerHTML = `
+                    <div class="text-center py-12">
+                        <i class="fas fa-shopping-cart text-4xl text-gray-400 mb-4"></i>
+                        <p class="text-gray-500">Your cart is empty</p>
+                        <button onclick="toggleCart()" class="mt-4 text-red-600 hover:text-red-500 underline">
+                            Browse our menu
+                        </button>
+                    </div>
+                `;
+            } else {
+                cartItemsContainer.innerHTML = '';
+                cart.forEach(item => {
+                    const cartItem = document.createElement('div');
+                    cartItem.className = 'flex items-center justify-between py-4 border-b border-amber-100';
+                    cartItem.innerHTML = `
+                        <div class="flex items-center">
+                            <img src="${item.image}" alt="${item.name}" class="w-16 h-16 object-cover rounded">
+                            <div class="ml-4">
+                                <h4 class="font-medium text-gray-800">${item.name}</h4>
+                                <p class="text-sm text-gray-600">₹${item.price.toFixed(2)} x ${item.quantity}</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center">
+                            <button onclick="updateCartItem(${item.id}, -1)" class="text-gray-500 hover:text-red-600 p-1">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                            <span class="mx-2">${item.quantity}</span>
+                            <button onclick="updateCartItem(${item.id}, 1)" class="text-gray-500 hover:text-green-600 p-1">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                            <button onclick="removeFromCart(${item.id})" class="ml-4 text-red-500 hover:text-red-700 p-1">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    `;
+                    cartItemsContainer.appendChild(cartItem);
+                });
+            }
+            
+            // Update totals
+            const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const total = subtotal + 30; // Adding delivery fee
+            
+            cartSubtotal.textContent = `₹${subtotal.toFixed(2)}`;
+            cartTotal.textContent = `₹${total.toFixed(2)}`;
+        }
+
+        function updateCartItem(itemId, change) {
+            let cart = JSON.parse(localStorage.getItem('cart')) || [];
+            const itemIndex = cart.findIndex(item => item.id === itemId);
+            
+            if (itemIndex !== -1) {
+                cart[itemIndex].quantity += change;
+                
+                if (cart[itemIndex].quantity <= 0) {
+                    cart.splice(itemIndex, 1);
+                }
+                
+                localStorage.setItem('cart', JSON.stringify(cart));
+                updateCart();
+            }
+        }
+
+        function removeFromCart(itemId) {
+            let cart = JSON.parse(localStorage.getItem('cart')) || [];
+            cart = cart.filter(item => item.id !== itemId);
+            localStorage.setItem('cart', JSON.stringify(cart));
+            updateCart();
+        }
+
+        // Make functions available globally
+        window.toggleCart = toggleCart;
+        window.addToCart = addToCart;
+        window.updateCartItem = updateCartItem;
+        window.removeFromCart = removeFromCart;
+        window.showRestaurantMenu = showRestaurantMenu;
+        window.hideRestaurantMenu = hideRestaurantMenu;
+        window.showRecipe = showRecipe;
+        window.hideRecipe = hideRecipe;
+        window.filterByCategory = filterByCategory;
     </script>
 </body>
 </html>
