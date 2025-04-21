@@ -188,7 +188,7 @@
         }
 
         /* Custom button shine effect */
-        .btn-shine:hover {
+        .btn-shine {
             position: relative;
             overflow: hidden;
         }
@@ -210,86 +210,28 @@
                 left: 120%;
             }
         }
+
+        /* Loading spinner */
+        .spinner {
+            width: 24px;
+            height: 24px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Responsive cart */
+        @media (max-width: 640px) {
+            #cart-sidebar {
+                width: 100%;
+            }
+        }
     </style>
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyBx0Kt9o04ye0XrtA8ecp84wD8Q9OCDjlA",
-            authDomain: "foodorder-4380c.firebaseapp.com",
-            databaseURL: "https://foodorder-4380c.firebaseio.com",
-            projectId: "foodorder-4380c",
-            storageBucket: "foodorder-4380c.appspot.com",
-            messagingSenderId: "735023580381",
-            appId: "1:735023580381:web:c6740bef2fc9bdee1b4734"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const database = getDatabase(app);
-
-        // Check auth state
-        onAuthStateChanged(auth, (user) => {
-            if (!user) {
-                window.location.href = 'login.html';
-            } else {
-                document.getElementById('profile-name').textContent = user.displayName || 'User';
-                document.getElementById('welcome-message').textContent = `Welcome back, ${user.displayName || 'User'}!`;
-                loadUserData(user.uid);
-            }
-        });
-
-        // Sign out functionality
-        window.logout = async function() {
-            try {
-                await signOut(auth);
-                window.location.href = 'index.html';
-            } catch (error) {
-                console.error('Logout error:', error);
-            }
-        };
-
-        async function loadUserData(userId) {
-            const userRef = ref(database, 'users/' + userId);
-            get(userRef).then((snapshot) => {
-                if (snapshot.exists()) {
-                    const userData = snapshot.val();
-                    document.getElementById('total-orders').textContent = userData.totalOrders || 0;
-                    document.getElementById('favorite-items').textContent = userData.favoriteItems || 0;
-                    document.getElementById('average-rating').textContent = userData.averageRating || '4.8';
-                }
-            }).catch((error) => {
-                console.error("Error loading user data:", error);
-            });
-        }
-    </script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#e11d48',
-                        secondary: '#be123c',
-                        accent: '#f59e0b',
-                        light: '#fff7ed',
-                        dark: '#1f2937'
-                    },
-                    animation: {
-                        'click': 'click 300ms ease-out',
-                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-                    },
-                    keyframes: {
-                        click: {
-                            '0%, 100%': { transform: 'scale(1)' },
-                            '50%': { transform: 'scale(0.95)' },
-                        }
-                    }
-                }
-            }
-        }
-    </script>
 </head>
 <body class="bg-amber-50 text-gray-800 min-h-screen">
     <!-- Navigation -->
@@ -307,18 +249,20 @@
             </div>
             <div class="flex items-center space-x-4">
                 <div id="profile-section" class="relative">
-                    <button id="profile-button" class="flex items-center space-x-2 bg-amber-100 hover:bg-amber-200 px-4 py-2 rounded-full transition border-animate">
+                    <button id="profile-button" class="flex items-center space-x-2 bg-amber-100 hover:bg-amber-200 px-4 py-2 rounded-full transition border-animate"
+                            aria-expanded="false" aria-controls="profile-dropdown">
                         <i class="fas fa-user-circle text-red-600"></i>
-                        <span id="profile-name" class="text-gray-700"></span>
+                        <span id="profile-name" class="text-gray-700">Loading...</span>
                     </button>
                     <div id="profile-dropdown" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 hidden border border-amber-200 backdrop-blur-sm">
                         <a href="dashboard.html" class="block px-4 py-2 text-sm hover:bg-amber-50 transition text-gray-700">Dashboard</a>
                         <a href="preferences.html" class="block px-4 py-2 text-sm hover:bg-amber-50 transition text-gray-700">Preferences</a>
                         <a href="orders.html" class="block px-4 py-2 text-sm hover:bg-amber-50 transition text-gray-700">My Orders</a>
-                        <a href="#" onclick="logout()" class="block px-4 py-2 text-sm hover:bg-amber-50 transition text-gray-700">Sign out</a>
+                        <a href="#" id="logout-btn" class="block px-4 py-2 text-sm hover:bg-amber-50 transition text-gray-700">Sign out</a>
                     </div>
                 </div>
-                <button onclick="toggleCart()" class="flex items-center space-x-2 bg-gradient-to-r from-red-600 to-amber-600 hover:from-red-700 hover:to-amber-700 px-4 py-2 rounded-full transition shadow-lg relative group text-white btn-shine">
+                <button onclick="toggleCart()" class="flex items-center space-x-2 bg-gradient-to-r from-red-600 to-amber-600 hover:from-red-700 hover:to-amber-700 px-4 py-2 rounded-full transition shadow-lg relative group text-white btn-shine"
+                        aria-label="Shopping cart">
                     <i class="fas fa-shopping-cart"></i>
                     <span id="cart-count" class="bg-white text-red-600 rounded-full w-6 h-6 flex items-center justify-center font-bold">0</span>
                     <span class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity" id="cart-hover-count">0</span>
@@ -354,21 +298,24 @@
                     <div class="text-red-500 text-5xl mb-6">
                         <i class="fas fa-shopping-bag"></i>
                     </div>
-                    <h3 id="total-orders" class="text-4xl font-bold mb-3">12</h3>
+                    <div id="total-orders-loader" class="spinner mx-auto mb-6"></div>
+                    <h3 id="total-orders" class="text-4xl font-bold mb-3 hidden">0</h3>
                     <p class="text-gray-600">Total Orders</p>
                 </div>
                 <div class="bg-white p-8 rounded-xl hover:bg-amber-50 transition-all duration-300 card-hover border-animate shadow-md">
                     <div class="text-red-500 text-5xl mb-6">
                         <i class="fas fa-heart"></i>
                     </div>
-                    <h3 id="favorite-items" class="text-4xl font-bold mb-3">8</h3>
+                    <div id="favorite-items-loader" class="spinner mx-auto mb-6"></div>
+                    <h3 id="favorite-items" class="text-4xl font-bold mb-3 hidden">0</h3>
                     <p class="text-gray-600">Favorite Items</p>
                 </div>
                 <div class="bg-white p-8 rounded-xl hover:bg-amber-50 transition-all duration-300 card-hover border-animate shadow-md">
                     <div class="text-red-500 text-5xl mb-6">
                         <i class="fas fa-star"></i>
                     </div>
-                    <h3 id="average-rating" class="text-4xl font-bold mb-3">4.8</h3>
+                    <div id="average-rating-loader" class="spinner mx-auto mb-6"></div>
+                    <h3 id="average-rating" class="text-4xl font-bold mb-3 hidden">0.0</h3>
                     <p class="text-gray-600">Average Rating</p>
                 </div>
             </div>
@@ -397,7 +344,8 @@
                         </div>
                         <p class="text-gray-600 text-sm mb-4 flex-grow">Creamy tomato-based curry with tender chicken pieces</p>
                         <div class="mt-auto">
-                            <button class="w-full bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition flex items-center justify-center btn-shine">
+                            <button class="w-full bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition flex items-center justify-center btn-shine add-to-cart" 
+                                    data-name="Butter Chicken" data-price="325" data-id="item1">
                                 <i class="fas fa-plus mr-2"></i> Add to Cart
                             </button>
                         </div>
@@ -417,7 +365,8 @@
                         </div>
                         <p class="text-gray-600 text-sm mb-4 flex-grow">Crispy rice crepe filled with spiced potato mixture</p>
                         <div class="mt-auto">
-                            <button class="w-full bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition flex items-center justify-center btn-shine">
+                            <button class="w-full bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition flex items-center justify-center btn-shine add-to-cart"
+                                    data-name="Masala Dosa" data-price="180" data-id="item2">
                                 <i class="fas fa-plus mr-2"></i> Add to Cart
                             </button>
                         </div>
@@ -437,7 +386,8 @@
                         </div>
                         <p class="text-gray-600 text-sm mb-4 flex-grow">Crispy hollow puris filled with spicy tamarind water</p>
                         <div class="mt-auto">
-                            <button class="w-full bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition flex items-center justify-center btn-shine">
+                            <button class="w-full bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition flex items-center justify-center btn-shine add-to-cart"
+                                    data-name="Pani Puri" data-price="60" data-id="item3">
                                 <i class="fas fa-plus mr-2"></i> Add to Cart
                             </button>
                         </div>
@@ -457,7 +407,8 @@
                         </div>
                         <p class="text-gray-600 text-sm mb-4 flex-grow">Fragrant basmati rice cooked with spices and chicken</p>
                         <div class="mt-auto">
-                            <button class="w-full bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition flex items-center justify-center btn-shine">
+                            <button class="w-full bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition flex items-center justify-center btn-shine add-to-cart"
+                                    data-name="Hyderabadi Biryani" data-price="350" data-id="item4">
                                 <i class="fas fa-plus mr-2"></i> Add to Cart
                             </button>
                         </div>
@@ -476,7 +427,8 @@
             </div>
             
             <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200">
+                <div id="orders-loader" class="spinner mx-auto my-12"></div>
+                <table class="min-w-full divide-y divide-gray-200 hidden" id="orders-table">
                     <thead class="bg-gray-50">
                         <tr>
                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order #</th>
@@ -487,45 +439,17 @@
                             <th scope="col" class="relative px-6 py-3"><span class="sr-only">Action</span></th>
                         </tr>
                     </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
-                        <tr>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">#12345</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Jun 15, 2023</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">2 items</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">₹485</td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Delivered</span>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                <a href="#" class="text-red-600 hover:text-red-900">View</a>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">#12344</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Jun 14, 2023</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">3 items</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">₹620</td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Delivered</span>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                <a href="#" class="text-red-600 hover:text-red-900">View</a>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">#12343</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Jun 12, 2023</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">1 item</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">₹180</td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">On the way</span>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                <a href="#" class="text-red-600 hover:text-red-900">View</a>
-                            </td>
-                        </tr>
+                    <tbody class="bg-white divide-y divide-gray-200" id="orders-body">
+                        <!-- Orders will be loaded here dynamically -->
                     </tbody>
                 </table>
+                <div id="no-orders" class="text-center py-12 hidden">
+                    <i class="fas fa-shopping-bag text-4xl text-gray-400 mb-4"></i>
+                    <p class="text-gray-600">You haven't placed any orders yet</p>
+                    <a href="index.html#menu" class="mt-4 inline-block text-red-600 hover:text-red-500 underline">
+                        Browse our menu
+                    </a>
+                </div>
             </div>
         </div>
     </section>
@@ -538,72 +462,16 @@
                 <h2 class="text-4xl font-bold mt-2 heading-font">Favorite <span class="gradient-text">Restaurants</span></h2>
             </div>
             
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                <!-- Restaurant 1 -->
-                <div class="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-all duration-300 card-hover border-animate">
-                    <img class="h-48 w-full object-cover" src="https://images.unsplash.com/photo-1578474846511-04ba529a0a0f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1374&q=80" alt="Punjabi Dhaba">
-                    <div class="p-6">
-                        <h3 class="text-xl font-bold text-gray-800 mb-2">Punjabi Dhaba</h3>
-                        <div class="flex items-center mb-2">
-                            <div class="flex text-yellow-400">
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                            </div>
-                            <span class="ml-2 text-sm text-gray-600">4.8 (450 reviews)</span>
-                        </div>
-                        <p class="text-sm text-gray-600 mb-4">North Indian, Punjabi · ₹₹ · 25 min · 2.5 km away</p>
-                        <button class="w-full bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition flex items-center justify-center btn-shine">
-                            Order Now
-                        </button>
-                    </div>
-                </div>
-                
-                <!-- Restaurant 2 -->
-                <div class="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-all duration-300 card-hover border-animate">
-                    <img class="h-48 w-full object-cover" src="https://images.unsplash.com/photo-1601050690597-df0568f70950?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" alt="Madras Cafe">
-                    <div class="p-6">
-                        <h3 class="text-xl font-bold text-gray-800 mb-2">Madras Cafe</h3>
-                        <div class="flex items-center mb-2">
-                            <div class="flex text-yellow-400">
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star-half-alt"></i>
-                            </div>
-                            <span class="ml-2 text-sm text-gray-600">4.3 (320 reviews)</span>
-                        </div>
-                        <p class="text-sm text-gray-600 mb-4">South Indian, Vegetarian · ₹ · 15 min · 1.2 km away</p>
-                        <button class="w-full bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition flex items-center justify-center btn-shine">
-                            Order Now
-                        </button>
-                    </div>
-                </div>
-                
-                <!-- Restaurant 3 -->
-                <div class="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-all duration-300 card-hover border-animate">
-                    <img class="h-48 w-full object-cover" src="https://images.unsplash.com/photo-1606491956689-2ea866880c84?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1521&q=80" alt="Biryani Blues">
-                    <div class="p-6">
-                        <h3 class="text-xl font-bold text-gray-800 mb-2">Biryani Blues</h3>
-                        <div class="flex items-center mb-2">
-                            <div class="flex text-yellow-400">
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="far fa-star"></i>
-                            </div>
-                            <span class="ml-2 text-sm text-gray-600">4.0 (280 reviews)</span>
-                        </div>
-                        <p class="text-sm text-gray-600 mb-4">Hyderabadi, Mughlai · ₹₹₹ · 30 min · 3.5 km away</p>
-                        <button class="w-full bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition flex items-center justify-center btn-shine">
-                            Order Now
-                        </button>
-                    </div>
-                </div>
+            <div id="favorites-loader" class="spinner mx-auto my-12"></div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 hidden" id="favorites-container">
+                <!-- Restaurants will be loaded here dynamically -->
+            </div>
+            <div id="no-favorites" class="text-center py-12 hidden">
+                <i class="fas fa-heart text-4xl text-gray-400 mb-4"></i>
+                <p class="text-gray-600">You don't have any favorite restaurants yet</p>
+                <a href="index.html#menu" class="mt-4 inline-block text-red-600 hover:text-red-500 underline">
+                    Explore restaurants
+                </a>
             </div>
         </div>
     </section>
@@ -614,13 +482,13 @@
             <h3 class="text-xl font-semibold text-gray-800 flex items-center">
                 <i class="fas fa-shopping-cart mr-2 text-red-600"></i> Your Order
             </h3>
-            <button onclick="toggleCart()" class="text-gray-500 hover:text-gray-700 text-xl">
+            <button onclick="toggleCart()" class="text-gray-500 hover:text-gray-700 text-xl" aria-label="Close cart">
                 <i class="fas fa-times"></i>
             </button>
         </div>
         <div id="cart-items" class="p-6">
             <!-- Cart items will be added here dynamically -->
-            <div class="text-center py-12">
+            <div id="empty-cart-message" class="text-center py-12">
                 <i class="fas fa-shopping-cart text-4xl text-gray-400 mb-4"></i>
                 <p class="text-gray-500">Your cart is empty</p>
                 <button onclick="toggleCart()" class="mt-4 text-red-600 hover:text-red-500 underline">
@@ -641,7 +509,7 @@
                 <span>Total:</span>
                 <span id="cart-total">₹30.00</span>
             </div>
-            <a href="orders.html" class="w-full bg-gradient-to-r from-red-600 to-amber-600 text-white py-3 rounded-lg hover:from-red-700 hover:to-amber-700 transition flex items-center justify-center shadow-lg btn-shine">
+            <a href="checkout.html" class="w-full bg-gradient-to-r from-red-600 to-amber-600 text-white py-3 rounded-lg hover:from-red-700 hover:to-amber-700 transition flex items-center justify-center shadow-lg btn-shine">
                 <i class="fas fa-credit-card mr-2"></i> Proceed to Checkout
             </a>
         </div>
@@ -698,56 +566,468 @@
         </div>
     </footer>
 
-    <script>
-        // Profile dropdown toggle
-        document.getElementById('profile-button').addEventListener('click', function() {
-            const dropdown = document.getElementById('profile-dropdown');
-            dropdown.classList.toggle('hidden');
-        });
+    <script type="module">
+        // Firebase configuration and initialization
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getDatabase, ref, get, child } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        // Close dropdown when clicking outside
-        document.addEventListener('click', function(event) {
-            const dropdown = document.getElementById('profile-dropdown');
-            const button = document.getElementById('profile-button');
-            if (!button.contains(event.target) && !dropdown.contains(event.target)) {
-                dropdown.classList.add('hidden');
-            }
-        });
+        const firebaseConfig = {
+            apiKey: "AIzaSyBx0Kt9o04ye0XrtA8ecp84wD8Q9OCDjlA",
+            authDomain: "foodorder-4380c.firebaseapp.com",
+            databaseURL: "https://foodorder-4380c.firebaseio.com",
+            projectId: "foodorder-4380c",
+            storageBucket: "foodorder-4380c.appspot.com",
+            messagingSenderId: "735023580381",
+            appId: "1:735023580381:web:c6740bef2fc9bdee1b4734"
+        };
 
-        // Toggle cart visibility
-        function toggleCart() {
-            const cartSidebar = document.getElementById('cart-sidebar');
-            const cartOverlay = document.getElementById('cart-overlay');
+        // Initialize Firebase
+        try {
+            const app = initializeApp(firebaseConfig);
+            const auth = getAuth(app);
+            const database = getDatabase(app);
             
-            cartSidebar.classList.toggle('translate-x-full');
-            cartOverlay.classList.toggle('hidden');
-        }
-
-        // Add smooth transition to all links
-        document.addEventListener('DOMContentLoaded', function() {
-            document.querySelectorAll('a').forEach(link => {
-                link.addEventListener('click', function(e) {
-                    // Don't apply to:
-                    // 1. External links
-                    // 2. Anchor links (#)
-                    // 3. Links to the current page
-                    if (!this.href || 
-                        this.href.startsWith('http') || 
-                        this.href.includes('#') || 
-                        this.href === window.location.href) {
-                        return;
+            // Cart state
+            let cart = JSON.parse(localStorage.getItem('cart')) || [];
+            
+            // Update cart display
+            function updateCartDisplay() {
+                const cartItemsContainer = document.getElementById('cart-items');
+                const emptyCartMessage = document.getElementById('empty-cart-message');
+                const cartCount = document.getElementById('cart-count');
+                const cartHoverCount = document.getElementById('cart-hover-count');
+                const cartSubtotal = document.getElementById('cart-subtotal');
+                const cartTotal = document.getElementById('cart-total');
+                
+                // Update cart count
+                const itemCount = cart.reduce((total, item) => total + item.quantity, 0);
+                cartCount.textContent = itemCount;
+                cartHoverCount.textContent = itemCount;
+                
+                // Calculate subtotal
+                const subtotal = cart.reduce((total, item) => total + (item.price * item.quantity), 0);
+                cartSubtotal.textContent = `₹${subtotal.toFixed(2)}`;
+                cartTotal.textContent = `₹${(subtotal + 30).toFixed(2)}`;
+                
+                // Clear existing items
+                cartItemsContainer.innerHTML = '';
+                
+                if (cart.length === 0) {
+                    // Show empty cart message
+                    emptyCartMessage.classList.remove('hidden');
+                    cartItemsContainer.appendChild(emptyCartMessage);
+                } else {
+                    // Hide empty cart message
+                    emptyCartMessage.classList.add('hidden');
+                    
+                    // Add each item to cart
+                    cart.forEach((item, index) => {
+                        const cartItem = document.createElement('div');
+                        cartItem.className = 'flex justify-between items-center py-4 border-b border-amber-100';
+                        cartItem.innerHTML = `
+                            <div class="flex-1">
+                                <h4 class="font-medium text-gray-800">${item.name}</h4>
+                                <p class="text-sm text-gray-600">₹${item.price.toFixed(2)} x ${item.quantity}</p>
+                            </div>
+                            <div class="flex items-center">
+                                <span class="font-medium text-gray-800 mr-4">₹${(item.price * item.quantity).toFixed(2)}</span>
+                                <button class="text-red-600 hover:text-red-800 remove-item" data-index="${index}">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        `;
+                        cartItemsContainer.appendChild(cartItem);
+                    });
+                    
+                    // Add event listeners to remove buttons
+                    document.querySelectorAll('.remove-item').forEach(button => {
+                        button.addEventListener('click', function() {
+                            const index = parseInt(this.getAttribute('data-index'));
+                            cart.splice(index, 1);
+                            localStorage.setItem('cart', JSON.stringify(cart));
+                            updateCartDisplay();
+                        });
+                    });
+                }
+            }
+            
+            // Add to cart function
+            function addToCart(itemId, itemName, itemPrice) {
+                // Check if item already exists in cart
+                const existingItem = cart.find(item => item.id === itemId);
+                
+                if (existingItem) {
+                    // Increase quantity
+                    existingItem.quantity += 1;
+                } else {
+                    // Add new item
+                    cart.push({
+                        id: itemId,
+                        name: itemName,
+                        price: parseFloat(itemPrice),
+                        quantity: 1
+                    });
+                }
+                
+                // Save to localStorage
+                localStorage.setItem('cart', JSON.stringify(cart));
+                
+                // Update cart display
+                updateCartDisplay();
+                
+                // Show cart sidebar
+                toggleCart();
+            }
+            
+            // Toggle cart visibility
+            window.toggleCart = function() {
+                const cartSidebar = document.getElementById('cart-sidebar');
+                const cartOverlay = document.getElementById('cart-overlay');
+                
+                cartSidebar.classList.toggle('translate-x-full');
+                cartOverlay.classList.toggle('hidden');
+                
+                // Update cart display when opening
+                if (!cartSidebar.classList.contains('translate-x-full')) {
+                    updateCartDisplay();
+                }
+            }
+            
+            // Load user data from Firebase
+            async function loadUserData(userId) {
+                try {
+                    // Show loading states
+                    document.getElementById('total-orders-loader').classList.remove('hidden');
+                    document.getElementById('favorite-items-loader').classList.remove('hidden');
+                    document.getElementById('average-rating-loader').classList.remove('hidden');
+                    
+                    // Hide stat elements
+                    document.getElementById('total-orders').classList.add('hidden');
+                    document.getElementById('favorite-items').classList.add('hidden');
+                    document.getElementById('average-rating').classList.add('hidden');
+                    
+                    const userRef = ref(database, 'users/' + userId);
+                    const snapshot = await get(userRef);
+                    
+                    if (snapshot.exists()) {
+                        const userData = snapshot.val();
+                        
+                        // Update stats with animation
+                        animateValue('total-orders', 0, userData.totalOrders || 0, 1000);
+                        animateValue('favorite-items', 0, userData.favoriteItems || 0, 1000);
+                        
+                        // For rating, we'll just set it directly since it's a decimal
+                        const ratingElement = document.getElementById('average-rating');
+                        ratingElement.textContent = userData.averageRating || '4.8';
+                        ratingElement.classList.remove('hidden');
+                        document.getElementById('average-rating-loader').classList.add('hidden');
+                        
+                        // Hide loaders when done
+                        setTimeout(() => {
+                            document.getElementById('total-orders-loader').classList.add('hidden');
+                            document.getElementById('favorite-items-loader').classList.add('hidden');
+                        }, 1000);
+                    } else {
+                        // No data found, show default values
+                        animateValue('total-orders', 0, 0, 1000);
+                        animateValue('favorite-items', 0, 0, 1000);
+                        
+                        const ratingElement = document.getElementById('average-rating');
+                        ratingElement.textContent = '4.8';
+                        ratingElement.classList.remove('hidden');
+                        
+                        document.getElementById('total-orders-loader').classList.add('hidden');
+                        document.getElementById('favorite-items-loader').classList.add('hidden');
+                        document.getElementById('average-rating-loader').classList.add('hidden');
                     }
                     
-                    e.preventDefault();
-                    document.body.style.opacity = '0';
-                    document.body.style.transition = 'opacity 0.3s ease';
+                    // Load orders history
+                    loadOrdersHistory(userId);
                     
-                    setTimeout(() => {
-                        window.location.href = this.href;
-                    }, 300);
+                    // Load favorite restaurants
+                    loadFavoriteRestaurants(userId);
+                    
+                } catch (error) {
+                    console.error("Error loading user data:", error);
+                    
+                    // Fallback to default values if error occurs
+                    document.getElementById('total-orders').textContent = '0';
+                    document.getElementById('favorite-items').textContent = '0';
+                    document.getElementById('average-rating').textContent = '4.8';
+                    
+                    document.getElementById('total-orders').classList.remove('hidden');
+                    document.getElementById('favorite-items').classList.remove('hidden');
+                    document.getElementById('average-rating').classList.remove('hidden');
+                    
+                    document.getElementById('total-orders-loader').classList.add('hidden');
+                    document.getElementById('favorite-items-loader').classList.add('hidden');
+                    document.getElementById('average-rating-loader').classList.add('hidden');
+                }
+            }
+            
+            // Animate value changes
+            function animateValue(id, start, end, duration) {
+                const element = document.getElementById(id);
+                const range = end - start;
+                let current = start;
+                const increment = end > start ? 1 : -1;
+                const stepTime = Math.abs(Math.floor(duration / range));
+                const timer = setInterval(() => {
+                    current += increment;
+                    element.textContent = current;
+                    if (current === end) {
+                        clearInterval(timer);
+                        element.classList.remove('hidden');
+                    }
+                }, stepTime);
+            }
+            
+            // Load orders history
+            async function loadOrdersHistory(userId) {
+                try {
+                    const ordersRef = ref(database, `users/${userId}/orders`);
+                    const snapshot = await get(ordersRef);
+                    
+                    const ordersTable = document.getElementById('orders-table');
+                    const ordersBody = document.getElementById('orders-body');
+                    const noOrders = document.getElementById('no-orders');
+                    const ordersLoader = document.getElementById('orders-loader');
+                    
+                    ordersLoader.classList.add('hidden');
+                    
+                    if (snapshot.exists()) {
+                        const orders = snapshot.val();
+                        ordersBody.innerHTML = '';
+                        
+                        // Sort orders by date (newest first)
+                        const sortedOrders = Object.values(orders).sort((a, b) => 
+                            new Date(b.date) - new Date(a.date));
+                        
+                        // Show only the 3 most recent orders
+                        sortedOrders.slice(0, 3).forEach(order => {
+                            const row = document.createElement('tr');
+                            
+                            // Format date
+                            const orderDate = new Date(order.date);
+                            const formattedDate = orderDate.toLocaleDateString('en-US', {
+                                year: 'numeric',
+                                month: 'short',
+                                day: 'numeric'
+                            });
+                            
+                            // Determine status and styling
+                            let statusText, statusClass;
+                            if (order.status === 'delivered') {
+                                statusText = 'Delivered';
+                                statusClass = 'bg-green-100 text-green-800';
+                            } else if (order.status === 'cancelled') {
+                                statusText = 'Cancelled';
+                                statusClass = 'bg-red-100 text-red-800';
+                            } else {
+                                statusText = 'On the way';
+                                statusClass = 'bg-yellow-100 text-yellow-800';
+                            }
+                            
+                            row.innerHTML = `
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${order.id}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${formattedDate}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${order.items.length} items</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">₹${order.total.toFixed(2)}</td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${statusClass}">${statusText}</span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                    <a href="order-details.html?orderId=${order.id}" class="text-red-600 hover:text-red-900">View</a>
+                                </td>
+                            `;
+                            ordersBody.appendChild(row);
+                        });
+                        
+                        ordersTable.classList.remove('hidden');
+                        noOrders.classList.add('hidden');
+                    } else {
+                        ordersTable.classList.add('hidden');
+                        noOrders.classList.remove('hidden');
+                    }
+                } catch (error) {
+                    console.error("Error loading orders history:", error);
+                    document.getElementById('orders-loader').classList.add('hidden');
+                    document.getElementById('no-orders').classList.remove('hidden');
+                }
+            }
+            
+            // Load favorite restaurants
+            async function loadFavoriteRestaurants(userId) {
+                try {
+                    const favoritesRef = ref(database, `users/${userId}/favorites`);
+                    const snapshot = await get(favoritesRef);
+                    
+                    const favoritesContainer = document.getElementById('favorites-container');
+                    const noFavorites = document.getElementById('no-favorites');
+                    const favoritesLoader = document.getElementById('favorites-loader');
+                    
+                    favoritesLoader.classList.add('hidden');
+                    
+                    if (snapshot.exists()) {
+                        const favorites = snapshot.val();
+                        favoritesContainer.innerHTML = '';
+                        
+                        // Show only the first 3 favorites for this demo
+                        Object.values(favorites).slice(0, 3).forEach(restaurant => {
+                            const restaurantCard = document.createElement('div');
+                            restaurantCard.className = 'bg-white rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-all duration-300 card-hover border-animate';
+                            restaurantCard.innerHTML = `
+                                <img class="h-48 w-full object-cover" src="${restaurant.image}" alt="${restaurant.name}">
+                                <div class="p-6">
+                                    <h3 class="text-xl font-bold text-gray-800 mb-2">${restaurant.name}</h3>
+                                    <div class="flex items-center mb-2">
+                                        <div class="flex text-yellow-400">
+                                            ${'<i class="fas fa-star"></i>'.repeat(Math.floor(restaurant.rating))}
+                                            ${restaurant.rating % 1 >= 0.5 ? '<i class="fas fa-star-half-alt"></i>' : ''}
+                                            ${'<i class="far fa-star"></i>'.repeat(5 - Math.ceil(restaurant.rating))}
+                                        </div>
+                                        <span class="ml-2 text-sm text-gray-600">${restaurant.rating.toFixed(1)} (${restaurant.reviews} reviews)</span>
+                                    </div>
+                                    <p class="text-sm text-gray-600 mb-4">${restaurant.cuisine} · ${'₹'.repeat(restaurant.priceLevel)} · ${restaurant.deliveryTime} min · ${restaurant.distance} km away</p>
+                                    <button class="w-full bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition flex items-center justify-center btn-shine">
+                                        Order Now
+                                    </button>
+                                </div>
+                            `;
+                            favoritesContainer.appendChild(restaurantCard);
+                        });
+                        
+                        favoritesContainer.classList.remove('hidden');
+                        noFavorites.classList.add('hidden');
+                    } else {
+                        favoritesContainer.classList.add('hidden');
+                        noFavorites.classList.remove('hidden');
+                    }
+                } catch (error) {
+                    console.error("Error loading favorite restaurants:", error);
+                    document.getElementById('favorites-loader').classList.add('hidden');
+                    document.getElementById('no-favorites').classList.remove('hidden');
+                }
+            }
+            
+            // Check auth state
+            onAuthStateChanged(auth, (user) => {
+                if (!user) {
+                    // User is not logged in, redirect to login page
+                    window.location.href = 'login.html';
+                } else {
+                    // User is logged in, update UI
+                    document.getElementById('profile-name').textContent = user.displayName || 'User';
+                    document.getElementById('welcome-message').textContent = `Welcome back, ${user.displayName || 'User'}!`;
+                    
+                    // Load user data
+                    loadUserData(user.uid);
+                    
+                    // Initialize cart
+                    updateCartDisplay();
+                }
+            });
+            
+            // Logout functionality
+            document.getElementById('logout-btn').addEventListener('click', async function(e) {
+                e.preventDefault();
+                try {
+                    await signOut(auth);
+                    // Clear cart on logout
+                    localStorage.removeItem('cart');
+                    window.location.href = 'index.html';
+                } catch (error) {
+                    console.error('Logout error:', error);
+                    alert('Failed to sign out. Please try again.');
+                }
+            });
+            
+            // Add to cart button event listeners
+            document.addEventListener('DOMContentLoaded', function() {
+                document.querySelectorAll('.add-to-cart').forEach(button => {
+                    button.addEventListener('click', function() {
+                        const itemId = this.getAttribute('data-id');
+                        const itemName = this.getAttribute('data-name');
+                        const itemPrice = this.getAttribute('data-price');
+                        addToCart(itemId, itemName, itemPrice);
+                    });
+                });
+                
+                // Profile dropdown toggle
+                document.getElementById('profile-button').addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const dropdown = document.getElementById('profile-dropdown');
+                    const isExpanded = this.getAttribute('aria-expanded') === 'true';
+                    
+                    dropdown.classList.toggle('hidden');
+                    this.setAttribute('aria-expanded', !isExpanded);
+                });
+                
+                // Close dropdown when clicking outside
+                document.addEventListener('click', function() {
+                    const dropdown = document.getElementById('profile-dropdown');
+                    const button = document.getElementById('profile-button');
+                    
+                    if (!dropdown.classList.contains('hidden')) {
+                        dropdown.classList.add('hidden');
+                        button.setAttribute('aria-expanded', 'false');
+                    }
+                });
+                
+                // Prevent dropdown from closing when clicking inside it
+                document.getElementById('profile-dropdown').addEventListener('click', function(e) {
+                    e.stopPropagation();
+                });
+                
+                // Smooth transition for internal links
+                document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                    anchor.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        
+                        const targetId = this.getAttribute('href');
+                        const targetElement = document.querySelector(targetId);
+                        
+                        if (targetElement) {
+                            targetElement.scrollIntoView({
+                                behavior: 'smooth'
+                            });
+                        }
+                    });
                 });
             });
-        });
+            
+        } catch (error) {
+            console.error("Firebase initialization error:", error);
+            // Show error message to user
+            alert("Failed to initialize the application. Please try again later.");
+        }
+    </script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#e11d48',
+                        secondary: '#be123c',
+                        accent: '#f59e0b',
+                        light: '#fff7ed',
+                        dark: '#1f2937'
+                    },
+                    animation: {
+                        'click': 'click 300ms ease-out',
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    },
+                    keyframes: {
+                        click: {
+                            '0%, 100%': { transform: 'scale(1)' },
+                            '50%': { transform: 'scale(0.95)' },
+                        }
+                    }
+                }
+            }
+        }
     </script>
 </body>
 </html>

@@ -214,11 +214,57 @@
                 left: 120%;
             }
         }
+
+        /* Blob animation */
+        @keyframes blob {
+            0% {
+                transform: translate(0px, 0px) scale(1);
+            }
+            33% {
+                transform: translate(30px, -50px) scale(1.1);
+            }
+            66% {
+                transform: translate(-20px, 20px) scale(0.9);
+            }
+            100% {
+                transform: translate(0px, 0px) scale(1);
+            }
+        }
+
+        .animate-blob {
+            animation: blob 7s infinite;
+        }
+
+        .animation-delay-2000 {
+            animation-delay: 2s;
+        }
+
+        .animation-delay-4000 {
+            animation-delay: 4s;
+        }
+
+        /* Click animation */
+        @keyframes click {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(0.95); }
+        }
+
+        .animate-click {
+            animation: click 300ms ease-out;
+        }
+
+        /* Responsive cart sidebar */
+        @media (max-width: 640px) {
+            #cart-sidebar {
+                width: 100%;
+                max-width: 100%;
+            }
+        }
     </style>
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
-        import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBx0Kt9o04ye0XrtA8ecp84wD8Q9OCDjlA",
@@ -253,6 +299,8 @@
                     if (doc.exists() && doc.data().preferences) {
                         localStorage.setItem('userPreferences', JSON.stringify(doc.data().preferences));
                     }
+                }).catch((error) => {
+                    console.error("Error loading user preferences:", error);
                 });
             }
         });
@@ -276,6 +324,7 @@
                 window.location.href = 'index.html';
             } catch (error) {
                 console.error('Logout error:', error);
+                alert('Logout failed. Please try again.');
             }
         };
     </script>
@@ -318,7 +367,7 @@
                 <a href="recommended.html" class="hover:text-red-600 transition underline-animate">Recommended</a>
                 <a href="restaurants.html" class="hover:text-red-600 transition underline-animate">Restaurants</a>
             </div>
-            <div class="flex items-center space-x-4"></div>
+            <div class="flex items-center space-x-4">
                 <button onclick="toggleCart()" class="flex items-center space-x-2 bg-gradient-to-r from-red-600 to-amber-600 hover:from-red-700 hover:to-amber-700 px-4 py-2 rounded-full transition shadow-lg relative group text-white btn-shine">
                     <i class="fas fa-shopping-cart"></i>
                     <span id="cart-count" class="bg-white text-red-600 rounded-full w-6 h-6 flex items-center justify-center font-bold">0</span>
@@ -672,7 +721,7 @@
     </footer>
 
     <!-- Shopping Cart Sidebar -->
-    <div id="cart-sidebar" class="fixed top-0 right-0 h-full w-96 bg-white shadow-xl transform translate-x-full transition-transform duration-300 ease-in-out z-50 overflow-y-auto border-l border-amber-200">
+    <div id="cart-sidebar" class="fixed top-0 right-0 h-full w-full sm:w-96 bg-white shadow-xl transform translate-x-full transition-transform duration-300 ease-in-out z-50 overflow-y-auto border-l border-amber-200">
         <div class="p-6 border-b border-amber-200 flex justify-between items-center bg-white">
             <h3 class="text-xl font-semibold text-gray-800 flex items-center">
                 <i class="fas fa-shopping-cart mr-2 text-red-600"></i> Your Order
@@ -801,8 +850,8 @@
     </div>
 
     <script>
-        // Food items database (expanded with more items)
-        const foodItems = [
+       // Food items database (expanded with more items)
+       const foodItems = [
             // Vegetarian Indian dishes
             {
                 id: 1,
@@ -811,7 +860,7 @@
                 diet: ["vegetarian", "gluten-free", "high-protein"],
                 price: 220,
                 description: "Fresh spinach cooked with cottage cheese in aromatic spices",
-                image: "https://images.unsplash.com/photo-1601050690597-df0568f70950?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+                image: "https://images.unsplash.com/photo-1601050690597-df0568f70950?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80",
                 healthScore: 9,
                 calories: 320,
                 protein: 18,
@@ -2313,7 +2362,7 @@
                                 <button onclick="showRecipe(${food.id})" class="text-red-600 border border-red-600 py-1 px-3 focus:outline-none hover:bg-red-600 hover:text-white rounded text-sm transition">
                                     View Recipe
                                 </button>
-                                <button onclick="addToCart(${food.id})" class="text-white bg-gradient-to-r from-red-600 to-amber-600 border-0 py-1 px-3 focus:outline-none hover:from-red-700 hover:to-amber-700 rounded text-sm transition btn-shine">
+                                <button onclick="addToCart(${food.id}, event)" class="text-white bg-gradient-to-r from-red-600 to-amber-600 border-0 py-1 px-3 focus:outline-none hover:from-red-700 hover:to-amber-700 rounded text-sm transition btn-shine">
                                     Add to Cart
                                 </button>
                             </div>
@@ -2381,7 +2430,10 @@
         // Function to show restaurant menu
         function showRestaurantMenu(restaurantId) {
             const restaurant = restaurants.find(r => r.id === restaurantId);
-            if (!restaurant) return;
+            if (!restaurant) {
+                console.error("Restaurant not found");
+                return;
+            }
             
             const menuItems = getRestaurantMenu(restaurantId);
             
@@ -2409,7 +2461,7 @@
                                         <button onclick="showRecipe(${item.id})" class="text-red-600 text-sm hover:underline">
                                             View Recipe
                                         </button>
-                                        <button onclick="addToCart(${item.id})" class="text-white bg-gradient-to-r from-red-600 to-amber-600 text-sm py-1 px-3 rounded hover:from-red-700 hover:to-amber-700 transition btn-shine">
+                                        <button onclick="addToCart(${item.id}, event)" class="text-white bg-gradient-to-r from-red-600 to-amber-600 text-sm py-1 px-3 rounded hover:from-red-700 hover:to-amber-700 transition btn-shine">
                                             Add to Cart
                                         </button>
                                     </div>
@@ -2427,7 +2479,10 @@
         // Function to show recipe details
         function showRecipe(itemId) {
             const item = foodItems.find(food => food.id === itemId);
-            if (!item) return;
+            if (!item) {
+                console.error("Food item not found");
+                return;
+            }
             
             document.getElementById('recipe-title').textContent = item.name;
             document.getElementById('recipe-image').src = item.image;
@@ -2598,7 +2653,138 @@
                 }
             ];
         }
-    
+
+        // Shopping cart functions
+        function toggleCart() {
+            const cartSidebar = document.getElementById('cart-sidebar');
+            const cartOverlay = document.getElementById('cart-overlay');
+            
+            if (cartSidebar.classList.contains('translate-x-full')) {
+                cartSidebar.classList.remove('translate-x-full');
+                cartOverlay.classList.remove('hidden');
+            } else {
+                cartSidebar.classList.add('translate-x-full');
+                cartOverlay.classList.add('hidden');
+            }
+        }
+
+        function addToCart(itemId, event = null) {
+            const item = foodItems.find(food => food.id === itemId);
+            if (!item) {
+                console.error("Item not found");
+                return;
+            }
+            
+            let cart = JSON.parse(localStorage.getItem('cart')) || [];
+            const existingItem = cart.find(cartItem => cartItem.id === itemId);
+            
+            if (existingItem) {
+                existingItem.quantity += 1;
+            } else {
+                cart.push({
+                    ...item,
+                    quantity: 1
+                });
+            }
+            
+            localStorage.setItem('cart', JSON.stringify(cart));
+            updateCart();
+            
+            // Show added to cart animation if event is available
+            if (event) {
+                const addButton = event.target;
+                addButton.classList.add('animate-click');
+                setTimeout(() => {
+                    addButton.classList.remove('animate-click');
+                }, 300);
+            }
+        }
+
+        function updateCart() {
+            const cart = JSON.parse(localStorage.getItem('cart')) || [];
+            const cartItemsContainer = document.getElementById('cart-items');
+            const cartCount = document.getElementById('cart-count');
+            const cartHoverCount = document.getElementById('cart-hover-count');
+            const cartSubtotal = document.getElementById('cart-subtotal');
+            const cartTotal = document.getElementById('cart-total');
+            
+            // Update cart count
+            const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+            cartCount.textContent = totalItems;
+            cartHoverCount.textContent = totalItems;
+            
+            // Update cart items display
+            if (cart.length === 0) {
+                cartItemsContainer.innerHTML = `
+                    <div class="text-center py-12">
+                        <i class="fas fa-shopping-cart text-4xl text-gray-400 mb-4"></i>
+                        <p class="text-gray-500">Your cart is empty</p>
+                        <button onclick="toggleCart()" class="mt-4 text-red-600 hover:text-red-500 underline">
+                            Browse our menu
+                        </button>
+                    </div>
+                `;
+            } else {
+                cartItemsContainer.innerHTML = '';
+                cart.forEach(item => {
+                    const cartItem = document.createElement('div');
+                    cartItem.className = 'flex items-center justify-between py-4 border-b border-amber-100';
+                    cartItem.innerHTML = `
+                        <div class="flex items-center">
+                            <img src="${item.image}" alt="${item.name}" class="w-16 h-16 object-cover rounded">
+                            <div class="ml-4">
+                                <h4 class="font-medium text-gray-800">${item.name}</h4>
+                                <p class="text-sm text-gray-600">₹${item.price.toFixed(2)} x ${item.quantity}</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center">
+                            <button onclick="updateCartItem(${item.id}, -1)" class="text-gray-500 hover:text-red-600 p-1">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                            <span class="mx-2">${item.quantity}</span>
+                            <button onclick="updateCartItem(${item.id}, 1)" class="text-gray-500 hover:text-green-600 p-1">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                            <button onclick="removeFromCart(${item.id})" class="ml-4 text-red-500 hover:text-red-700 p-1">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    `;
+                    cartItemsContainer.appendChild(cartItem);
+                });
+            }
+            
+            // Update totals
+            const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const total = subtotal + 30; // Adding delivery fee
+            
+            cartSubtotal.textContent = `₹${subtotal.toFixed(2)}`;
+            cartTotal.textContent = `₹${total.toFixed(2)}`;
+        }
+
+        function updateCartItem(itemId, change) {
+            let cart = JSON.parse(localStorage.getItem('cart')) || [];
+            const itemIndex = cart.findIndex(item => item.id === itemId);
+            
+            if (itemIndex !== -1) {
+                cart[itemIndex].quantity += change;
+                
+                if (cart[itemIndex].quantity <= 0) {
+                    cart.splice(itemIndex, 1);
+                }
+                
+                localStorage.setItem('cart', JSON.stringify(cart));
+                updateCart();
+            }
+        }
+
+        function removeFromCart(itemId) {
+            let cart = JSON.parse(localStorage.getItem('cart')) || [];
+            cart = cart.filter(item => item.id !== itemId);
+            localStorage.setItem('cart', JSON.stringify(cart));
+            updateCart();
+        }
+
         // Initialize the page
         document.addEventListener('DOMContentLoaded', function() {
             // Initialize cart from localStorage
@@ -2720,7 +2906,7 @@
                 }
             }
         });
-    
+
         // Add smooth transition to all links
         document.addEventListener('DOMContentLoaded', function() {
             document.querySelectorAll('a').forEach(link => {
@@ -2747,132 +2933,6 @@
             });
         });
 
-        // Shopping cart functions
-        function toggleCart() {
-            const cartSidebar = document.getElementById('cart-sidebar');
-            const cartOverlay = document.getElementById('cart-overlay');
-            
-            if (cartSidebar.classList.contains('translate-x-full')) {
-                cartSidebar.classList.remove('translate-x-full');
-                cartOverlay.classList.remove('hidden');
-            } else {
-                cartSidebar.classList.add('translate-x-full');
-                cartOverlay.classList.add('hidden');
-            }
-        }
-
-        function addToCart(itemId) {
-            const item = foodItems.find(food => food.id === itemId);
-            if (!item) return;
-            
-            let cart = JSON.parse(localStorage.getItem('cart')) || [];
-            const existingItem = cart.find(cartItem => cartItem.id === itemId);
-            
-            if (existingItem) {
-                existingItem.quantity += 1;
-            } else {
-                cart.push({
-                    ...item,
-                    quantity: 1
-                });
-            }
-            
-            localStorage.setItem('cart', JSON.stringify(cart));
-            updateCart();
-            
-            // Show added to cart animation
-            const addButton = event.target;
-            addButton.classList.add('animate-click');
-            setTimeout(() => {
-                addButton.classList.remove('animate-click');
-            }, 300);
-        }
-
-        function updateCart() {
-            const cart = JSON.parse(localStorage.getItem('cart')) || [];
-            const cartItemsContainer = document.getElementById('cart-items');
-            const cartCount = document.getElementById('cart-count');
-            const cartHoverCount = document.getElementById('cart-hover-count');
-            const cartSubtotal = document.getElementById('cart-subtotal');
-            const cartTotal = document.getElementById('cart-total');
-            
-            // Update cart count
-            const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
-            cartCount.textContent = totalItems;
-            cartHoverCount.textContent = totalItems;
-            
-            // Update cart items display
-            if (cart.length === 0) {
-                cartItemsContainer.innerHTML = `
-                    <div class="text-center py-12">
-                        <i class="fas fa-shopping-cart text-4xl text-gray-400 mb-4"></i>
-                        <p class="text-gray-500">Your cart is empty</p>
-                        <button onclick="toggleCart()" class="mt-4 text-red-600 hover:text-red-500 underline">
-                            Browse our menu
-                        </button>
-                    </div>
-                `;
-            } else {
-                cartItemsContainer.innerHTML = '';
-                cart.forEach(item => {
-                    const cartItem = document.createElement('div');
-                    cartItem.className = 'flex items-center justify-between py-4 border-b border-amber-100';
-                    cartItem.innerHTML = `
-                        <div class="flex items-center">
-                            <img src="${item.image}" alt="${item.name}" class="w-16 h-16 object-cover rounded">
-                            <div class="ml-4">
-                                <h4 class="font-medium text-gray-800">${item.name}</h4>
-                                <p class="text-sm text-gray-600">₹${item.price.toFixed(2)} x ${item.quantity}</p>
-                            </div>
-                        </div>
-                        <div class="flex items-center">
-                            <button onclick="updateCartItem(${item.id}, -1)" class="text-gray-500 hover:text-red-600 p-1">
-                                <i class="fas fa-minus"></i>
-                            </button>
-                            <span class="mx-2">${item.quantity}</span>
-                            <button onclick="updateCartItem(${item.id}, 1)" class="text-gray-500 hover:text-green-600 p-1">
-                                <i class="fas fa-plus"></i>
-                            </button>
-                            <button onclick="removeFromCart(${item.id})" class="ml-4 text-red-500 hover:text-red-700 p-1">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </div>
-                    `;
-                    cartItemsContainer.appendChild(cartItem);
-                });
-            }
-            
-            // Update totals
-            const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-            const total = subtotal + 30; // Adding delivery fee
-            
-            cartSubtotal.textContent = `₹${subtotal.toFixed(2)}`;
-            cartTotal.textContent = `₹${total.toFixed(2)}`;
-        }
-
-        function updateCartItem(itemId, change) {
-            let cart = JSON.parse(localStorage.getItem('cart')) || [];
-            const itemIndex = cart.findIndex(item => item.id === itemId);
-            
-            if (itemIndex !== -1) {
-                cart[itemIndex].quantity += change;
-                
-                if (cart[itemIndex].quantity <= 0) {
-                    cart.splice(itemIndex, 1);
-                }
-                
-                localStorage.setItem('cart', JSON.stringify(cart));
-                updateCart();
-            }
-        }
-
-        function removeFromCart(itemId) {
-            let cart = JSON.parse(localStorage.getItem('cart')) || [];
-            cart = cart.filter(item => item.id !== itemId);
-            localStorage.setItem('cart', JSON.stringify(cart));
-            updateCart();
-        }
-
         // Make functions available globally
         window.toggleCart = toggleCart;
         window.addToCart = addToCart;
@@ -2883,6 +2943,7 @@
         window.showRecipe = showRecipe;
         window.hideRecipe = hideRecipe;
         window.filterByCategory = filterByCategory;
+        window.logout = window.logout;
     </script>
 </body>
 </html>

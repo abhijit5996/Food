@@ -228,83 +228,455 @@
         }
     </style>
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
-        import { getDatabase, ref, push, set } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js";
-  
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import {
+            getAuth,
+            onAuthStateChanged,
+        } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import {
+            getDatabase,
+            ref,
+            get,
+            push,
+            update,
+            increment,
+            serverTimestamp,
+        } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
         const firebaseConfig = {
-          apiKey: "AIzaSyBx0Kt9o04ye0XrtA8ecp84wD8Q9OCDjlA",
-          authDomain: "foodorder-4380c.firebaseapp.com",
-          projectId: "foodorder-4380c",
-          storageBucket: "foodorder-4380c.appspot.com",
-          messagingSenderId: "735023580381",
-          appId: "1:735023580381:web:c6740bef2fc9bdee1b4734",
-          databaseURL: "https://foodorder-4380c-default-rtdb.asia-southeast1.firebasedatabase.app/"
+            apiKey: "AIzaSyBx0Kt9o04ye0XrtA8ecp84wD8Q9OCDjlA",
+            authDomain: "foodorder-4380c.firebaseapp.com",
+            databaseURL: "https://foodorder-4380c-default-rtdb.firebaseio.com",
+            projectId: "foodorder-4380c",
+            storageBucket: "foodorder-4380c.firebasestorage.app",
+            messagingSenderId: "735023580381",
+            appId: "1:735023580381:web:c6740bef2fc9bdee1b4734",
         };
-  
+
+        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
-        const provider = new GoogleAuthProvider();
         const database = getDatabase(app);
-  
+
+        // Cart counter
+        function updateCartCounter() {
+            const cart = JSON.parse(localStorage.getItem("cart")) || [];
+            const count = cart.reduce((total, item) => total + item.quantity, 0);
+            document.getElementById("cart-count").textContent = count;
+            const cartHoverCount = document.getElementById("cart-hover-count");
+            if (cartHoverCount) {
+                cartHoverCount.textContent = count;
+            }
+        }
+
+        // Update cart counter on page load
+        updateCartCounter();
+
         // Check auth state
         onAuthStateChanged(auth, (user) => {
-          if (user) {
-            // Update UI for logged in user
-            document.getElementById('login-btn').classList.add('hidden');
-            document.getElementById('profile-section').classList.remove('hidden');
-            document.getElementById('profile-name').textContent = user.displayName || user.email.split('@')[0];
-            
-            // Update form with user data
-            document.getElementById('name').value = user.displayName || '';
-            document.getElementById('email').value = user.email || '';
-            
-            const redirectAfterLogin = localStorage.getItem('redirectAfterLogin');
-            if (redirectAfterLogin) {
-              localStorage.removeItem('redirectAfterLogin');
-              window.location.href = redirectAfterLogin;
+            if (!user) {
+                localStorage.setItem("redirectAfterLogin", "checkout.html");
+                window.location.href = "login.html";
+            } else {
+                loadUserData(user.uid);
+                loadCartItems();
+                
+                // Show profile section and update with user data
+                const profileSection = document.getElementById('profile-section');
+                const profileName = document.getElementById('profile-name');
+                const profileButton = document.getElementById('profile-button');
+                
+                // Show the profile section that was hidden by default
+                profileSection.classList.remove('hidden');
+                
+                // Set the profile name
+                profileName.textContent = user.displayName || user.email || 'User';
+                
+                // Replace font awesome icon with profile picture if available
+                if (user.photoURL) {
+                    // Remove the existing font awesome icon
+                    const iconElement = profileButton.querySelector('.fas.fa-user-circle');
+                    if (iconElement) {
+                        iconElement.remove();
+                    }
+                    
+                    // Create profile picture element
+                    const profilePic = document.createElement('img');
+                    profilePic.src = user.photoURL;
+                    profilePic.alt = 'Profile';
+                    profilePic.className = 'h-8 w-8 rounded-full object-cover mr-2';
+                    
+                    // Add it to the beginning of the profile button
+                    profileButton.prepend(profilePic);
+                }
             }
-          } else {
-            // Update UI for logged out user
-            document.getElementById('login-btn').classList.remove('hidden');
-            document.getElementById('profile-section').classList.add('hidden');
-          }
         });
-  
-        // Google sign-in function
-        window.signInWithGoogle = async function() {
-          try {
-            const result = await signInWithPopup(auth, provider);
-            const user = result.user;
-            window.location.href = 'homepage.html';
-          } catch (error) {
-            console.error('Google sign-in error:', error);
-            alert('Google sign-in failed: ' + error.message);
-          }
-        };
 
-        // Logout function
-        window.logout = async function() {
-          try {
-            await signOut(auth);
-            window.location.href = 'index.html';
-          } catch (error) {
-            console.error('Logout error:', error);
-          }
-        };
-
-        // Save order to Firebase
-        window.saveOrderToFirebase = async function(order) {
+        async function loadUserData(userId) {
             try {
-                const ordersRef = ref(database, 'orders');
-                const newOrderRef = push(ordersRef);
-                await set(newOrderRef, order);
-                return newOrderRef.key; // Return the generated order ID
+                const userRef = ref(database, "users/" + userId);
+                const snapshot = await get(userRef);
+
+                if (snapshot.exists()) {
+                    const userData = snapshot.val();
+                    if (userData.deliveryInfo) {
+                        document.getElementById("name").value =
+                            userData.deliveryInfo.name || "";
+                        document.getElementById("email").value =
+                            userData.email || "";
+                        document.getElementById("phone").value =
+                            userData.deliveryInfo.phone || "";
+                        document.getElementById("address").value =
+                            userData.deliveryInfo.address || "";
+                        document.getElementById("city").value =
+                            userData.deliveryInfo.city || "";
+                        document.getElementById("pincode").value =
+                            userData.deliveryInfo.pincode || "";
+                        document.getElementById("instructions").value =
+                            userData.deliveryInfo.instructions || "";
+                    }
+                }
             } catch (error) {
-                console.error('Error saving order:', error);
-                throw error;
+                console.error("Error loading user data:", error);
+                showErrorMessage(
+                    "Failed to load your information. Please refresh the page or try again later."
+                );
             }
-        };
+        }
+
+        function loadCartItems() {
+            const cart = JSON.parse(localStorage.getItem("cart")) || [];
+            const orderSummary = document.getElementById("checkout-items");
+            const subtotalElement = document.getElementById("checkout-subtotal");
+            const totalElement = document.getElementById("checkout-total");
+            const deliveryFeeContainer = document.getElementById("delivery-fee-container");
+
+            orderSummary.innerHTML = "";
+
+            if (cart.length === 0) {
+                orderSummary.innerHTML = `
+                    <div class="text-center py-8">
+                        <i class="fas fa-shopping-cart text-4xl text-gray-400 mb-4"></i>
+                        <p class="text-gray-500">Your cart is empty</p>
+                        <a href="homepage.html" class="mt-4 text-red-600 hover:text-red-500 underline inline-block">
+                            Browse our menu
+                        </a>
+                    </div>
+                `;
+                deliveryFeeContainer.classList.add('hidden');
+                subtotalElement.textContent = "₹0.00";
+                totalElement.textContent = "₹0.00";
+                return;
+            }
+
+            let subtotal = 0;
+
+            cart.forEach((item) => {
+                const itemTotal = item.price * item.quantity;
+                subtotal += itemTotal;
+
+                const itemElement = document.createElement("div");
+                itemElement.className = 'flex justify-between items-center pb-4 border-b border-amber-200';
+                itemElement.innerHTML = `
+                    <div class="flex items-center">
+                        <img src="${item.image || 'https://via.placeholder.com/100'}" alt="${item.name}" class="w-16 h-16 object-cover rounded-lg">
+                        <div class="ml-4">
+                            <h3 class="text-sm font-medium text-gray-800">${item.name}</h3>
+                            <p class="text-xs text-gray-600">${item.description || ''}</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center">
+                        <span class="text-sm font-medium text-gray-800">₹${itemTotal.toFixed(2)}</span>
+                        <span class="ml-2 text-xs text-gray-500">(${item.quantity} × ₹${item.price.toFixed(2)})</span>
+                    </div>
+                `;
+                orderSummary.appendChild(itemElement);
+            });
+
+            const deliveryFee = 30;
+            const total = subtotal + deliveryFee;
+
+            subtotalElement.textContent = `₹${subtotal.toFixed(2)}`;
+            totalElement.textContent = `₹${total.toFixed(2)}`;
+            deliveryFeeContainer.classList.remove('hidden');
+        }
+
+        // Form validation function
+        function validateForm() {
+            const name = document.getElementById("name").value.trim();
+            const email = document.getElementById("email").value.trim();
+            const phone = document.getElementById("phone").value.trim();
+            const address = document.getElementById("address").value.trim();
+            const city = document.getElementById("city").value.trim();
+            const pincode = document.getElementById("pincode").value.trim();
+
+            if (!name) {
+                showErrorMessage("Please enter your full name");
+                return false;
+            }
+
+            if (!email) {
+                showErrorMessage("Please enter your email address");
+                return false;
+            }
+
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                showErrorMessage("Please enter a valid email address");
+                return false;
+            }
+
+            if (!phone) {
+                showErrorMessage("Please enter your phone number");
+                return false;
+            }
+
+            // Basic phone validation
+            if (!/^\d{10}$/.test(phone.replace(/[\s-]/g, ""))) {
+                showErrorMessage("Please enter a valid 10-digit phone number");
+                return false;
+            }
+
+            if (!address) {
+                showErrorMessage("Please enter your delivery address");
+                return false;
+            }
+
+            if (!city) {
+                showErrorMessage("Please enter your city");
+                return false;
+            }
+
+            if (!pincode) {
+                showErrorMessage("Please enter your pincode");
+                return false;
+            }
+
+            if (!/^\d{6}$/.test(pincode)) {
+                showErrorMessage("Please enter a valid 6-digit pincode");
+                return false;
+            }
+
+            return true;
+        }
+
+        // Show loading indicator
+        function showLoading() {
+            document.getElementById("submit-btn").classList.add("hidden");
+            document.getElementById("loading-btn").classList.remove("hidden");
+        }
+
+        // Hide loading indicator
+        function hideLoading() {
+            document.getElementById("submit-btn").classList.remove("hidden");
+            document.getElementById("loading-btn").classList.add("hidden");
+        }
+
+        // Show error message
+        function showErrorMessage(message) {
+            // Create error element
+            const errorElement = document.createElement("div");
+            errorElement.className =
+                "fixed top-4 right-4 bg-red-500 text-white px-4 py-2 rounded shadow-lg z-50";
+            errorElement.textContent = message;
+
+            // Add to body
+            document.body.appendChild(errorElement);
+
+            // Remove after 3 seconds
+            setTimeout(() => {
+                errorElement.remove();
+            }, 3000);
+        }
+
+        // Show success message
+        function showSuccessMessage(message) {
+            // Create success element
+            const successElement = document.createElement("div");
+            successElement.className =
+                "fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded shadow-lg z-50";
+            successElement.textContent = message;
+
+            // Add to body
+            document.body.appendChild(successElement);
+
+            // Remove after 3 seconds
+            setTimeout(() => {
+                successElement.remove();
+            }, 3000);
+        }
+
+        // Place order button functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            // Profile dropdown functionality
+            const profileButton = document.getElementById('profile-button');
+            if (profileButton) {
+                profileButton.addEventListener('click', function() {
+                    const dropdown = document.getElementById('profile-dropdown');
+                    dropdown.classList.toggle('hidden');
+                });
+            }
+
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function(event) {
+                const dropdown = document.getElementById('profile-dropdown');
+                const profileButton = document.getElementById('profile-button');
+                
+                if (profileButton && !profileButton.contains(event.target) && dropdown && !dropdown.contains(event.target)) {
+                    dropdown.classList.add('hidden');
+                }
+            });
+
+            // Handle checkout form submission
+            document.getElementById("checkout-form").addEventListener("submit", async function(e) {
+                e.preventDefault();
+
+                // Check if user is logged in
+                const user = auth.currentUser;
+                if (!user) {
+                    localStorage.setItem("redirectAfterLogin", "checkout.html");
+                    window.location.href = "login.html";
+                    return;
+                }
+
+                // Get the cart from localStorage
+                const cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+                if (cart.length === 0) {
+                    showErrorMessage("Your cart is empty!");
+                    return;
+                }
+
+                // Validate form first
+                if (!validateForm()) {
+                    return;
+                }
+
+                // Show loading overlay
+                showLoading();
+
+                // Get the delivery form data
+                const deliveryForm = document.getElementById("checkout-form");
+                const formData = {
+                    name: deliveryForm.elements.name.value.trim(),
+                    email: deliveryForm.elements.email.value.trim(),
+                    phone: deliveryForm.elements.phone.value.trim(),
+                    address: deliveryForm.elements.address.value.trim(),
+                    city: deliveryForm.elements.city.value.trim(),
+                    pincode: deliveryForm.elements.pincode.value.trim(),
+                    instructions: deliveryForm.elements.instructions.value.trim(),
+                    paymentMethod: document.querySelector('input[name="payment"]:checked').value,
+                };
+
+                // Calculate order total
+                const subtotal = cart.reduce(
+                    (sum, item) => sum + item.price * item.quantity,
+                    0
+                );
+                const deliveryFee = 30;
+                const total = subtotal + deliveryFee;
+
+                // Create order object
+                const order = {
+                    userId: user.uid,
+                    userEmail: user.email,
+                    items: [...cart],
+                    deliveryDetails: formData,
+                    subtotal: subtotal,
+                    deliveryFee: deliveryFee,
+                    total: total,
+                    status: "active",
+                    statusText: "Preparing",
+                    timestamp: serverTimestamp(),
+                    createdAt: new Date().toISOString(),
+                };
+
+                try {
+                    // Save order to Realtime Database
+                    const ordersRef = ref(database, "orders");
+                    const newOrderRef = push(ordersRef);
+
+                    // Get the generated order ID
+                    const orderId = newOrderRef.key;
+
+                    // Add order ID to the order object
+                    order.orderId = orderId;
+
+                    // Save the order
+                    await update(newOrderRef, order);
+
+                    // Update user's order count and save delivery info
+                    const userRef = ref(database, "users/" + user.uid);
+                    await update(userRef, {
+                        totalOrders: increment(1),
+                        lastOrder: new Date().toISOString(),
+                        deliveryInfo: formData,
+                    });
+
+                    // Update user's orders list
+                    const userOrdersRef = ref(
+                        database,
+                        `users/${user.uid}/orders/${orderId}`
+                    );
+                    await update(userOrdersRef, {
+                        orderId: orderId,
+                        total: total,
+                        status: "active",
+                        statusText: "Preparing",
+                        timestamp: serverTimestamp(),
+                        createdAt: new Date().toISOString(),
+                    });
+
+                    // Clear the cart
+                    localStorage.removeItem("cart");
+
+                    // Update cart counter
+                    updateCartCounter();
+
+                    // Hide loading overlay
+                    hideLoading();
+
+                    // Show success message
+                    showSuccessMessage("Your order has been placed successfully!");
+
+                    // Redirect to orders page after a small delay
+                    setTimeout(() => {
+                        window.location.href = "orders.html";
+                    }, 1500);
+                } catch (error) {
+                    // Hide loading overlay
+                    hideLoading();
+
+                    console.error("Error placing order:", error);
+                    showErrorMessage(
+                        "There was an error placing your order. Please try again."
+                    );
+                }
+            });
+
+            // Add smooth transition to all links
+            document.querySelectorAll('a').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    // Don't apply to:
+                    // 1. External links
+                    // 2. Anchor links (#)
+                    // 3. Links to the current page
+                    if (!this.href || 
+                        this.href.startsWith('http') || 
+                        this.href.includes('#') || 
+                        this.href === window.location.href) {
+                        return;
+                    }
+                    
+                    e.preventDefault();
+                    document.body.style.opacity = '0';
+                    document.body.style.transition = 'opacity 0.3s ease';
+                    
+                    setTimeout(() => {
+                        window.location.href = this.href;
+                    }, 300);
+                });
+            });
+        });
     </script>
     <script>
         tailwind.config = {
@@ -536,261 +908,5 @@
             </div>
         </div>
     </footer>
-
-    <script>
-        // Shopping cart - load from localStorage or initialize empty
-        let cart = JSON.parse(localStorage.getItem('cart')) || [];
-        
-        document.addEventListener('DOMContentLoaded', function() {
-            // Check if user is logged in
-            const userData = JSON.parse(localStorage.getItem('userData'));
-            
-            if (userData) {
-                // Show profile section and update with user data
-                const profileSection = document.getElementById('profile-section');
-                const profileName = document.getElementById('profile-name');
-                const profileButton = document.getElementById('profile-button');
-                
-                // Show the profile section that was hidden by default
-                profileSection.classList.remove('hidden');
-                
-                // Set the profile name
-                profileName.textContent = userData.displayName || userData.email || 'User';
-                
-                // Replace font awesome icon with profile picture if available
-                if (userData.photoURL) {
-                    // Remove the existing font awesome icon
-                    const iconElement = profileButton.querySelector('.fas.fa-user-circle');
-                    if (iconElement) {
-                        iconElement.remove();
-                    }
-                    
-                    // Create profile picture element
-                    const profilePic = document.createElement('img');
-                    profilePic.src = userData.photoURL;
-                    profilePic.alt = 'Profile';
-                    profilePic.className = 'h-8 w-8 rounded-full object-cover mr-2';
-                    
-                    // Add it to the beginning of the profile button
-                    profileButton.prepend(profilePic);
-                }
-                
-                // Set up dropdown toggle
-                profileButton.addEventListener('click', function() {
-                    const dropdown = document.getElementById('profile-dropdown');
-                    dropdown.classList.toggle('hidden');
-                });
-            }
-            
-            // Close dropdown when clicking outside
-            document.addEventListener('click', function(event) {
-                const dropdown = document.getElementById('profile-dropdown');
-                const profileButton = document.getElementById('profile-button');
-                
-                if (profileButton && !profileButton.contains(event.target) && dropdown && !dropdown.contains(event.target)) {
-                    dropdown.classList.add('hidden');
-                }
-            });
-            
-            // Initialize checkout page
-            renderCheckoutItems();
-            updateCartCount();
-            
-            // Add smooth transition to all links
-            document.querySelectorAll('a').forEach(link => {
-                link.addEventListener('click', function(e) {
-                    // Don't apply to:
-                    // 1. External links
-                    // 2. Anchor links (#)
-                    // 3. Links to the current page
-                    if (!this.href || 
-                        this.href.startsWith('http') || 
-                        this.href.includes('#') || 
-                        this.href === window.location.href) {
-                        return;
-                    }
-                    
-                    e.preventDefault();
-                    document.body.style.opacity = '0';
-                    document.body.style.transition = 'opacity 0.3s ease';
-                    
-                    setTimeout(() => {
-                        window.location.href = this.href;
-                    }, 300);
-                });
-            });
-            
-            // Handle checkout form submission
-            document.getElementById('checkout-form').addEventListener('submit', async function(e) {
-                e.preventDefault();
-                
-                if (cart.length === 0) {
-                    alert('Your cart is empty. Please add items before checkout.');
-                    return;
-                }
-                
-                // Get form elements
-                const form = e.target;
-                const submitBtn = document.getElementById('submit-btn');
-                const loadingBtn = document.getElementById('loading-btn');
-                
-                // Show loading state
-                submitBtn.classList.add('hidden');
-                loadingBtn.classList.remove('hidden');
-                
-                try {
-                    // Simple validation
-                    const name = document.getElementById('name').value.trim();
-                    const email = document.getElementById('email').value.trim();
-                    const phone = document.getElementById('phone').value.trim();
-                    const address = document.getElementById('address').value.trim();
-                    const city = document.getElementById('city').value.trim();
-                    const pincode = document.getElementById('pincode').value.trim();
-                    
-                    if (!name || !email || !phone || !address || !city || !pincode) {
-                        throw new Error('Please fill in all required fields.');
-                    }
-                    
-                    // Validate phone number (10 digits)
-                    if (!/^\d{10}$/.test(phone)) {
-                        throw new Error('Please enter a valid 10-digit phone number.');
-                    }
-                    
-                    // Validate pincode (6 digits)
-                    if (!/^\d{6}$/.test(pincode)) {
-                        throw new Error('Please enter a valid 6-digit pincode.');
-                    }
-                    
-                    // Validate email
-                    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-                        throw new Error('Please enter a valid email address.');
-                    }
-                    
-                    // Calculate totals
-                    const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-                    const deliveryFee = cart.length > 0 ? 30 : 0;
-                    const total = subtotal + deliveryFee;
-                    
-                    // Create order object
-                    const order = {
-                        date: new Date().toISOString(),
-                        items: cart,
-                        customer: {
-                            name,
-                            email,
-                            phone,
-                            address,
-                            city,
-                            pincode,
-                            instructions: document.getElementById('instructions').value.trim()
-                        },
-                        paymentMethod: document.querySelector('input[name="payment"]:checked').value,
-                        status: 'pending',
-                        subtotal,
-                        deliveryFee,
-                        total
-                    };
-                    
-                    // Save order to Firebase
-                    const orderId = await saveOrderToFirebase(order);
-                    
-                    // Also save to localStorage for offline access
-                    try {
-                        const orders = JSON.parse(localStorage.getItem('orders')) || [];
-                        orders.push({...order, id: orderId});
-                        localStorage.setItem('orders', JSON.stringify(orders));
-                    } catch (e) {
-                        console.warn('Failed to save order to localStorage:', e);
-                    }
-                    
-                    // Clear cart
-                    cart = [];
-                    localStorage.setItem('cart', JSON.stringify(cart));
-                    
-                    // Redirect to order confirmation page
-                    window.location.href = `order-confirmation.html?orderId=${orderId}`;
-                    
-                } catch (error) {
-                    alert(error.message);
-                    console.error('Checkout error:', error);
-                } finally {
-                    // Restore submit button
-                    submitBtn.classList.remove('hidden');
-                    loadingBtn.classList.add('hidden');
-                }
-            });
-        });
-        
-        // Render checkout items
-        function renderCheckoutItems() {
-            const checkoutItemsContainer = document.getElementById('checkout-items');
-            const checkoutSubtotal = document.getElementById('checkout-subtotal');
-            const checkoutTotal = document.getElementById('checkout-total');
-            const deliveryFeeContainer = document.getElementById('delivery-fee-container');
-            
-            // Update checkout items
-            if (cart.length === 0) {
-                checkoutItemsContainer.innerHTML = `
-                    <div class="text-center py-8">
-                        <i class="fas fa-shopping-cart text-4xl text-gray-400 mb-4"></i>
-                        <p class="text-gray-500">Your cart is empty</p>
-                        <a href="homepage.html" class="mt-4 text-red-600 hover:text-red-500 underline inline-block">
-                            Browse our menu
-                        </a>
-                    </div>
-                `;
-                
-                // Hide delivery fee when cart is empty
-                deliveryFeeContainer.classList.add('hidden');
-            } else {
-                checkoutItemsContainer.innerHTML = '';
-                cart.forEach(item => {
-                    const checkoutItem = document.createElement('div');
-                    checkoutItem.className = 'flex justify-between items-center pb-4 border-b border-amber-200';
-                    checkoutItem.innerHTML = `
-                        <div class="flex items-center">
-                            <img src="${item.image}" alt="${item.name}" class="w-16 h-16 object-cover rounded-lg">
-                            <div class="ml-4">
-                                <h3 class="text-sm font-medium text-gray-800">${item.name}</h3>
-                                <p class="text-xs text-gray-600">${item.description}</p>
-                            </div>
-                        </div>
-                        <div class="flex items-center">
-                            <span class="text-sm font-medium text-gray-800">₹${(item.price * item.quantity).toFixed(2)}</span>
-                            <span class="ml-2 text-xs text-gray-500">(${item.quantity} x ₹${item.price.toFixed(2)})</span>
-                        </div>
-                    `;
-                    checkoutItemsContainer.appendChild(checkoutItem);
-                });
-                
-                // Show delivery fee when cart has items
-                deliveryFeeContainer.classList.remove('hidden');
-            }
-            
-            // Update totals
-            const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-            const deliveryFee = cart.length > 0 ? 30 : 0; // Only show delivery fee if cart has items
-            const total = subtotal + deliveryFee;
-            
-            checkoutSubtotal.textContent = `₹${subtotal.toFixed(2)}`;
-            checkoutTotal.textContent = `₹${total.toFixed(2)}`;
-        }
-        
-        // Update cart count in navbar
-        function updateCartCount() {
-            const cartCount = document.getElementById('cart-count');
-            const cartHoverCount = document.getElementById('cart-hover-count');
-            
-            const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
-            cartCount.textContent = totalItems;
-            cartHoverCount.textContent = totalItems;
-        }
-        
-        // Toggle cart visibility
-        function toggleCart() {
-            alert('Cart sidebar functionality would be implemented here');
-            // In a real implementation, this would show/hide the cart sidebar
-        }
-    </script>
 </body>
 </html>

@@ -708,9 +708,10 @@
                             order.id.toLowerCase().includes(searchTerm) ||
                             (order.items && order.items.some(item => 
                                 item.name.toLowerCase().includes(searchTerm)
-                            ) ||
+                            ) )||
                             (order.statusText && order.statusText.toLowerCase().includes(searchTerm))
                         );
+                        
                     });
                 }
                 

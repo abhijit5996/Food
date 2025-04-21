@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Settings - NutriOrder</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         /* Page transition animations */
         body {
@@ -30,27 +31,272 @@
         }
 
         ::-webkit-scrollbar-track {
-            background: #1a202c;
+            background: #f1f1f1;
         }
 
         ::-webkit-scrollbar-thumb {
-            background: #4a5568;
+            background: #e11d48;
             border-radius: 4px;
         }
 
         ::-webkit-scrollbar-thumb:hover {
-            background: #718096;
+            background: #be123c;
+        }
+
+        /* Animation for hover effects */
+        .hover\:scale-105:hover {
+            transform: scale(1.05);
+        }
+
+        /* Custom glow effect */
+        .glow {
+            box-shadow: 0 0 15px rgba(225, 29, 72, 0.3);
+        }
+
+        /* Pulse animation for CTA */
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        /* Gradient text */
+        .gradient-text {
+            background: linear-gradient(90deg, #e11d48, #f59e0b);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        /* Floating animation */
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .floating {
+            animation: float 6s ease-in-out infinite;
+        }
+
+        /* Custom card hover effect */
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(225, 29, 72, 0.15);
+        }
+
+        /* Custom border animation */
+        .border-animate {
+            position: relative;
+        }
+
+        .border-animate::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 0.5rem;
+            padding: 2px;
+            background: linear-gradient(45deg, #e11d48, #f59e0b);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .border-animate:hover::before {
+            opacity: 1;
+        }
+
+        /* Custom underline animation */
+        .underline-animate {
+            position: relative;
+        }
+
+        .underline-animate::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -2px;
+            left: 0;
+            background: linear-gradient(90deg, #e11d48, #f59e0b);
+            transition: width 0.3s ease;
+        }
+
+        .underline-animate:hover::after {
+            width: 100%;
+        }
+
+        /* Food card animation */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .food-card {
+            animation: fadeInUp 0.5s ease-out forwards;
+            animation-delay: calc(var(--order) * 0.1s);
+            opacity: 0;
+        }
+
+        /* Custom scroll snap */
+        .scroll-snap-x {
+            scroll-snap-type: x mandatory;
+        }
+
+        .scroll-snap-item {
+            scroll-snap-align: start;
+        }
+
+        /* Shimmer effect for loading */
+        .shimmer {
+            background: linear-gradient(90deg, #fff7ed 0%, #ffedd5 50%, #fff7ed 100%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+        }
+
+        @keyframes shimmer {
+            0% {
+                background-position: -200% 0;
+            }
+            100% {
+                background-position: 200% 0;
+            }
+        }
+
+        /* Indian pattern overlay */
+        .indian-pattern {
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23e11d48' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            opacity: 0.1;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        /* Special heading font */
+        .heading-font {
+            font-family: 'Playfair Display', serif;
+        }
+
+        /* Custom button shine effect */
+        .btn-shine:hover {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-shine:hover::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -60%;
+            width: 40%;
+            height: 200%;
+            background: rgba(255, 255, 255, 0.2);
+            transform: rotate(30deg);
+            animation: shine 1.5s ease;
+        }
+
+        @keyframes shine {
+            100% {
+                left: 120%;
+            }
+        }
+
+        /* Blob animation */
+        @keyframes blob {
+            0% {
+                transform: translate(0px, 0px) scale(1);
+            }
+            33% {
+                transform: translate(30px, -50px) scale(1.1);
+            }
+            66% {
+                transform: translate(-20px, 20px) scale(0.9);
+            }
+            100% {
+                transform: translate(0px, 0px) scale(1);
+            }
+        }
+
+        .animate-blob {
+            animation: blob 7s infinite;
+        }
+
+        .animation-delay-2000 {
+            animation-delay: 2s;
+        }
+
+        .animation-delay-4000 {
+            animation-delay: 4s;
+        }
+
+        /* Click animation */
+        @keyframes click {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(0.95); }
+        }
+
+        .animate-click {
+            animation: click 300ms ease-out;
+        }
+
+        /* Responsive cart sidebar */
+        @media (max-width: 640px) {
+            #cart-sidebar {
+                width: 100%;
+                max-width: 100%;
+            }
+        }
+
+        /* Custom toggle switch */
+        .toggle-checkbox:checked {
+            @apply right-0 border-red-600;
+            right: 0;
+            border-color: #e11d48;
+        }
+        .toggle-checkbox:checked + .toggle-label {
+            @apply bg-red-600;
+            background-color: #e11d48;
+        }
+
+        /* Mobile menu styles */
+        .mobile-menu {
+            transition: all 0.3s ease;
+            max-height: 0;
+            overflow: hidden;
+        }
+
+        .mobile-menu.open {
+            max-height: 500px;
+        }
+
+        /* Accessibility focus styles */
+        button:focus, a:focus, input:focus {
+            outline: 2px solid #e11d48;
+            outline-offset: 2px;
         }
     </style>
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBx0Kt9o04ye0XrtA8ecp84wD8Q9OCDjlA",
             authDomain: "foodorder-4380c.firebaseapp.com",
-            databaseURL: "https://foodorder-4380c.firebaseio.com",
             projectId: "foodorder-4380c",
             storageBucket: "foodorder-4380c.appspot.com",
             messagingSenderId: "735023580381",
@@ -59,76 +305,112 @@
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
-        const database = getDatabase(app);
+        const provider = new GoogleAuthProvider();
+        const db = getFirestore(app);
 
         // Check auth state
         onAuthStateChanged(auth, (user) => {
             if (!user) {
+                // If not logged in, redirect to login page
+                localStorage.setItem('redirectAfterLogin', window.location.href);
                 window.location.href = 'login.html';
             } else {
-                document.getElementById('user-menu-button').innerHTML = `
-                    <i class="fas fa-user-circle mr-2"></i> ${user.displayName || 'User'}
-                `;
-                loadUserSettings(user.uid);
+                // Update profile name if logged in
+                const profileName = document.getElementById('profile-name');
+                if (profileName) {
+                    profileName.textContent = user.displayName || user.email.split('@')[0];
+                }
+
+                // Update profile picture if available
+                const profileButton = document.getElementById('profile-button');
+                if (profileButton && user.photoURL) {
+                    const existingIcon = profileButton.querySelector('.fas.fa-user-circle');
+                    if (existingIcon) existingIcon.remove();
+                    
+                    const profilePic = document.createElement('img');
+                    profilePic.src = user.photoURL;
+                    profilePic.alt = 'Profile picture';
+                    profilePic.className = 'h-8 w-8 rounded-full object-cover';
+                    profileButton.prepend(profilePic);
+                }
+
+                // Load user settings from Firestore
+                const userDocRef = doc(db, 'users', user.uid);
+                getDoc(userDocRef).then((doc) => {
+                    if (doc.exists()) {
+                        const userData = doc.data();
+                        
+                        // Profile settings
+                        if (userData.profile) {
+                            document.getElementById('name').value = userData.profile.name || '';
+                            document.getElementById('email').value = userData.profile.email || '';
+                            document.getElementById('phone').value = userData.profile.phone || '';
+                        }
+                        
+                        // Notification settings
+                        if (userData.notifications) {
+                            document.getElementById('order-updates').checked = userData.notifications.orderUpdates || false;
+                            document.getElementById('promo-offers').checked = userData.notifications.promoOffers || false;
+                            document.getElementById('new-restaurants').checked = userData.notifications.newRestaurants || false;
+                        }
+                        
+                        // Appearance settings
+                        if (userData.appearance) {
+                            document.querySelector(`input[name="theme"][value="${userData.appearance.theme || 'system'}"]`).checked = true;
+                        }
+                        
+                        // Delivery settings
+                        if (userData.delivery) {
+                            document.getElementById('address').value = userData.delivery.address || '';
+                            document.getElementById('instructions').value = userData.delivery.instructions || '';
+                            document.querySelector(`input[name="delivery_speed"][value="${userData.delivery.speed || 'fastest'}"]`).checked = true;
+                        }
+                    }
+                }).catch((error) => {
+                    console.error("Error loading user settings:", error);
+                });
             }
         });
 
-        // Sign out functionality
-        document.getElementById('sign-out-btn').addEventListener('click', () => {
-            signOut(auth).then(() => {
+        // Google sign-in function
+        window.signInWithGoogle = async function() {
+            try {
+                const result = await signInWithPopup(auth, provider);
+                const user = result.user;
+                window.location.href = 'homepage.html';
+            } catch (error) {
+                console.error('Google sign-in error:', error);
+                alert('Google sign-in failed: ' + error.message);
+            }
+        };
+
+        // Logout function
+        window.logout = async function() {
+            try {
+                await signOut(auth);
                 window.location.href = 'index.html';
-            });
-        });
+            } catch (error) {
+                console.error('Logout error:', error);
+                alert('Logout failed. Please try again.');
+            }
+        };
 
-        async function loadUserSettings(userId) {
-            const userRef = ref(database, 'users/' + userId);
-            get(userRef).then((snapshot) => {
-                if (snapshot.exists()) {
-                    const userData = snapshot.val();
-                    
-                    // Profile settings
-                    if (userData.profile) {
-                        document.getElementById('name').value = userData.profile.name || '';
-                        document.getElementById('email').value = userData.profile.email || '';
-                        document.getElementById('phone').value = userData.profile.phone || '';
-                    }
-                    
-                    // Notification settings
-                    if (userData.notifications) {
-                        document.getElementById('order-updates').checked = userData.notifications.orderUpdates || false;
-                        document.getElementById('promo-offers').checked = userData.notifications.promoOffers || false;
-                        document.getElementById('new-restaurants').checked = userData.notifications.newRestaurants || false;
-                    }
-                    
-                    // Appearance settings
-                    if (userData.appearance) {
-                        document.querySelector(`input[name="theme"][value="${userData.appearance.theme || 'system'}"]`).checked = true;
-                    }
-                    
-                    // Delivery settings
-                    if (userData.delivery) {
-                        document.getElementById('address').value = userData.delivery.address || '';
-                        document.getElementById('instructions').value = userData.delivery.instructions || '';
-                        document.querySelector(`input[name="delivery_speed"][value="${userData.delivery.speed || 'fastest'}"]`).checked = true;
-                    }
-                }
-            }).catch((error) => {
-                console.error("Error loading user settings:", error);
-            });
-        }
+        // Update profile function
+        window.updateProfile = async function() {
+            const user = auth.currentUser;
+            if (!user) return;
 
-        // Update profile
-        document.getElementById('update-profile-btn').addEventListener('click', async function() {
-            const userId = auth.currentUser.uid;
             const profileData = {
                 name: document.getElementById('name').value,
                 email: document.getElementById('email').value,
                 phone: document.getElementById('phone').value
             };
-            
+
             try {
-                await update(ref(database, 'users/' + userId + '/profile'), profileData);
-                
+                await setDoc(doc(db, 'users', user.uid), {
+                    profile: profileData
+                }, { merge: true });
+
                 const successMsg = document.getElementById('profile-success');
                 successMsg.textContent = 'Profile updated successfully!';
                 successMsg.classList.remove('hidden');
@@ -139,44 +421,50 @@
             } catch (error) {
                 console.error('Error updating profile:', error);
             }
-        });
+        };
 
         // Save notification settings
-        document.querySelectorAll('#order-updates, #promo-offers, #new-restaurants').forEach(toggle => {
-            toggle.addEventListener('change', async function() {
-                const userId = auth.currentUser.uid;
-                const notificationData = {
-                    orderUpdates: document.getElementById('order-updates').checked,
-                    promoOffers: document.getElementById('promo-offers').checked,
-                    newRestaurants: document.getElementById('new-restaurants').checked
-                };
+        window.saveNotificationSettings = async function() {
+            const user = auth.currentUser;
+            if (!user) return;
+
+            const notificationData = {
+                orderUpdates: document.getElementById('order-updates').checked,
+                promoOffers: document.getElementById('promo-offers').checked,
+                newRestaurants: document.getElementById('new-restaurants').checked
+            };
+
+            try {
+                await setDoc(doc(db, 'users', user.uid), {
+                    notifications: notificationData
+                }, { merge: true });
+
+                const successMsg = document.getElementById('notification-success');
+                successMsg.textContent = 'Notification settings saved!';
+                successMsg.classList.remove('hidden');
                 
-                try {
-                    await update(ref(database, 'users/' + userId + '/notifications'), notificationData);
-                    
-                    const successMsg = document.getElementById('notification-success');
-                    successMsg.textContent = 'Notification settings saved!';
-                    successMsg.classList.remove('hidden');
-                    
-                    setTimeout(() => {
-                        successMsg.classList.add('hidden');
-                    }, 3000);
-                } catch (error) {
-                    console.error('Error saving notification settings:', error);
-                }
-            });
-        });
+                setTimeout(() => {
+                    successMsg.classList.add('hidden');
+                }, 3000);
+            } catch (error) {
+                console.error('Error saving notification settings:', error);
+            }
+        };
 
         // Save appearance settings
-        document.getElementById('save-appearance-btn').addEventListener('click', async function() {
-            const userId = auth.currentUser.uid;
+        window.saveAppearanceSettings = async function() {
+            const user = auth.currentUser;
+            if (!user) return;
+
             const selectedTheme = document.querySelector('input[name="theme"]:checked').value;
-            
+
             try {
-                await update(ref(database, 'users/' + userId + '/appearance'), {
-                    theme: selectedTheme
-                });
-                
+                await setDoc(doc(db, 'users', user.uid), {
+                    appearance: {
+                        theme: selectedTheme
+                    }
+                }, { merge: true });
+
                 const successMsg = document.getElementById('appearance-success');
                 successMsg.textContent = 'Appearance settings saved!';
                 successMsg.classList.remove('hidden');
@@ -187,20 +475,24 @@
             } catch (error) {
                 console.error('Error saving appearance settings:', error);
             }
-        });
+        };
 
         // Save delivery settings
-        document.getElementById('save-delivery-btn').addEventListener('click', async function() {
-            const userId = auth.currentUser.uid;
+        window.saveDeliverySettings = async function() {
+            const user = auth.currentUser;
+            if (!user) return;
+
             const deliveryData = {
                 address: document.getElementById('address').value,
                 instructions: document.getElementById('instructions').value,
                 speed: document.querySelector('input[name="delivery_speed"]:checked').value
             };
-            
+
             try {
-                await update(ref(database, 'users/' + userId + '/delivery'), deliveryData);
-                
+                await setDoc(doc(db, 'users', user.uid), {
+                    delivery: deliveryData
+                }, { merge: true });
+
                 const successMsg = document.getElementById('delivery-success');
                 successMsg.textContent = 'Delivery settings saved!';
                 successMsg.classList.remove('hidden');
@@ -211,20 +503,22 @@
             } catch (error) {
                 console.error('Error saving delivery settings:', error);
             }
-        });
+        };
     </script>
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        primary: '#8b5cf6', // Purple color from previous theme
-                        secondary: '#7c3aed',
-                        dark: '#1f2937',
-                        light: '#f3f4f6'
+                        primary: '#e11d48',
+                        secondary: '#be123c',
+                        accent: '#f59e0b',
+                        light: '#fff7ed',
+                        dark: '#1f2937'
                     },
                     animation: {
                         'click': 'click 300ms ease-out',
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
                     },
                     keyframes: {
                         click: {
@@ -237,274 +531,439 @@
         }
     </script>
 </head>
-<body class="bg-gray-900 text-gray-100 min-h-screen">
+<body class="bg-amber-50 text-gray-800 min-h-screen">
     <!-- Navigation -->
-    <nav class="bg-gray-800 py-4 px-6 shadow-lg sticky top-0 z-50">
+    <nav class="bg-white/90 backdrop-blur-md py-4 px-6 shadow-sm sticky top-0 z-50 border-b border-amber-200">
         <div class="container mx-auto flex justify-between items-center">
             <div class="flex items-center space-x-2">
-                <i class="fas fa-utensils text-purple-500 text-2xl"></i>
-                <span class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-600">NutriOrder</span>
+                <i class="fas fa-utensils text-red-600 text-2xl" aria-hidden="true"></i>
+                <span class="text-xl font-bold gradient-text heading-font">NutriOrder</span>
             </div>
+            
+            <!-- Mobile menu button -->
+            <button id="mobile-menu-button" class="md:hidden text-gray-700 focus:outline-none" aria-label="Toggle menu" aria-expanded="false">
+                <i class="fas fa-bars text-2xl"></i>
+            </button>
+            
             <div class="hidden md:flex space-x-6">
-                <a href="homepage.html" class="hover:text-purple-400 transition">Home</a>
-                <a href="recommended.html" class="hover:text-purple-400 transition">Recommended</a>
-                <a href="restaurants.html" class="hover:text-purple-400 transition">Restaurants</a>
-                <a href="index.html#contact" class="hover:text-purple-400 transition">Contact</a>
+                <a href="homepage.html" class="hover:text-red-600 transition underline-animate">Home</a>
+                <a href="recommended.html" class="hover:text-red-600 transition underline-animate">Recommended</a>
+                <a href="restaurants.html" class="hover:text-red-600 transition underline-animate">Restaurants</a>
             </div>
             <div class="flex items-center space-x-4">
-                <button id="theme-toggle" class="p-2 rounded-lg focus:outline-none text-gray-300 hover:bg-gray-700">
-                    <i class="fas fa-moon"></i>
+                <button onclick="toggleCart()" class="flex items-center space-x-2 bg-gradient-to-r from-red-600 to-amber-600 hover:from-red-700 hover:to-amber-700 px-4 py-2 rounded-full transition shadow-lg relative group text-white btn-shine" aria-label="Shopping cart">
+                    <i class="fas fa-shopping-cart" aria-hidden="true"></i>
+                    <span id="cart-count" class="bg-white text-red-600 rounded-full w-6 h-6 flex items-center justify-center font-bold">0</span>
+                    <span class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity" id="cart-hover-count">0</span>
                 </button>
-                <div class="relative group">
-                    <button id="user-menu-button" class="flex items-center space-x-2 bg-gray-700 px-4 py-2 rounded-full hover:bg-gray-600 transition">
-                        <i class="fas fa-user-circle"></i>
-                        <span>User</span>
+                <div class="relative">
+                    <button id="profile-button" class="flex items-center space-x-2 bg-amber-100 hover:bg-amber-200 px-4 py-2 rounded-full transition border-animate" aria-label="Profile menu" aria-haspopup="true">
+                        <i class="fas fa-user-circle text-red-600" aria-hidden="true"></i>
+                        <span id="profile-name" class="text-gray-700"></span>
+                        <i class="fas fa-chevron-down text-xs text-gray-600" aria-hidden="true"></i>
                     </button>
-                    <div class="absolute right-0 mt-2 w-48 bg-gray-800 rounded-md shadow-lg py-1 z-50 hidden group-hover:block border border-gray-700">
-                        <a href="dashboard.html" class="block px-4 py-2 text-sm hover:bg-gray-700">Dashboard</a>
-                        <a href="settings.html" class="block px-4 py-2 text-sm hover:bg-gray-700">Settings</a>
-                        <a href="preferences.html" class="block px-4 py-2 text-sm hover:bg-gray-700">Preferences</a>
-                        <a href="orders.html" class="block px-4 py-2 text-sm hover:bg-gray-700">My Orders</a>
-                        <div class="border-t border-gray-700"></div>
-                        <a id="sign-out-btn" href="#" class="block px-4 py-2 text-sm hover:bg-gray-700">Sign out</a>
+                    <div id="profile-dropdown" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 hidden border border-amber-200 backdrop-blur-sm" aria-labelledby="profile-button">
+                        <a href="dashboard.html" class="block px-4 py-2 text-sm hover:bg-amber-50 transition text-gray-700">Dashboard</a>
+                        <a href="orders.html" class="block px-4 py-2 text-sm hover:bg-amber-50 transition text-gray-700">My Orders</a>
+                        <a href="settings.html" class="block px-4 py-2 text-sm hover:bg-amber-50 transition text-gray-700">Settings</a>
+                        <a href="#" onclick="logout()" class="block px-4 py-2 text-sm hover:bg-amber-50 transition text-gray-700">Sign out</a>
                     </div>
                 </div>
             </div>
         </div>
+        
+        <!-- Mobile menu -->
+        <div id="mobile-menu" class="mobile-menu md:hidden bg-white w-full mt-4 rounded-lg shadow-lg">
+            <div class="px-4 py-3 space-y-3">
+                <a href="homepage.html" class="block px-4 py-2 hover:bg-amber-50 rounded-lg transition">Home</a>
+                <a href="recommended.html" class="block px-4 py-2 hover:bg-amber-50 rounded-lg transition">Recommended</a>
+                <a href="restaurants.html" class="block px-4 py-2 hover:bg-amber-50 rounded-lg transition">Restaurants</a>
+                <a href="dashboard.html" class="block px-4 py-2 hover:bg-amber-50 rounded-lg transition">Dashboard</a>
+                <a href="orders.html" class="block px-4 py-2 hover:bg-amber-50 rounded-lg transition">My Orders</a>
+                <a href="settings.html" class="block px-4 py-2 bg-gradient-to-r from-red-600 to-amber-600 text-white rounded-lg transition text-center">Settings</a>
+            </div>
+        </div>
     </nav>
 
+    <!-- Hero Banner -->
+    <section class="relative bg-gradient-to-br from-amber-50 to-red-50 py-16 px-6 overflow-hidden">
+        <div class="indian-pattern" aria-hidden="true"></div>
+        <div class="absolute inset-0 opacity-60" aria-hidden="true">
+            <div class="absolute top-0 left-0 w-64 h-64 bg-red-200 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob"></div>
+            <div class="absolute top-0 right-0 w-64 h-64 bg-amber-200 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-2000"></div>
+            <div class="absolute bottom-0 left-1/2 w-64 h-64 bg-pink-200 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-4000"></div>
+        </div>
+        <div class="container mx-auto text-center relative z-10">
+            <h1 class="text-4xl md:text-6xl font-bold mb-6 leading-tight heading-font">
+                Account <span class="gradient-text">Settings</span>
+            </h1>
+            <p class="text-xl md:text-2xl mb-8 max-w-3xl mx-auto text-gray-600">
+                Manage your profile, notifications, and preferences to customize your NutriOrder experience.
+            </p>
+        </div>
+        <div class="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-amber-50 to-transparent" aria-hidden="true"></div>
+    </section>
+
     <!-- Settings Content -->
-    <section class="text-gray-300 body-font py-12">
-        <div class="container px-5 mx-auto max-w-4xl">
-            <div class="flex flex-col text-center w-full mb-12">
-                <h1 class="text-3xl font-bold title-font mb-4 text-white">Settings</h1>
-                <p class="lg:w-2/3 mx-auto leading-relaxed">Customize your NutriOrder experience</p>
-            </div>
-            
+    <section class="py-12 px-6">
+        <div class="max-w-4xl mx-auto">
             <!-- Profile Settings -->
-            <div class="bg-gray-800 shadow rounded-lg p-6 mb-8">
-                <h2 class="text-xl font-semibold mb-6 text-white">Profile Settings</h2>
+            <div class="bg-white rounded-xl shadow-md p-6 mb-8 border border-amber-200 card-hover">
+                <h2 class="text-2xl font-bold mb-6 text-gray-800 heading-font flex items-center">
+                    <i class="fas fa-user-circle text-red-600 mr-3" aria-hidden="true"></i>
+                    Profile Settings
+                </h2>
                 
                 <div class="mb-6">
-                    <label for="name" class="block text-sm font-medium text-gray-300 mb-2">Full Name</label>
-                    <input type="text" id="name" class="w-full px-3 py-2 border border-gray-600 rounded-lg focus:ring-purple-500 focus:border-purple-500 bg-gray-700 text-white">
+                    <label for="name" class="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
+                    <input type="text" id="name" class="w-full px-4 py-3 border border-amber-300 rounded-lg focus:ring-red-500 focus:border-red-500 bg-amber-50">
                 </div>
                 
                 <div class="mb-6">
-                    <label for="email" class="block text-sm font-medium text-gray-300 mb-2">Email Address</label>
-                    <input type="email" id="email" class="w-full px-3 py-2 border border-gray-600 rounded-lg focus:ring-purple-500 focus:border-purple-500 bg-gray-700 text-white">
+                    <label for="email" class="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
+                    <input type="email" id="email" class="w-full px-4 py-3 border border-amber-300 rounded-lg focus:ring-red-500 focus:border-red-500 bg-amber-50">
                 </div>
                 
                 <div class="mb-6">
-                    <label for="phone" class="block text-sm font-medium text-gray-300 mb-2">Phone Number</label>
-                    <input type="tel" id="phone" class="w-full px-3 py-2 border border-gray-600 rounded-lg focus:ring-purple-500 focus:border-purple-500 bg-gray-700 text-white">
+                    <label for="phone" class="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
+                    <input type="tel" id="phone" class="w-full px-4 py-3 border border-amber-300 rounded-lg focus:ring-red-500 focus:border-red-500 bg-amber-50">
                 </div>
                 
                 <div class="flex justify-end">
-                    <button id="update-profile-btn" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition">Update Profile</button>
+                    <button onclick="updateProfile()" class="bg-gradient-to-r from-red-600 to-amber-600 text-white px-6 py-3 rounded-lg hover:from-red-700 hover:to-amber-700 transition shadow-lg btn-shine">
+                        Update Profile
+                    </button>
                 </div>
-                <div id="profile-success" class="hidden mt-4 p-3 bg-green-800 text-green-100 rounded-lg text-sm"></div>
+                <div id="profile-success" class="hidden mt-4 p-3 bg-green-100 text-green-800 rounded-lg text-sm border border-green-200"></div>
             </div>
             
             <!-- Notification Settings -->
-            <div class="bg-gray-800 shadow rounded-lg p-6 mb-8">
-                <h2 class="text-xl font-semibold mb-6 text-white">Notification Settings</h2>
+            <div class="bg-white rounded-xl shadow-md p-6 mb-8 border border-amber-200 card-hover">
+                <h2 class="text-2xl font-bold mb-6 text-gray-800 heading-font flex items-center">
+                    <i class="fas fa-bell text-red-600 mr-3" aria-hidden="true"></i>
+                    Notification Settings
+                </h2>
                 
-                <div class="space-y-4">
+                <div class="space-y-6">
                     <div class="flex items-center justify-between">
                         <div>
-                            <h3 class="text-md font-medium text-white">Order Updates</h3>
-                            <p class="text-sm text-gray-400">Get notified about your order status</p>
+                            <h3 class="text-lg font-medium text-gray-800">Order Updates</h3>
+                            <p class="text-sm text-gray-600">Get notified about your order status</p>
                         </div>
                         <label class="relative inline-flex items-center cursor-pointer">
-                            <input type="checkbox" id="order-updates" class="sr-only peer">
-                            <div class="w-11 h-6 bg-gray-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-600 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+                            <input type="checkbox" id="order-updates" class="sr-only peer" onchange="saveNotificationSettings()">
+                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600"></div>
                         </label>
                     </div>
                     
                     <div class="flex items-center justify-between">
                         <div>
-                            <h3 class="text-md font-medium text-white">Promotions & Offers</h3>
-                            <p class="text-sm text-gray-400">Receive special offers and discounts</p>
+                            <h3 class="text-lg font-medium text-gray-800">Promotions & Offers</h3>
+                            <p class="text-sm text-gray-600">Receive special offers and discounts</p>
                         </div>
                         <label class="relative inline-flex items-center cursor-pointer">
-                            <input type="checkbox" id="promo-offers" class="sr-only peer">
-                            <div class="w-11 h-6 bg-gray-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-600 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+                            <input type="checkbox" id="promo-offers" class="sr-only peer" onchange="saveNotificationSettings()">
+                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600"></div>
                         </label>
                     </div>
                     
                     <div class="flex items-center justify-between">
                         <div>
-                            <h3 class="text-md font-medium text-white">New Restaurants</h3>
-                            <p class="text-sm text-gray-400">Be notified when new restaurants join</p>
+                            <h3 class="text-lg font-medium text-gray-800">New Restaurants</h3>
+                            <p class="text-sm text-gray-600">Be notified when new restaurants join</p>
                         </div>
                         <label class="relative inline-flex items-center cursor-pointer">
-                            <input type="checkbox" id="new-restaurants" class="sr-only peer">
-                            <div class="w-11 h-6 bg-gray-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-600 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+                            <input type="checkbox" id="new-restaurants" class="sr-only peer" onchange="saveNotificationSettings()">
+                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600"></div>
                         </label>
                     </div>
                 </div>
-                <div id="notification-success" class="hidden mt-4 p-3 bg-green-800 text-green-100 rounded-lg text-sm"></div>
+                <div id="notification-success" class="hidden mt-4 p-3 bg-green-100 text-green-800 rounded-lg text-sm border border-green-200"></div>
             </div>
             
             <!-- Appearance Settings -->
-            <div class="bg-gray-800 shadow rounded-lg p-6 mb-8">
-                <h2 class="text-xl font-semibold mb-6 text-white">Appearance Settings</h2>
+            <div class="bg-white rounded-xl shadow-md p-6 mb-8 border border-amber-200 card-hover">
+                <h2 class="text-2xl font-bold mb-6 text-gray-800 heading-font flex items-center">
+                    <i class="fas fa-palette text-red-600 mr-3" aria-hidden="true"></i>
+                    Appearance Settings
+                </h2>
                 
                 <div class="mb-6">
-                    <label class="block text-sm font-medium text-gray-300 mb-2">Theme</label>
-                    <div class="flex items-center space-x-4">
-                        <label class="inline-flex items-center">
-                            <input type="radio" name="theme" value="light" class="form-radio h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-600 bg-gray-700">
-                            <span class="ml-2 text-gray-300">Light</span>
+                    <label class="block text-sm font-medium text-gray-700 mb-3">Theme</label>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        <label class="flex items-center p-4 border border-amber-300 rounded-lg cursor-pointer hover:bg-amber-50">
+                            <input type="radio" name="theme" value="light" class="h-4 w-4 text-red-600 focus:ring-red-500 border-amber-300">
+                            <div class="ml-3">
+                                <span class="block text-sm font-medium text-gray-800">Light</span>
+                                <span class="block text-xs text-gray-600">Bright and clean interface</span>
+                            </div>
                         </label>
-                        <label class="inline-flex items-center">
-                            <input type="radio" name="theme" value="dark" class="form-radio h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-600 bg-gray-700">
-                            <span class="ml-2 text-gray-300">Dark</span>
+                        
+                        <label class="flex items-center p-4 border border-amber-300 rounded-lg cursor-pointer hover:bg-amber-50">
+                            <input type="radio" name="theme" value="dark" class="h-4 w-4 text-red-600 focus:ring-red-500 border-amber-300">
+                            <div class="ml-3">
+                                <span class="block text-sm font-medium text-gray-800">Dark</span>
+                                <span class="block text-xs text-gray-600">Easier on the eyes</span>
+                            </div>
                         </label>
-                        <label class="inline-flex items-center">
-                            <input type="radio" name="theme" value="system" checked class="form-radio h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-600 bg-gray-700">
-                            <span class="ml-2 text-gray-300">System Default</span>
+                        
+                        <label class="flex items-center p-4 border border-amber-300 rounded-lg cursor-pointer hover:bg-amber-50">
+                            <input type="radio" name="theme" value="system" checked class="h-4 w-4 text-red-600 focus:ring-red-500 border-amber-300">
+                            <div class="ml-3">
+                                <span class="block text-sm font-medium text-gray-800">System Default</span>
+                                <span class="block text-xs text-gray-600">Match your device settings</span>
+                            </div>
                         </label>
                     </div>
                 </div>
                 
                 <div class="flex justify-end">
-                    <button id="save-appearance-btn" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition">Save Appearance Settings</button>
+                    <button onclick="saveAppearanceSettings()" class="bg-gradient-to-r from-red-600 to-amber-600 text-white px-6 py-3 rounded-lg hover:from-red-700 hover:to-amber-700 transition shadow-lg btn-shine">
+                        Save Appearance
+                    </button>
                 </div>
-                <div id="appearance-success" class="hidden mt-4 p-3 bg-green-800 text-green-100 rounded-lg text-sm"></div>
+                <div id="appearance-success" class="hidden mt-4 p-3 bg-green-100 text-green-800 rounded-lg text-sm border border-green-200"></div>
             </div>
             
             <!-- Delivery Settings -->
-            <div class="bg-gray-800 shadow rounded-lg p-6">
-                <h2 class="text-xl font-semibold mb-6 text-white">Delivery Settings</h2>
+            <div class="bg-white rounded-xl shadow-md p-6 border border-amber-200 card-hover">
+                <h2 class="text-2xl font-bold mb-6 text-gray-800 heading-font flex items-center">
+                    <i class="fas fa-truck text-red-600 mr-3" aria-hidden="true"></i>
+                    Delivery Settings
+                </h2>
                 
                 <div class="mb-6">
-                    <label for="address" class="block text-sm font-medium text-gray-300 mb-2">Default Delivery Address</label>
-                    <textarea id="address" rows="3" class="w-full px-3 py-2 border border-gray-600 rounded-lg focus:ring-purple-500 focus:border-purple-500 bg-gray-700 text-white"></textarea>
+                    <label for="address" class="block text-sm font-medium text-gray-700 mb-2">Default Delivery Address</label>
+                    <textarea id="address" rows="3" class="w-full px-4 py-3 border border-amber-300 rounded-lg focus:ring-red-500 focus:border-red-500 bg-amber-50"></textarea>
                 </div>
                 
                 <div class="mb-6">
-                    <label for="instructions" class="block text-sm font-medium text-gray-300 mb-2">Delivery Instructions</label>
-                    <textarea id="instructions" rows="2" class="w-full px-3 py-2 border border-gray-600 rounded-lg focus:ring-purple-500 focus:border-purple-500 bg-gray-700 text-white"></textarea>
+                    <label for="instructions" class="block text-sm font-medium text-gray-700 mb-2">Delivery Instructions</label>
+                    <textarea id="instructions" rows="2" class="w-full px-4 py-3 border border-amber-300 rounded-lg focus:ring-red-500 focus:border-red-500 bg-amber-50" placeholder="e.g., Leave at front door, call when arrived"></textarea>
                 </div>
                 
                 <div class="mb-6">
-                    <label class="block text-sm font-medium text-gray-300 mb-2">Delivery Speed Preference</label>
-                    <div class="flex items-center space-x-4">
-                        <label class="inline-flex items-center">
-                            <input type="radio" name="delivery_speed" value="fastest" class="form-radio h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-600 bg-gray-700" checked>
-                            <span class="ml-2 text-gray-300">Fastest</span>
+                    <label class="block text-sm font-medium text-gray-700 mb-3">Delivery Speed Preference</label>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        <label class="flex items-center p-4 border border-amber-300 rounded-lg cursor-pointer hover:bg-amber-50">
+                            <input type="radio" name="delivery_speed" value="fastest" checked class="h-4 w-4 text-red-600 focus:ring-red-500 border-amber-300">
+                            <div class="ml-3">
+                                <span class="block text-sm font-medium text-gray-800">Fastest</span>
+                                <span class="block text-xs text-gray-600">Get your food as fast as possible</span>
+                            </div>
                         </label>
-                        <label class="inline-flex items-center">
-                            <input type="radio" name="delivery_speed" value="standard" class="form-radio h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-600 bg-gray-700">
-                            <span class="ml-2 text-gray-300">Standard</span>
+                        
+                        <label class="flex items-center p-4 border border-amber-300 rounded-lg cursor-pointer hover:bg-amber-50">
+                            <input type="radio" name="delivery_speed" value="standard" class="h-4 w-4 text-red-600 focus:ring-red-500 border-amber-300">
+                            <div class="ml-3">
+                                <span class="block text-sm font-medium text-gray-800">Standard</span>
+                                <span class="block text-xs text-gray-600">Balance between speed and cost</span>
+                            </div>
                         </label>
-                        <label class="inline-flex items-center">
-                            <input type="radio" name="delivery_speed" value="scheduled" class="form-radio h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-600 bg-gray-700">
-                            <span class="ml-2 text-gray-300">Scheduled</span>
+                        
+                        <label class="flex items-center p-4 border border-amber-300 rounded-lg cursor-pointer hover:bg-amber-50">
+                            <input type="radio" name="delivery_speed" value="scheduled" class="h-4 w-4 text-red-600 focus:ring-red-500 border-amber-300">
+                            <div class="ml-3">
+                                <span class="block text-sm font-medium text-gray-800">Scheduled</span>
+                                <span class="block text-xs text-gray-600">Choose a specific delivery time</span>
+                            </div>
                         </label>
                     </div>
                 </div>
                 
                 <div class="flex justify-end">
-                    <button id="save-delivery-btn" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition">Save Delivery Settings</button>
+                    <button onclick="saveDeliverySettings()" class="bg-gradient-to-r from-red-600 to-amber-600 text-white px-6 py-3 rounded-lg hover:from-red-700 hover:to-amber-700 transition shadow-lg btn-shine">
+                        Save Delivery Settings
+                    </button>
                 </div>
-                <div id="delivery-success" class="hidden mt-4 p-3 bg-green-800 text-green-100 rounded-lg text-sm"></div>
+                <div id="delivery-success" class="hidden mt-4 p-3 bg-green-100 text-green-800 rounded-lg text-sm border border-green-200"></div>
             </div>
         </div>
     </section>
 
     <!-- Footer -->
-    <footer class="bg-gray-900 py-12 px-6 border-t border-gray-800">
+    <footer class="bg-white py-16 px-6 border-t border-amber-200">
         <div class="container mx-auto">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-12">
                 <div>
-                    <h3 class="text-xl font-bold mb-4 flex items-center">
-                        <i class="fas fa-utensils text-purple-500 mr-2"></i> NutriOrder
+                    <h3 class="text-xl font-bold mb-6 flex items-center heading-font">
+                        <i class="fas fa-utensils text-red-500 mr-3" aria-hidden="true"></i> NutriOrder
                     </h3>
-                    <p class="text-gray-400">Where food meets health intelligence.</p>
-                    <div class="flex space-x-4 mt-4">
-                        <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-facebook-f"></i></a>
-                        <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-twitter"></i></a>
-                        <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-instagram"></i></a>
+                    <p class="text-gray-600 mb-4">Where traditional Indian food meets health intelligence. Making healthy eating simple, delicious, and accessible.</p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-gray-600 hover:text-red-600 transition text-lg" aria-label="Facebook"><i class="fab fa-facebook-f" aria-hidden="true"></i></a>
+                        <a href="#" class="text-gray-600 hover:text-red-600 transition text-lg" aria-label="Twitter"><i class="fab fa-twitter" aria-hidden="true"></i></a>
+                        <a href="#" class="text-gray-600 hover:text-red-600 transition text-lg" aria-label="Instagram"><i class="fab fa-instagram" aria-hidden="true"></i></a>
+                        <a href="#" class="text-gray-600 hover:text-red-600 transition text-lg" aria-label="LinkedIn"><i class="fab fa-linkedin-in" aria-hidden="true"></i></a>
                     </div>
                 </div>
                 <div>
-                    <h4 class="font-bold text-lg mb-4">Explore</h4>
-                    <ul class="space-y-2">
-                        <li><a href="homepage.html" class="text-gray-400 hover:text-white">Home</a></li>
-                        <li><a href="recommended.html" class="text-gray-400 hover:text-white">Recommended</a></li>
-                        <li><a href="restaurants.html" class="text-gray-400 hover:text-white">Restaurants</a></li>
-                        <li><a href="index.html#contact" class="text-gray-400 hover:text-white">Contact</a></li>
+                    <h4 class="font-bold text-lg mb-6 text-gray-800 heading-font">Explore</h4>
+                    <ul class="space-y-3">
+                        <li><a href="homepage.html" class="text-gray-600 hover:text-red-600 transition underline-animate">Home</a></li>
+                        <li><a href="recommended.html" class="text-gray-600 hover:text-red-600 transition underline-animate">Recommended</a></li>
+                        <li><a href="restaurants.html" class="text-gray-600 hover:text-red-600 transition underline-animate">Restaurants</a></li>
+                        <li><a href="#contact" class="text-gray-600 hover:text-red-600 transition underline-animate">Contact</a></li>
                     </ul>
                 </div>
                 <div>
-                    <h4 class="font-bold text-lg mb-4">Company</h4>
-                    <ul class="space-y-2">
-                        <li><a href="#" class="text-gray-400 hover:text-white">About Us</a></li>
-                        <li><a href="#" class="text-gray-400 hover:text-white">Careers</a></li>
-                        <li><a href="#" class="text-gray-400 hover:text-white">Blog</a></li>
-                        <li><a href="#" class="text-gray-400 hover:text-white">Press</a></li>
+                    <h4 class="font-bold text-lg mb-6 text-gray-800 heading-font">Company</h4>
+                    <ul class="space-y-3">
+                        <li><a href="#" class="text-gray-600 hover:text-red-600 transition underline-animate">About Us</a></li>
+                        <li><a href="#" class="text-gray-600 hover:text-red-600 transition underline-animate">Careers</a></li>
+                        <li><a href="#" class="text-gray-600 hover:text-red-600 transition underline-animate">Blog</a></li>
+                        <li><a href="#" class="text-gray-600 hover:text-red-600 transition underline-animate">Press</a></li>
                     </ul>
                 </div>
                 <div>
-                    <h4 class="font-bold text-lg mb-4">Get Help</h4>
-                    <ul class="space-y-2">
-                        <li><a href="#" class="text-gray-400 hover:text-white">FAQ</a></li>
-                        <li><a href="index.html#contact" class="text-gray-400 hover:text-white">Contact</a></li>
-                        <li><a href="#" class="text-gray-400 hover:text-white">Privacy</a></li>
-                        <li><a href="#" class="text-gray-400 hover:text-white">Terms</a></li>
+                    <h4 class="font-bold text-lg mb-6 text-gray-800 heading-font">Get Help</h4>
+                    <ul class="space-y-3">
+                        <li><a href="#" class="text-gray-600 hover:text-red-600 transition underline-animate">FAQ</a></li>
+                        <li><a href="#" class="text-gray-600 hover:text-red-600 transition underline-animate">Contact</a></li>
+                        <li><a href="#" class="text-gray-600 hover:text-red-600 transition underline-animate">Privacy</a></li>
+                        <li><a href="#" class="text-gray-600 hover:text-red-600 transition underline-animate">Terms</a></li>
                     </ul>
                 </div>
             </div>
-            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-500">
-                <p>© 2023 NutriOrder. All rights reserved.</p>
+            <div class="border-t border-amber-200 mt-12 pt-8 text-center text-gray-500">
+                <p>© 2023 NutriOrder. All rights reserved. | Designed with <i class="fas fa-heart text-red-500" aria-hidden="true"></i> for your health</p>
             </div>
         </div>
     </footer>
 
-    <!-- Theme Toggle Script -->
-    <script>
-        const themeToggle = document.getElementById('theme-toggle');
-        const html = document.documentElement;
-        
-        // Check for saved user preference or use system preference
-        const savedTheme = localStorage.getItem('theme') || 'system';
-        
-        // Apply the saved theme
-        if (savedTheme === 'dark' || (savedTheme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-            html.classList.add('dark');
-        } else {
-            html.classList.remove('dark');
-        }
-        
-        // Toggle between light/dark/system
-        themeToggle.addEventListener('click', () => {
-            if (html.classList.contains('dark')) {
-                html.classList.remove('dark');
-                localStorage.setItem('theme', 'light');
-            } else {
-                html.classList.add('dark');
-                localStorage.setItem('theme', 'dark');
-            }
-        });
+    <!-- Shopping Cart Sidebar -->
+    <div id="cart-sidebar" class="fixed top-0 right-0 h-full w-full sm:w-96 bg-white shadow-xl transform translate-x-full transition-transform duration-300 ease-in-out z-50 overflow-y-auto border-l border-amber-200" aria-hidden="true" aria-label="Shopping cart">
+        <div class="p-6 border-b border-amber-200 flex justify-between items-center bg-white">
+            <h3 class="text-xl font-semibold text-gray-800 flex items-center">
+                <i class="fas fa-shopping-cart mr-2 text-red-600" aria-hidden="true"></i> Your Order
+            </h3>
+            <button onclick="toggleCart()" class="text-gray-500 hover:text-gray-700 text-xl" aria-label="Close cart">
+                <i class="fas fa-times" aria-hidden="true"></i>
+            </button>
+        </div>
+        <div id="cart-items" class="p-6">
+            <!-- Cart items will be added here dynamically -->
+            <div class="text-center py-12">
+                <i class="fas fa-shopping-cart text-4xl text-gray-400 mb-4" aria-hidden="true"></i>
+                <p class="text-gray-500">Your cart is empty</p>
+                <button onclick="toggleCart()" class="mt-4 text-red-600 hover:text-red-500 underline">
+                    Browse our menu
+                </button>
+            </div>
+        </div>
+        <div class="p-6 border-t border-amber-200 bg-white">
+            <div class="flex justify-between mb-3 text-gray-700">
+                <span>Subtotal:</span>
+                <span id="cart-subtotal">₹0.00</span>
+            </div>
+            <div class="flex justify-between mb-3 text-gray-700">
+                <span>Delivery Fee:</span>
+                <span>₹30.00</span>
+            </div>
+            <div class="flex justify-between mb-6 text-lg font-bold text-gray-800">
+                <span>Total:</span>
+                <span id="cart-total">₹30.00</span>
+            </div>
+            <a href="checkout.html" class="w-full bg-gradient-to-r from-red-600 to-amber-600 text-white py-3 rounded-lg hover:from-red-700 hover:to-amber-700 transition flex items-center justify-center shadow-lg btn-shine">
+                <i class="fas fa-credit-card mr-2" aria-hidden="true"></i> Proceed to Checkout
+            </a>
+        </div>
+    </div>
+    <div id="cart-overlay" class="hidden fixed inset-0 bg-black bg-opacity-50 z-40 backdrop-blur-sm" onclick="toggleCart()" aria-hidden="true"></div>
 
-        // Add smooth transition to all links
+    <script>
+        // Shopping cart functions
+        function toggleCart() {
+            const cartSidebar = document.getElementById('cart-sidebar');
+            const cartOverlay = document.getElementById('cart-overlay');
+            
+            if (cartSidebar.classList.contains('translate-x-full')) {
+                cartSidebar.classList.remove('translate-x-full');
+                cartOverlay.classList.remove('hidden');
+                cartSidebar.setAttribute('aria-hidden', 'false');
+            } else {
+                cartSidebar.classList.add('translate-x-full');
+                cartOverlay.classList.add('hidden');
+                cartSidebar.setAttribute('aria-hidden', 'true');
+            }
+        }
+
+        function addToCart(itemId, event = null) {
+            // Implementation would be similar to checkout.html
+            console.log("Add to cart:", itemId);
+        }
+
+        function updateCart() {
+            // Implementation would be similar to checkout.html
+            console.log("Update cart");
+        }
+
+        function updateCartItem(itemId, change) {
+            // Implementation would be similar to checkout.html
+            console.log("Update cart item:", itemId, change);
+        }
+
+        function removeFromCart(itemId) {
+            // Implementation would be similar to checkout.html
+            console.log("Remove from cart:", itemId);
+        }
+
+        // Profile dropdown toggle
         document.addEventListener('DOMContentLoaded', function() {
-            document.querySelectorAll('a').forEach(link => {
-                link.addEventListener('click', function(e) {
-                    // Don't apply to:
-                    // 1. External links
-                    // 2. Anchor links (#)
-                    // 3. Links to the current page
-                    if (!this.href || 
-                        this.href.startsWith('http') || 
-                        this.href.includes('#') || 
-                        this.href === window.location.href) {
-                        return;
-                    }
+            const profileButton = document.getElementById('profile-button');
+            const profileDropdown = document.getElementById('profile-dropdown');
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            
+            // Mobile menu toggle
+            if (mobileMenuButton && mobileMenu) {
+                mobileMenuButton.addEventListener('click', function() {
+                    const isExpanded = this.getAttribute('aria-expanded') === 'true';
+                    this.setAttribute('aria-expanded', !isExpanded);
+                    mobileMenu.classList.toggle('open');
                     
+                    // Toggle icon
+                    const icon = this.querySelector('i');
+                    if (icon) {
+                        icon.classList.toggle('fa-bars');
+                        icon.classList.toggle('fa-times');
+                    }
+                });
+            }
+            
+            // Profile dropdown toggle
+            if (profileButton && profileDropdown) {
+                profileButton.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const isExpanded = this.getAttribute('aria-expanded') === 'true';
+                    this.setAttribute('aria-expanded', !isExpanded);
+                    profileDropdown.classList.toggle('hidden');
+                });
+                
+                // Close dropdown when clicking outside
+                document.addEventListener('click', function() {
+                    profileButton.setAttribute('aria-expanded', 'false');
+                    profileDropdown.classList.add('hidden');
+                });
+            }
+            
+            // Initialize cart
+            updateCart();
+
+            // Add smooth transition to all links
+            document.querySelectorAll('a').forEach(link => {
+                // Don't apply to:
+                // 1. External links
+                // 2. Anchor links (#)
+                // 3. Links to the current page
+                if (!this.href || 
+                    this.href.startsWith('http') || 
+                    this.href.includes('#') || 
+                    this.href === window.location.href) {
+                    return;
+                }
+                
+                link.addEventListener('click', function(e) {
                     e.preventDefault();
                     document.body.style.opacity = '0';
                     document.body.style.transition = 'opacity 0.3s ease';
@@ -515,6 +974,17 @@
                 });
             });
         });
+
+        // Make functions available globally
+        window.toggleCart = toggleCart;
+        window.addToCart = addToCart;
+        window.updateCartItem = updateCartItem;
+        window.removeFromCart = removeFromCart;
+        window.logout = window.logout;
+        window.updateProfile = window.updateProfile;
+        window.saveNotificationSettings = window.saveNotificationSettings;
+        window.saveAppearanceSettings = window.saveAppearanceSettings;
+        window.saveDeliverySettings = window.saveDeliverySettings;
     </script>
 </body>
 </html>

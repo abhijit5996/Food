@@ -210,65 +210,118 @@
                 left: 120%;
             }
         }
+
+        /* Mobile menu styles */
+        .mobile-menu {
+            transition: all 0.3s ease;
+            max-height: 0;
+            overflow: hidden;
+        }
+
+        .mobile-menu.open {
+            max-height: 500px;
+        }
+
+        /* Accessibility focus styles */
+        button:focus, a:focus, input:focus {
+            outline: 2px solid #e11d48;
+            outline-offset: 2px;
+        }
     </style>
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
-  
+        // Firebase configuration should be loaded from environment variables in a real app
+        // This is just for demonstration purposes
         const firebaseConfig = {
-          apiKey: "AIzaSyBx0Kt9o04ye0XrtA8ecp84wD8Q9OCDjlA",
-          authDomain: "foodorder-4380c.firebaseapp.com",
-          projectId: "foodorder-4380c",
-          storageBucket: "foodorder-4380c.appspot.com",
-          messagingSenderId: "735023580381",
-          appId: "1:735023580381:web:c6740bef2fc9bdee1b4734"
-        };
-  
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const provider = new GoogleAuthProvider();
-  
-        // Check auth state
-        onAuthStateChanged(auth, (user) => {
-          if (user) {
-            // Update UI for logged in user
-            document.getElementById('login-btn').classList.add('hidden');
-            document.getElementById('profile-section').classList.remove('hidden');
-            document.getElementById('profile-name').textContent = user.displayName || user.email.split('@')[0];
-            
-            const redirectAfterLogin = localStorage.getItem('redirectAfterLogin');
-            if (redirectAfterLogin) {
-              localStorage.removeItem('redirectAfterLogin');
-              window.location.href = redirectAfterLogin;
-            }
-          } else {
-            // Update UI for logged out user
-            document.getElementById('login-btn').classList.remove('hidden');
-            document.getElementById('profile-section').classList.add('hidden');
-          }
-        });
-  
-        // Google sign-in function
-        window.signInWithGoogle = async function() {
-          try {
-            const result = await signInWithPopup(auth, provider);
-            const user = result.user;
-            window.location.href = 'homepage.html';
-          } catch (error) {
-            console.error('Google sign-in error:', error);
-            alert('Google sign-in failed: ' + error.message);
-          }
+            apiKey: "AIzaSyBx0Kt9o04ye0XrtA8ecp84wD8Q9OCDjlA",
+            authDomain: "foodorder-4380c.firebaseapp.com",
+            projectId: "foodorder-4380c",
+            storageBucket: "foodorder-4380c.appspot.com",
+            messagingSenderId: "735023580381",
+            appId: "1:735023580381:web:c6740bef2fc9bdee1b4734"
         };
 
-        // Logout function
-        window.logout = async function() {
-          try {
-            await signOut(auth);
-            window.location.href = 'index.html';
-          } catch (error) {
-            console.error('Logout error:', error);
-          }
-        };
+        try {
+            const { initializeApp } = await import("https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js");
+            const { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut } = await import("https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js");
+            
+            const app = initializeApp(firebaseConfig);
+            const auth = getAuth(app);
+            const provider = new GoogleAuthProvider();
+
+            // Check auth state
+            onAuthStateChanged(auth, (user) => {
+                const loginBtn = document.getElementById('login-btn');
+                const profileSection = document.getElementById('profile-section');
+                const profileName = document.getElementById('profile-name');
+                
+                if (!loginBtn || !profileSection || !profileName) return;
+
+                if (user) {
+                    // Update UI for logged in user
+                    loginBtn.classList.add('hidden');
+                    profileSection.classList.remove('hidden');
+                    profileName.textContent = user.displayName || user.email.split('@')[0];
+                    
+                    // Update profile picture if available
+                    const profileButton = document.getElementById('profile-button');
+                    if (profileButton && user.photoURL) {
+                        const existingIcon = profileButton.querySelector('.fas.fa-user-circle');
+                        if (existingIcon) existingIcon.remove();
+                        
+                        const profilePic = document.createElement('img');
+                        profilePic.src = user.photoURL;
+                        profilePic.alt = 'Profile picture';
+                        profilePic.className = 'h-8 w-8 rounded-full object-cover';
+                        profileButton.prepend(profilePic);
+                    }
+
+                    const redirectAfterLogin = localStorage.getItem('redirectAfterLogin');
+                    if (redirectAfterLogin) {
+                        localStorage.removeItem('redirectAfterLogin');
+                        window.location.href = redirectAfterLogin;
+                    }
+                } else {
+                    // Update UI for logged out user
+                    loginBtn.classList.remove('hidden');
+                    profileSection.classList.add('hidden');
+                }
+            });
+
+            // Google sign-in function
+            window.signInWithGoogle = async function() {
+                try {
+                    const result = await signInWithPopup(auth, provider);
+                    if (result.user) {
+                        window.location.href = 'homepage.html';
+                    }
+                } catch (error) {
+                    console.error('Google sign-in error:', error);
+                    alert('Google sign-in failed. Please try again.');
+                }
+            };
+
+            // Logout function
+            window.logout = async function() {
+                try {
+                    await signOut(auth);
+                    window.location.href = 'index.html';
+                } catch (error) {
+                    console.error('Logout error:', error);
+                    alert('Failed to sign out. Please try again.');
+                }
+            };
+        } catch (error) {
+            console.error('Firebase initialization error:', error);
+            // Show user-friendly message
+            const authElements = document.querySelectorAll('[data-auth-only]');
+            authElements.forEach(el => {
+                el.style.display = 'none';
+            });
+            const errorMessage = document.createElement('div');
+            errorMessage.className = 'bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded fixed bottom-4 left-4';
+            errorMessage.textContent = 'Authentication service is currently unavailable. Please try again later.';
+            document.body.appendChild(errorMessage);
+        }
     </script>
     <script>
         tailwind.config = {
@@ -301,49 +354,67 @@
     <nav class="bg-white/90 backdrop-blur-md py-4 px-6 shadow-sm sticky top-0 z-50 border-b border-amber-200">
         <div class="container mx-auto flex justify-between items-center">
             <div class="flex items-center space-x-2">
-                <i class="fas fa-utensils text-red-600 text-2xl"></i>
+                <i class="fas fa-utensils text-red-600 text-2xl" aria-hidden="true"></i>
                 <span class="text-xl font-bold gradient-text heading-font">NutriOrder</span>
             </div>
+            
+            <!-- Mobile menu button -->
+            <button id="mobile-menu-button" class="md:hidden text-gray-700 focus:outline-none" aria-label="Toggle menu" aria-expanded="false">
+                <i class="fas fa-bars text-2xl"></i>
+            </button>
+            
             <div class="hidden md:flex space-x-6">
                 <a href="homepage.html" class="hover:text-red-600 transition underline-animate">Home</a>
                 <a href="#menu" class="hover:text-red-600 transition underline-animate">Menu</a>
                 <a href="#about" class="hover:text-red-600 transition underline-animate">About</a>
                 <a href="#contact" class="hover:text-red-600 transition underline-animate">Contact</a>
             </div>
-            <div class="flex items-center space-x-4">
+            <div class="hidden md:flex items-center space-x-4">
                 <a href="retailer-login.html" class="flex items-center space-x-2 bg-amber-100 hover:bg-amber-200 px-4 py-2 rounded-full transition border-animate">
-                    <i class="fas fa-store text-red-600"></i>
+                    <i class="fas fa-store text-red-600" aria-hidden="true"></i>
                     <span class="text-gray-700">Retailer Login</span>
                 </a>
                 <a href="login.html" id="login-btn" class="flex items-center space-x-2 bg-gradient-to-r from-red-600 to-amber-600 hover:from-red-700 hover:to-amber-700 px-4 py-2 rounded-full transition shadow-lg text-white btn-shine">
-                    <i class="fas fa-sign-in-alt"></i>
+                    <i class="fas fa-sign-in-alt" aria-hidden="true"></i>
                     <span>Login</span>
                 </a>
                 <div id="profile-section" class="hidden relative">
-                    <button id="profile-button" class="flex items-center space-x-2 bg-amber-100 hover:bg-amber-200 px-4 py-2 rounded-full transition border-animate">
-                        <i class="fas fa-user-circle text-red-600"></i>
+                    <button id="profile-button" class="flex items-center space-x-2 bg-amber-100 hover:bg-amber-200 px-4 py-2 rounded-full transition border-animate" aria-label="Profile menu" aria-haspopup="true">
+                        <i class="fas fa-user-circle text-red-600" aria-hidden="true"></i>
                         <span id="profile-name" class="text-gray-700"></span>
                     </button>
-                    <div id="profile-dropdown" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 hidden border border-amber-200 backdrop-blur-sm">
+                    <div id="profile-dropdown" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 hidden border border-amber-200 backdrop-blur-sm" aria-labelledby="profile-button">
                         <a href="homepage.html" class="block px-4 py-2 text-sm hover:bg-amber-50 transition text-gray-700">Dashboard</a>
                         <a href="orders.html" class="block px-4 py-2 text-sm hover:bg-amber-50 transition text-gray-700">My Orders</a>
                         <a href="settings.html" class="block px-4 py-2 text-sm hover:bg-amber-50 transition text-gray-700">Settings</a>
                         <a href="#" onclick="logout()" class="block px-4 py-2 text-sm hover:bg-amber-50 transition text-gray-700">Sign out</a>
                     </div>
                 </div>
-                <button onclick="toggleCart()" class="flex items-center space-x-2 bg-gradient-to-r from-red-600 to-amber-600 hover:from-red-700 hover:to-amber-700 px-4 py-2 rounded-full transition shadow-lg relative group text-white btn-shine">
-                    <i class="fas fa-shopping-cart"></i>
+                <button onclick="toggleCart()" class="flex items-center space-x-2 bg-gradient-to-r from-red-600 to-amber-600 hover:from-red-700 hover:to-amber-700 px-4 py-2 rounded-full transition shadow-lg relative group text-white btn-shine" aria-label="Shopping cart">
+                    <i class="fas fa-shopping-cart" aria-hidden="true"></i>
                     <span id="cart-count" class="bg-white text-red-600 rounded-full w-6 h-6 flex items-center justify-center font-bold">0</span>
                     <span class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity" id="cart-hover-count">0</span>
                 </button>
+            </div>
+        </div>
+        
+        <!-- Mobile menu -->
+        <div id="mobile-menu" class="mobile-menu md:hidden bg-white w-full mt-4 rounded-lg shadow-lg">
+            <div class="px-4 py-3 space-y-3">
+                <a href="homepage.html" class="block px-4 py-2 hover:bg-amber-50 rounded-lg transition">Home</a>
+                <a href="#menu" class="block px-4 py-2 hover:bg-amber-50 rounded-lg transition">Menu</a>
+                <a href="#about" class="block px-4 py-2 hover:bg-amber-50 rounded-lg transition">About</a>
+                <a href="#contact" class="block px-4 py-2 hover:bg-amber-50 rounded-lg transition">Contact</a>
+                <a href="retailer-login.html" class="block px-4 py-2 hover:bg-amber-50 rounded-lg transition">Retailer Login</a>
+                <a href="login.html" class="block px-4 py-2 bg-gradient-to-r from-red-600 to-amber-600 text-white rounded-lg transition text-center">Login</a>
             </div>
         </div>
     </nav>
 
     <!-- Hero Section -->
     <section class="relative bg-gradient-to-br from-amber-50 to-red-50 py-24 px-6 overflow-hidden">
-        <div class="indian-pattern"></div>
-        <div class="absolute inset-0 opacity-60">
+        <div class="indian-pattern" aria-hidden="true"></div>
+        <div class="absolute inset-0 opacity-60" aria-hidden="true">
             <div class="absolute top-0 left-0 w-64 h-64 bg-red-200 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob"></div>
             <div class="absolute top-0 right-0 w-64 h-64 bg-amber-200 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-2000"></div>
             <div class="absolute bottom-0 left-1/2 w-64 h-64 bg-pink-200 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-4000"></div>
@@ -358,17 +429,17 @@
             <div class="flex flex-col md:flex-row justify-center gap-4">
                <a href="homepage.html"> 
                 <button class="bg-gradient-to-r from-red-600 to-amber-600 hover:from-red-700 hover:to-amber-700 text-white px-8 py-4 rounded-full font-bold transition transform hover:scale-105 shadow-lg pulse btn-shine">
-                    Order Now <i class="fas fa-arrow-right ml-2"></i>
+                    Order Now <i class="fas fa-arrow-right ml-2" aria-hidden="true"></i>
                 </button>
                </a>
-                <button class="bg-white hover:bg-amber-100 text-gray-800 px-8 py-4 rounded-full font-bold transition transform hover:scale-105 shadow-lg border border-amber-200">
-                    How It Works <i class="fas fa-info-circle ml-2"></i>
+                <button onclick="showHowItWorks()" class="bg-white hover:bg-amber-100 text-gray-800 px-8 py-4 rounded-full font-bold transition transform hover:scale-105 shadow-lg border border-amber-200">
+                    How It Works <i class="fas fa-info-circle ml-2" aria-hidden="true"></i>
                 </button>
             </div>
         </div>
-        <div class="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-amber-50 to-transparent"></div>
+        <div class="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-amber-50 to-transparent" aria-hidden="true"></div>
         <div class="absolute top-1/2 right-10 transform -translate-y-1/2 floating hidden lg:block">
-            <img src="https://images.unsplash.com/photo-1601050690597-df0568f70950?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80" alt="Indian Thali" class="w-72 h-72 object-cover rounded-xl shadow-2xl border-4 border-white">
+            <img src="https://images.unsplash.com/photo-1601050690597-df0568f70950?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80" alt="Traditional Indian thali with various dishes" class="w-72 h-72 object-cover rounded-xl shadow-2xl border-4 border-white">
         </div>
     </section>
 
@@ -383,28 +454,28 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                 <div class="bg-white p-8 rounded-xl hover:bg-amber-50 transition-all duration-300 card-hover border-animate shadow-md">
                     <div class="text-red-500 text-5xl mb-6">
-                        <i class="fas fa-utensils"></i>
+                        <i class="fas fa-utensils" aria-hidden="true"></i>
                     </div>
                     <h3 class="text-xl font-bold mb-3">Authentic Flavors</h3>
                     <p class="text-gray-600">Enjoy traditional Indian dishes made with authentic recipes and high-quality ingredients.</p>
                 </div>
                 <div class="bg-white p-8 rounded-xl hover:bg-amber-50 transition-all duration-300 card-hover border-animate shadow-md">
                     <div class="text-red-500 text-5xl mb-6">
-                        <i class="fas fa-heartbeat"></i>
+                        <i class="fas fa-heartbeat" aria-hidden="true"></i>
                     </div>
                     <h3 class="text-xl font-bold mb-3">Health Tracking</h3>
                     <p class="text-gray-600">Monitor how your food choices affect your health metrics with our integrated tracking.</p>
                 </div>
                 <div class="bg-white p-8 rounded-xl hover:bg-amber-50 transition-all duration-300 card-hover border-animate shadow-md">
                     <div class="text-red-500 text-5xl mb-6">
-                        <i class="fas fa-book-open"></i>
+                        <i class="fas fa-book-open" aria-hidden="true"></i>
                     </div>
                     <h3 class="text-xl font-bold mb-3">Recipe Library</h3>
                     <p class="text-gray-600">Access thousands of traditional Indian recipes with detailed nutritional information.</p>
                 </div>
                 <div class="bg-white p-8 rounded-xl hover:bg-amber-50 transition-all duration-300 card-hover border-animate shadow-md">
                     <div class="text-red-500 text-5xl mb-6">
-                        <i class="fas fa-leaf"></i>
+                        <i class="fas fa-leaf" aria-hidden="true"></i>
                     </div>
                     <h3 class="text-xl font-bold mb-3">Ayurvedic Principles</h3>
                     <p class="text-gray-600">Meals designed according to Ayurvedic principles for balanced nutrition.</p>
@@ -422,12 +493,21 @@
                     <h2 class="text-4xl font-bold mt-2 heading-font">Traditional <span class="gradient-text">Indian Delicacies</span></h2>
                 </div>
                 <div class="mt-4 md:mt-0 relative w-full md:w-auto">
-                    <input type="text" placeholder="Search dishes..." class="bg-white text-gray-800 px-6 py-3 rounded-full pl-12 w-full md:w-80 focus:outline-none focus:ring-2 focus:ring-red-500 border border-amber-300 shadow-sm">
-                    <i class="fas fa-search absolute left-5 top-3.5 text-gray-400"></i>
+                    <input type="text" id="menu-search" placeholder="Search dishes..." class="bg-white text-gray-800 px-6 py-3 rounded-full pl-12 w-full md:w-80 focus:outline-none focus:ring-2 focus:ring-red-500 border border-amber-300 shadow-sm" aria-label="Search menu items">
+                    <i class="fas fa-search absolute left-5 top-3.5 text-gray-400" aria-hidden="true"></i>
                 </div>
             </div>
             
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div class="flex flex-wrap gap-2 mb-8 justify-center">
+                <button onclick="filterMenu('All')" class="px-4 py-2 rounded-full bg-red-600 text-white hover:bg-red-700 transition">All</button>
+                <button onclick="filterMenu('Comfort')" class="px-4 py-2 rounded-full bg-amber-100 hover:bg-amber-200 transition">Comfort Food</button>
+                <button onclick="filterMenu('Breakfast')" class="px-4 py-2 rounded-full bg-amber-100 hover:bg-amber-200 transition">Breakfast</button>
+                <button onclick="filterMenu('Appetizer')" class="px-4 py-2 rounded-full bg-amber-100 hover:bg-amber-200 transition">Appetizers</button>
+                <button onclick="filterMenu('Salad')" class="px-4 py-2 rounded-full bg-amber-100 hover:bg-amber-200 transition">Salads</button>
+                <button onclick="filterMenu('Beverage')" class="px-4 py-2 rounded-full bg-amber-100 hover:bg-amber-200 transition">Beverages</button>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="menu-container">
                 <!-- Menu items will be added here dynamically -->
             </div>
         </div>
@@ -444,21 +524,21 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                 <div class="bg-white p-8 rounded-xl hover:bg-amber-50 transition-all duration-300 card-hover border-animate shadow-md">
                     <div class="text-red-500 text-5xl mb-6">
-                        <i class="fas fa-history"></i>
+                        <i class="fas fa-history" aria-hidden="true"></i>
                     </div>
                     <h3 class="text-xl font-bold mb-3">Our Mission</h3>
                     <p class="text-gray-600">Founded in 2010, NutriOrder is committed to making healthy Indian eating convenient. We believe nutritious food should be delicious and accessible to everyone.</p>
                 </div>
                 <div class="bg-white p-8 rounded-xl hover:bg-amber-50 transition-all duration-300 card-hover border-animate shadow-md">
                     <div class="text-red-500 text-5xl mb-6">
-                        <i class="fas fa-leaf"></i>
+                        <i class="fas fa-leaf" aria-hidden="true"></i>
                     </div>
                     <h3 class="text-xl font-bold mb-3">Organic Ingredients</h3>
                     <p class="text-gray-600">We source only organic, fresh ingredients from local Indian farmers committed to sustainable practices. Our meals are free from artificial additives.</p>
                 </div>
                 <div class="bg-white p-8 rounded-xl hover:bg-amber-50 transition-all duration-300 card-hover border-animate shadow-md">
                     <div class="text-red-500 text-5xl mb-6">
-                        <i class="fas fa-mortar-pestle"></i>
+                        <i class="fas fa-mortar-pestle" aria-hidden="true"></i>
                     </div>
                     <h3 class="text-xl font-bold mb-3">Traditional Methods</h3>
                     <p class="text-gray-600">We use traditional Indian cooking methods that preserve nutrients and enhance flavors, just like our grandmothers used to do.</p>
@@ -477,17 +557,17 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                 <div class="bg-white p-8 rounded-xl hover:bg-amber-50 transition-all duration-300 card-hover border-animate shadow-md">
                     <div class="flex items-center mb-6">
-                        <div class="w-16 h-16 rounded-full bg-gradient-to-r from-red-600 to-amber-600 inline-flex items-center justify-center text-white font-bold text-xl">
+                        <div class="w-16 h-16 rounded-full bg-gradient-to-r from-red-600 to-amber-600 inline-flex items-center justify-center text-white font-bold text-xl" aria-hidden="true">
                             PK
                         </div>
                         <div class="ml-4">
                             <h3 class="text-gray-800 font-medium">Priya K.</h3>
                             <div class="flex text-yellow-400 mt-1">
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star" aria-hidden="true"></i>
+                                <i class="fas fa-star" aria-hidden="true"></i>
+                                <i class="fas fa-star" aria-hidden="true"></i>
+                                <i class="fas fa-star" aria-hidden="true"></i>
+                                <i class="fas fa-star" aria-hidden="true"></i>
                             </div>
                         </div>
                     </div>
@@ -495,17 +575,17 @@
                 </div>
                 <div class="bg-white p-8 rounded-xl hover:bg-amber-50 transition-all duration-300 card-hover border-animate shadow-md">
                     <div class="flex items-center mb-6">
-                        <div class="w-16 h-16 rounded-full bg-gradient-to-r from-red-600 to-amber-600 inline-flex items-center justify-center text-white font-bold text-xl">
+                        <div class="w-16 h-16 rounded-full bg-gradient-to-r from-red-600 to-amber-600 inline-flex items-center justify-center text-white font-bold text-xl" aria-hidden="true">
                             AM
                         </div>
                         <div class="ml-4">
                             <h3 class="text-gray-800 font-medium">Amit M.</h3>
                             <div class="flex text-yellow-400 mt-1">
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star" aria-hidden="true"></i>
+                                <i class="fas fa-star" aria-hidden="true"></i>
+                                <i class="fas fa-star" aria-hidden="true"></i>
+                                <i class="fas fa-star" aria-hidden="true"></i>
+                                <i class="fas fa-star" aria-hidden="true"></i>
                             </div>
                         </div>
                     </div>
@@ -513,17 +593,17 @@
                 </div>
                 <div class="bg-white p-8 rounded-xl hover:bg-amber-50 transition-all duration-300 card-hover border-animate shadow-md">
                     <div class="flex items-center mb-6">
-                        <div class="w-16 h-16 rounded-full bg-gradient-to-r from-red-600 to-amber-600 inline-flex items-center justify-center text-white font-bold text-xl">
+                        <div class="w-16 h-16 rounded-full bg-gradient-to-r from-red-600 to-amber-600 inline-flex items-center justify-center text-white font-bold text-xl" aria-hidden="true">
                             SD
                         </div>
                         <div class="ml-4">
                             <h3 class="text-gray-800 font-medium">Sunita D.</h3>
                             <div class="flex text-yellow-400 mt-1">
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star-half-alt"></i>
+                                <i class="fas fa-star" aria-hidden="true"></i>
+                                <i class="fas fa-star" aria-hidden="true"></i>
+                                <i class="fas fa-star" aria-hidden="true"></i>
+                                <i class="fas fa-star" aria-hidden="true"></i>
+                                <i class="fas fa-star-half-alt" aria-hidden="true"></i>
                             </div>
                         </div>
                     </div>
@@ -566,59 +646,59 @@
                 <p class="text-gray-600 max-w-2xl mx-auto mt-4">Have questions or feedback? We'd love to hear from you!</p>
             </div>
             <div class="lg:w-1/2 md:w-2/3 mx-auto bg-white p-8 rounded-xl border border-amber-200 shadow-md">
-                <div class="flex flex-wrap -m-2">
+                <form id="contact-form" class="flex flex-wrap -m-2">
                     <div class="p-2 w-full md:w-1/2">
                         <div class="relative">
                             <label for="name" class="leading-7 text-sm text-gray-600">Name</label>
-                            <input type="text" id="name" name="name" class="w-full bg-amber-50 rounded border border-amber-300 focus:border-red-500 focus:bg-white focus:ring-2 focus:ring-red-200 text-base outline-none text-gray-700 py-2 px-4 leading-8 transition-colors duration-200 ease-in-out">
+                            <input type="text" id="name" name="name" required class="w-full bg-amber-50 rounded border border-amber-300 focus:border-red-500 focus:bg-white focus:ring-2 focus:ring-red-200 text-base outline-none text-gray-700 py-2 px-4 leading-8 transition-colors duration-200 ease-in-out">
                         </div>
                     </div>
                     <div class="p-2 w-full md:w-1/2">
                         <div class="relative">
                             <label for="email" class="leading-7 text-sm text-gray-600">Email</label>
-                            <input type="email" id="email" name="email" class="w-full bg-amber-50 rounded border border-amber-300 focus:border-red-500 focus:bg-white focus:ring-2 focus:ring-red-200 text-base outline-none text-gray-700 py-2 px-4 leading-8 transition-colors duration-200 ease-in-out">
+                            <input type="email" id="email" name="email" required class="w-full bg-amber-50 rounded border border-amber-300 focus:border-red-500 focus:bg-white focus:ring-2 focus:ring-red-200 text-base outline-none text-gray-700 py-2 px-4 leading-8 transition-colors duration-200 ease-in-out">
                         </div>
                     </div>
                     <div class="p-2 w-full">
                         <div class="relative">
                             <label for="message" class="leading-7 text-sm text-gray-600">Message</label>
-                            <textarea id="message" name="message" class="w-full bg-amber-50 rounded border border-amber-300 focus:border-red-500 focus:bg-white focus:ring-2 focus:ring-red-200 h-32 text-base outline-none text-gray-700 py-2 px-4 resize-none leading-6 transition-colors duration-200 ease-in-out"></textarea>
+                            <textarea id="message" name="message" required class="w-full bg-amber-50 rounded border border-amber-300 focus:border-red-500 focus:bg-white focus:ring-2 focus:ring-red-200 h-32 text-base outline-none text-gray-700 py-2 px-4 resize-none leading-6 transition-colors duration-200 ease-in-out"></textarea>
                         </div>
                     </div>
                     <div class="p-2 w-full">
-                        <button class="flex mx-auto text-white bg-gradient-to-r from-red-600 to-amber-600 hover:from-red-700 hover:to-amber-700 border-0 py-3 px-10 focus:outline-none rounded-lg text-lg transition shadow-lg btn-shine">
-                            Send Message <i class="fas fa-paper-plane ml-2"></i>
+                        <button type="submit" class="flex mx-auto text-white bg-gradient-to-r from-red-600 to-amber-600 hover:from-red-700 hover:to-amber-700 border-0 py-3 px-10 focus:outline-none rounded-lg text-lg transition shadow-lg btn-shine">
+                            Send Message <i class="fas fa-paper-plane ml-2" aria-hidden="true"></i>
                         </button>
                     </div>
-                </div>
+                </form>
             </div>
             <div class="p-2 w-full pt-12 mt-12 border-t border-amber-200 text-center">
                 <div class="flex flex-col md:flex-row justify-center items-center gap-8">
                     <div class="flex items-center">
-                        <i class="fas fa-envelope text-red-600 text-xl mr-3"></i>
+                        <i class="fas fa-envelope text-red-600 text-xl mr-3" aria-hidden="true"></i>
                         <a href="mailto:hello@nutriorder.com" class="text-red-600 hover:text-red-500">hello@nutriorder.com</a>
                     </div>
                     <div class="flex items-center">
-                        <i class="fas fa-phone text-red-600 text-xl mr-3"></i>
+                        <i class="fas fa-phone text-red-600 text-xl mr-3" aria-hidden="true"></i>
                         <a href="tel:+911234567890" class="text-red-600 hover:text-red-500">+91 12345 67890</a>
                     </div>
                     <div class="flex items-center">
-                        <i class="fas fa-map-marker-alt text-red-600 text-xl mr-3"></i>
+                        <i class="fas fa-map-marker-alt text-red-600 text-xl mr-3" aria-hidden="true"></i>
                         <span class="text-gray-600">123 Health Street, Mumbai, MH 400001</span>
                     </div>
                 </div>
                 <div class="flex justify-center mt-8 space-x-6">
-                    <a href="#" class="text-gray-600 hover:text-red-600 transition text-xl">
-                        <i class="fab fa-facebook-f"></i>
+                    <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" class="text-gray-600 hover:text-red-600 transition text-xl" aria-label="Facebook">
+                        <i class="fab fa-facebook-f" aria-hidden="true"></i>
                     </a>
-                    <a href="#" class="text-gray-600 hover:text-red-600 transition text-xl">
-                        <i class="fab fa-twitter"></i>
+                    <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" class="text-gray-600 hover:text-red-600 transition text-xl" aria-label="Twitter">
+                        <i class="fab fa-twitter" aria-hidden="true"></i>
                     </a>
-                    <a href="#" class="text-gray-600 hover:text-red-600 transition text-xl">
-                        <i class="fab fa-instagram"></i>
+                    <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" class="text-gray-600 hover:text-red-600 transition text-xl" aria-label="Instagram">
+                        <i class="fab fa-instagram" aria-hidden="true"></i>
                     </a>
-                    <a href="#" class="text-gray-600 hover:text-red-600 transition text-xl">
-                        <i class="fab fa-linkedin-in"></i>
+                    <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" class="text-gray-600 hover:text-red-600 transition text-xl" aria-label="LinkedIn">
+                        <i class="fab fa-linkedin-in" aria-hidden="true"></i>
                     </a>
                 </div>
             </div>
@@ -633,30 +713,30 @@
             <div class="flex flex-col md:flex-row justify-center gap-4">
                <a href="homepage.html"> 
                 <button class="bg-white text-red-600 hover:bg-amber-100 px-8 py-4 rounded-full font-bold transition transform hover:scale-105 shadow-lg btn-shine">
-                    Order Now <i class="fas fa-arrow-right ml-2"></i>
+                    Order Now <i class="fas fa-arrow-right ml-2" aria-hidden="true"></i>
                 </button>
                </a>
-                <button class="bg-transparent border-2 border-white text-white hover:bg-white hover:text-red-600 px-8 py-4 rounded-full font-bold transition transform hover:scale-105">
-                    Learn More <i class="fas fa-info-circle ml-2"></i>
+                <button onclick="showHowItWorks()" class="bg-transparent border-2 border-white text-white hover:bg-white hover:text-red-600 px-8 py-4 rounded-full font-bold transition transform hover:scale-105">
+                    Learn More <i class="fas fa-info-circle ml-2" aria-hidden="true"></i>
                 </button>
             </div>
         </div>
     </section>
 
     <!-- Shopping Cart Sidebar -->
-    <div id="cart-sidebar" class="fixed top-0 right-0 h-full w-96 bg-white shadow-xl transform translate-x-full transition-transform duration-300 ease-in-out z-50 overflow-y-auto border-l border-amber-200">
+    <div id="cart-sidebar" class="fixed top-0 right-0 h-full w-full md:w-96 bg-white shadow-xl transform translate-x-full transition-transform duration-300 ease-in-out z-50 overflow-y-auto border-l border-amber-200" aria-hidden="true" aria-label="Shopping cart">
         <div class="p-6 border-b border-amber-200 flex justify-between items-center bg-white">
             <h3 class="text-xl font-semibold text-gray-800 flex items-center">
-                <i class="fas fa-shopping-cart mr-2 text-red-600"></i> Your Order
+                <i class="fas fa-shopping-cart mr-2 text-red-600" aria-hidden="true"></i> Your Order
             </h3>
-            <button onclick="toggleCart()" class="text-gray-500 hover:text-gray-700 text-xl">
-                <i class="fas fa-times"></i>
+            <button onclick="toggleCart()" class="text-gray-500 hover:text-gray-700 text-xl" aria-label="Close cart">
+                <i class="fas fa-times" aria-hidden="true"></i>
             </button>
         </div>
         <div id="cart-items" class="p-6">
             <!-- Cart items will be added here dynamically -->
             <div class="text-center py-12">
-                <i class="fas fa-shopping-cart text-4xl text-gray-400 mb-4"></i>
+                <i class="fas fa-shopping-cart text-4xl text-gray-400 mb-4" aria-hidden="true"></i>
                 <p class="text-gray-500">Your cart is empty</p>
                 <button onclick="toggleCart()" class="mt-4 text-red-600 hover:text-red-500 underline">
                     Browse our menu
@@ -677,11 +757,11 @@
                 <span id="cart-total">₹30.00</span>
             </div>
             <a href="orders.html" class="w-full bg-gradient-to-r from-red-600 to-amber-600 text-white py-3 rounded-lg hover:from-red-700 hover:to-amber-700 transition flex items-center justify-center shadow-lg btn-shine">
-                <i class="fas fa-credit-card mr-2"></i> Proceed to Checkout
+                <i class="fas fa-credit-card mr-2" aria-hidden="true"></i> Proceed to Checkout
             </a>
         </div>
     </div>
-    <div id="cart-overlay" class="hidden fixed inset-0 bg-black bg-opacity-50 z-40 backdrop-blur-sm" onclick="toggleCart()"></div>
+    <div id="cart-overlay" class="hidden fixed inset-0 bg-black bg-opacity-50 z-40 backdrop-blur-sm" onclick="toggleCart()" aria-hidden="true"></div>
 
     <!-- Footer -->
     <footer class="bg-white py-16 px-6 border-t border-amber-200">
@@ -689,14 +769,14 @@
             <div class="grid grid-cols-1 md:grid-cols-4 gap-12">
                 <div>
                     <h3 class="text-xl font-bold mb-6 flex items-center heading-font">
-                        <i class="fas fa-utensils text-red-500 mr-3"></i> NutriOrder
+                        <i class="fas fa-utensils text-red-500 mr-3" aria-hidden="true"></i> NutriOrder
                     </h3>
                     <p class="text-gray-600 mb-4">Where traditional Indian food meets health intelligence. Making healthy eating simple, delicious, and accessible.</p>
                     <div class="flex space-x-4">
-                        <a href="#" class="text-gray-600 hover:text-red-600 transition text-lg"><i class="fab fa-facebook-f"></i></a>
-                        <a href="#" class="text-gray-600 hover:text-red-600 transition text-lg"><i class="fab fa-twitter"></i></a>
-                        <a href="#" class="text-gray-600 hover:text-red-600 transition text-lg"><i class="fab fa-instagram"></i></a>
-                        <a href="#" class="text-gray-600 hover:text-red-600 transition text-lg"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" class="text-gray-600 hover:text-red-600 transition text-lg" aria-label="Facebook"><i class="fab fa-facebook-f" aria-hidden="true"></i></a>
+                        <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" class="text-gray-600 hover:text-red-600 transition text-lg" aria-label="Twitter"><i class="fab fa-twitter" aria-hidden="true"></i></a>
+                        <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" class="text-gray-600 hover:text-red-600 transition text-lg" aria-label="Instagram"><i class="fab fa-instagram" aria-hidden="true"></i></a>
+                        <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" class="text-gray-600 hover:text-red-600 transition text-lg" aria-label="LinkedIn"><i class="fab fa-linkedin-in" aria-hidden="true"></i></a>
                     </div>
                 </div>
                 <div>
@@ -711,7 +791,7 @@
                 <div>
                     <h4 class="font-bold text-lg mb-6 text-gray-800">Company</h4>
                     <ul class="space-y-3">
-                        <li><a href="#" class="text-gray-600 hover:text-red-600 transition underline-animate">About Us</a></li>
+                        <li><a href="#about" class="text-gray-600 hover:text-red-600 transition underline-animate">About Us</a></li>
                         <li><a href="#" class="text-gray-600 hover:text-red-600 transition underline-animate">Careers</a></li>
                         <li><a href="#" class="text-gray-600 hover:text-red-600 transition underline-animate">Blog</a></li>
                         <li><a href="#" class="text-gray-600 hover:text-red-600 transition underline-animate">Press</a></li>
@@ -721,20 +801,20 @@
                     <h4 class="font-bold text-lg mb-6 text-gray-800">Get Help</h4>
                     <ul class="space-y-3">
                         <li><a href="#" class="text-gray-600 hover:text-red-600 transition underline-animate">FAQ</a></li>
-                        <li><a href="#" class="text-gray-600 hover:text-red-600 transition underline-animate">Contact</a></li>
+                        <li><a href="#contact" class="text-gray-600 hover:text-red-600 transition underline-animate">Contact</a></li>
                         <li><a href="#" class="text-gray-600 hover:text-red-600 transition underline-animate">Privacy</a></li>
                         <li><a href="#" class="text-gray-600 hover:text-red-600 transition underline-animate">Terms</a></li>
                     </ul>
                 </div>
             </div>
             <div class="border-t border-amber-200 mt-12 pt-8 text-center text-gray-500">
-                <p>© 2023 NutriOrder. All rights reserved. | Designed with <i class="fas fa-heart text-red-500"></i> for your health</p>
+                <p>© 2023 NutriOrder. All rights reserved. | Designed with <i class="fas fa-heart text-red-500" aria-hidden="true"></i> for your health</p>
             </div>
         </div>
     </footer>
 
     <script>
-        // Updated menu data with traditional Indian healthy foods
+        // Menu data with unique images for each item
         const menuItems = [
             {
                 id: 1,
@@ -790,7 +870,7 @@
                 category: "Desserts",
                 price: 90,
                 description: "Traditional rice pudding made with jaggery and nuts",
-                image: "https://images.unsplash.com/photo-1603105037880-880cd4edfb0d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=687&q=80"
+                image: "https://images.unsplash.com/photo-1563805042-7684c019e1cb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=627&q=80"
             },
             {
                 id: 8,
@@ -811,56 +891,89 @@
         ];
     
         // Shopping cart - load from localStorage or initialize empty
-        let cart = JSON.parse(localStorage.getItem('cart')) || [];
+        let cart = [];
         
+        // Initialize the app when DOM is loaded
         document.addEventListener('DOMContentLoaded', function() {
-            // Check if user is logged in
-            const userData = JSON.parse(localStorage.getItem('userData'));
+            // Load cart from localStorage
+            try {
+                const savedCart = localStorage.getItem('cart');
+                cart = savedCart ? JSON.parse(savedCart) : [];
+            } catch (e) {
+                console.error('Error loading cart from localStorage:', e);
+                cart = [];
+            }
             
-            if (userData) {
-                // Show profile section and update with user data
-                const profileSection = document.getElementById('profile-section');
-                const profileName = document.getElementById('profile-name');
-                const profileButton = document.getElementById('profile-button');
-                
-                // Show the profile section that was hidden by default
-                profileSection.classList.remove('hidden');
-                
-                // Set the profile name
-                profileName.textContent = userData.displayName || userData.email || 'User';
-                
-                // Replace font awesome icon with profile picture if available
-                if (userData.photoURL) {
-                    // Remove the existing font awesome icon
-                    const iconElement = profileButton.querySelector('.fas.fa-user-circle');
-                    if (iconElement) {
-                        iconElement.remove();
+            // Initialize mobile menu toggle
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            
+            if (mobileMenuButton && mobileMenu) {
+                mobileMenuButton.addEventListener('click', function() {
+                    const isExpanded = this.getAttribute('aria-expanded') === 'true';
+                    this.setAttribute('aria-expanded', !isExpanded);
+                    mobileMenu.classList.toggle('open');
+                    
+                    // Toggle icon
+                    const icon = this.querySelector('i');
+                    if (icon) {
+                        icon.classList.toggle('fa-bars');
+                        icon.classList.toggle('fa-times');
                     }
+                });
+            }
+            
+            // Initialize menu search
+            const menuSearch = document.getElementById('menu-search');
+            if (menuSearch) {
+                menuSearch.addEventListener('input', function() {
+                    const searchTerm = this.value.toLowerCase();
+                    if (searchTerm.length > 0) {
+                        const filteredItems = menuItems.filter(item => 
+                            item.name.toLowerCase().includes(searchTerm) || 
+                            item.description.toLowerCase().includes(searchTerm) ||
+                            item.category.toLowerCase().includes(searchTerm)
+                        );
+                        renderFilteredMenu(filteredItems, 'Search Results');
+                    } else {
+                        renderMenu();
+                    }
+                });
+            }
+            
+            // Initialize contact form
+            const contactForm = document.getElementById('contact-form');
+            if (contactForm) {
+                contactForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    const formData = new FormData(this);
+                    const formObject = Object.fromEntries(formData.entries());
                     
-                    // Create profile picture element
-                    const profilePic = document.createElement('img');
-                    profilePic.src = userData.photoURL;
-                    profilePic.alt = 'Profile';
-                    profilePic.className = 'h-8 w-8 rounded-full object-cover mr-2';
+                    // In a real app, you would send this data to your server
+                    console.log('Form submitted:', formObject);
                     
-                    // Add it to the beginning of the profile button
-                    profileButton.prepend(profilePic);
-                }
-                
-                // Set up dropdown toggle
-                profileButton.addEventListener('click', function() {
-                    const dropdown = document.getElementById('profile-dropdown');
-                    dropdown.classList.toggle('hidden');
+                    // Show success message
+                    alert('Thank you for your message! We will get back to you soon.');
+                    this.reset();
+                });
+            }
+            
+            // Initialize profile dropdown
+            const profileButton = document.getElementById('profile-button');
+            const profileDropdown = document.getElementById('profile-dropdown');
+            
+            if (profileButton && profileDropdown) {
+                profileButton.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const isExpanded = this.getAttribute('aria-expanded') === 'true';
+                    this.setAttribute('aria-expanded', !isExpanded);
+                    profileDropdown.classList.toggle('hidden');
                 });
                 
                 // Close dropdown when clicking outside
-                document.addEventListener('click', function(event) {
-                    const dropdown = document.getElementById('profile-dropdown');
-                    const profileButton = document.getElementById('profile-button');
-                    
-                    if (!profileButton.contains(event.target) && !dropdown.contains(event.target)) {
-                        dropdown.classList.add('hidden');
-                    }
+                document.addEventListener('click', function() {
+                    profileButton.setAttribute('aria-expanded', 'false');
+                    profileDropdown.classList.add('hidden');
                 });
             }
             
@@ -868,59 +981,50 @@
             renderMenu();
             updateCart();
             
-            // Update cart hover count
-            document.getElementById('cart-hover-count').textContent = cart.reduce((sum, item) => sum + item.quantity, 0);
-            
-            // Add smooth transition to all links
-            document.querySelectorAll('a').forEach(link => {
-                link.addEventListener('click', function(e) {
-                    // Don't apply to:
-                    // 1. External links
-                    // 2. Anchor links (#)
-                    // 3. Links to the current page
-                    if (!this.href || 
-                        this.href.startsWith('http') || 
-                        this.href.includes('#') || 
-                        this.href === window.location.href) {
-                        return;
-                    }
-                    
-                    e.preventDefault();
-                    document.body.style.opacity = '0';
-                    document.body.style.transition = 'opacity 0.3s ease';
-                    
-                    setTimeout(() => {
-                        window.location.href = this.href;
-                    }, 300);
-                });
+            // Add smooth transition to all internal links
+            document.querySelectorAll('a[href^="/"], a[href^="."], a[href^="#"]').forEach(link => {
+                if (link.href && !link.href.includes('#') && link.href !== window.location.href) {
+                    link.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        document.body.style.opacity = '0';
+                        document.body.style.transition = 'opacity 0.3s ease';
+                        
+                        setTimeout(() => {
+                            window.location.href = this.href;
+                        }, 300);
+                    });
+                }
             });
         });
     
         // Filter menu by category
         function filterMenu(category) {
-            const filteredItems = category === 'All' ? menuItems : menuItems.filter(item => 
-                item.category.toLowerCase().includes(category.toLowerCase()) || 
-                item.name.toLowerCase().includes(category.toLowerCase())
-            );
+            const filteredItems = category === 'All' ? 
+                menuItems : 
+                menuItems.filter(item => item.category.toLowerCase().includes(category.toLowerCase()));
             
-            renderFilteredMenu(filteredItems, category);
+            renderFilteredMenu(filteredItems, category === 'All' ? 'All Items' : category);
         }
     
         // Render filtered menu items
         function renderFilteredMenu(items, category) {
-            const menuContainer = document.querySelector('#menu .grid.grid-cols-1');
+            const menuContainer = document.getElementById('menu-container');
             const menuTitle = document.querySelector('#menu h2');
             
+            if (!menuContainer || !menuTitle) return;
+            
             // Update the menu title
-            menuTitle.textContent = category === 'All' ? 'Traditional Indian Delicacies' : `${category} Options`;
+            menuTitle.innerHTML = category === 'All Items' ? 
+                'Traditional <span class="gradient-text">Indian Delicacies</span>' : 
+                `${category} <span class="gradient-text">Options</span>`;
             
             // Clear the menu
             menuContainer.innerHTML = '';
             
-            if (items.length === 0) {
+            if (!items || items.length === 0) {
                 menuContainer.innerHTML = `
                     <div class="w-full text-center py-12 col-span-3">
-                        <i class="fas fa-utensils text-4xl text-gray-400 mb-4"></i>
+                        <i class="fas fa-utensils text-4xl text-gray-400 mb-4" aria-hidden="true"></i>
                         <p class="text-gray-500">No dishes found in this category.</p>
                         <button onclick="filterMenu('All')" class="mt-4 text-red-600 hover:text-red-500 underline">
                             View All Menu Items
@@ -946,8 +1050,8 @@
                         </div>
                         <p class="text-gray-600 text-sm mb-4 flex-grow">${item.description}</p>
                         <div class="mt-auto">
-                            <button onclick="addToCart(${item.id})" class="w-full bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition flex items-center justify-center btn-shine">
-                                <i class="fas fa-plus mr-2"></i> Add to Cart
+                            <button onclick="addToCart(${item.id})" class="w-full bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition flex items-center justify-center btn-shine" aria-label="Add ${item.name} to cart">
+                                <i class="fas fa-plus mr-2" aria-hidden="true"></i> Add to Cart
                             </button>
                         </div>
                     </div>
@@ -956,14 +1060,16 @@
             });
         }
     
-        // Render menu items
+        // Render all menu items
         function renderMenu() {
-            filterMenu('All'); // Show all items by default
+            filterMenu('All');
         }
     
         // Add item to cart
         function addToCart(itemId) {
             const item = menuItems.find(i => i.id === itemId);
+            if (!item) return;
+            
             const existingItem = cart.find(i => i.id === itemId);
             
             if (existingItem) {
@@ -973,7 +1079,11 @@
             }
             
             // Save to localStorage
-            localStorage.setItem('cart', JSON.stringify(cart));
+            try {
+                localStorage.setItem('cart', JSON.stringify(cart));
+            } catch (e) {
+                console.error('Error saving cart to localStorage:', e);
+            }
             
             updateCart();
             showAddedToCartMessage(item.name);
@@ -983,8 +1093,9 @@
         function showAddedToCartMessage(itemName) {
             const notification = document.createElement('div');
             notification.className = 'fixed bottom-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg flex items-center z-50 animate-bounce';
+            notification.setAttribute('role', 'alert');
             notification.innerHTML = `
-                <i class="fas fa-check-circle mr-3 text-xl"></i>
+                <i class="fas fa-check-circle mr-3 text-xl" aria-hidden="true"></i>
                 <div>
                     <p class="font-bold">Added to cart!</p>
                     <p class="text-sm">${itemName}</p>
@@ -1006,16 +1117,18 @@
             const cartSubtotal = document.getElementById('cart-subtotal');
             const cartTotal = document.getElementById('cart-total');
             
+            if (!cartItemsContainer || !cartCount || !cartHoverCount || !cartSubtotal || !cartTotal) return;
+            
             // Update cart count
-            const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+            const totalItems = cart.reduce((sum, item) => sum + (item.quantity || 0), 0);
             cartCount.textContent = totalItems;
             cartHoverCount.textContent = totalItems;
             
             // Update cart items
-            if (cart.length === 0) {
+            if (!cart || cart.length === 0) {
                 cartItemsContainer.innerHTML = `
                     <div class="text-center py-12">
-                        <i class="fas fa-shopping-cart text-4xl text-gray-400 mb-4"></i>
+                        <i class="fas fa-shopping-cart text-4xl text-gray-400 mb-4" aria-hidden="true"></i>
                         <p class="text-gray-500">Your cart is empty</p>
                         <button onclick="toggleCart()" class="mt-4 text-red-600 hover:text-red-500 underline">
                             Browse our menu
@@ -1025,6 +1138,8 @@
             } else {
                 cartItemsContainer.innerHTML = '';
                 cart.forEach(item => {
+                    if (!item || !item.id) return;
+                    
                     const cartItem = document.createElement('div');
                     cartItem.className = 'flex justify-between items-center mb-4 pb-4 border-b border-amber-200';
                     cartItem.innerHTML = `
@@ -1034,20 +1149,20 @@
                                 <h3 class="text-sm font-medium text-gray-800">${item.name}</h3>
                                 <p class="text-xs text-gray-600">₹${item.price.toFixed(2)} x ${item.quantity}</p>
                                 <div class="flex items-center mt-1">
-                                    <button onclick="decreaseQuantity(${item.id})" class="text-gray-500 hover:text-red-600 text-xs">
-                                        <i class="fas fa-minus"></i>
+                                    <button onclick="decreaseQuantity(${item.id})" class="text-gray-500 hover:text-red-600 text-xs" aria-label="Decrease quantity">
+                                        <i class="fas fa-minus" aria-hidden="true"></i>
                                     </button>
                                     <span class="mx-2 text-sm">${item.quantity}</span>
-                                    <button onclick="increaseQuantity(${item.id})" class="text-gray-500 hover:text-red-600 text-xs">
-                                        <i class="fas fa-plus"></i>
+                                    <button onclick="increaseQuantity(${item.id})" class="text-gray-500 hover:text-red-600 text-xs" aria-label="Increase quantity">
+                                        <i class="fas fa-plus" aria-hidden="true"></i>
                                     </button>
                                 </div>
                             </div>
                         </div>
                         <div class="flex items-center">
                             <span class="text-sm font-medium text-gray-800">₹${(item.price * item.quantity).toFixed(2)}</span>
-                            <button onclick="removeFromCart(${item.id})" class="ml-4 text-red-500 hover:text-red-600">
-                                <i class="fas fa-trash"></i>
+                            <button onclick="removeFromCart(${item.id})" class="ml-4 text-red-500 hover:text-red-600" aria-label="Remove item">
+                                <i class="fas fa-trash" aria-hidden="true"></i>
                             </button>
                         </div>
                     `;
@@ -1056,7 +1171,7 @@
             }
             
             // Update totals
-            const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const subtotal = cart.reduce((sum, item) => sum + (item.price * (item.quantity || 0)), 0);
             const deliveryFee = 30; // 30 INR delivery fee
             const total = subtotal + deliveryFee;
             
@@ -1068,8 +1183,8 @@
         function increaseQuantity(itemId) {
             const item = cart.find(i => i.id === itemId);
             if (item) {
-                item.quantity += 1;
-                localStorage.setItem('cart', JSON.stringify(cart));
+                item.quantity = (item.quantity || 0) + 1;
+                saveCart();
                 updateCart();
             }
         }
@@ -1083,8 +1198,17 @@
                 } else {
                     cart.splice(itemIndex, 1);
                 }
-                localStorage.setItem('cart', JSON.stringify(cart));
+                saveCart();
                 updateCart();
+            }
+        }
+        
+        // Save cart to localStorage
+        function saveCart() {
+            try {
+                localStorage.setItem('cart', JSON.stringify(cart));
+            } catch (e) {
+                console.error('Error saving cart:', e);
             }
         }
     
@@ -1094,17 +1218,15 @@
             
             if (itemIndex !== -1) {
                 cart.splice(itemIndex, 1);
-                
-                // Save to localStorage
-                localStorage.setItem('cart', JSON.stringify(cart));
-                
+                saveCart();
                 updateCart();
                 
                 // Show removed notification
                 const notification = document.createElement('div');
                 notification.className = 'fixed bottom-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg flex items-center z-50 animate-bounce';
+                notification.setAttribute('role', 'alert');
                 notification.innerHTML = `
-                    <i class="fas fa-trash mr-3 text-xl"></i>
+                    <i class="fas fa-trash mr-3 text-xl" aria-hidden="true"></i>
                     <p class="font-bold">Item removed from cart</p>
                 `;
                 document.body.appendChild(notification);
@@ -1121,13 +1243,82 @@
             const cartSidebar = document.getElementById('cart-sidebar');
             const cartOverlay = document.getElementById('cart-overlay');
             
+            if (!cartSidebar || !cartOverlay) return;
+            
+            const isOpen = !cartSidebar.classList.contains('translate-x-full');
+            
             cartSidebar.classList.toggle('translate-x-full');
             cartOverlay.classList.toggle('hidden');
+            cartSidebar.setAttribute('aria-hidden', isOpen);
             
-            // Update cart when opened
-            if (!cartSidebar.classList.contains('translate-x-full')) {
+            // Update cart when opened and manage focus
+            if (!isOpen) {
                 updateCart();
+                cartSidebar.focus();
             }
+        }
+        
+        // Show how it works modal
+        function showHowItWorks() {
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4';
+            modal.innerHTML = `
+                <div class="bg-white rounded-xl max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-2xl font-bold heading-font">How NutriOrder Works</h3>
+                        <button onclick="this.parentElement.parentElement.parentElement.remove()" class="text-gray-500 hover:text-gray-700 text-xl" aria-label="Close modal">
+                            <i class="fas fa-times" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                    <div class="space-y-4">
+                        <div class="flex items-start">
+                            <div class="bg-red-100 text-red-600 rounded-full w-8 h-8 flex items-center justify-center flex-shrink-0 mt-1 mr-3">
+                                <span>1</span>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-lg">Create Your Profile</h4>
+                                <p class="text-gray-600">Tell us about your dietary preferences, health goals, and any restrictions.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="bg-red-100 text-red-600 rounded-full w-8 h-8 flex items-center justify-center flex-shrink-0 mt-1 mr-3">
+                                <span>2</span>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-lg">Get Personalized Recommendations</h4>
+                                <p class="text-gray-600">Our algorithm suggests meals tailored to your needs and preferences.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="bg-red-100 text-red-600 rounded-full w-8 h-8 flex items-center justify-center flex-shrink-0 mt-1 mr-3">
+                                <span>3</span>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-lg">Place Your Order</h4>
+                                <p class="text-gray-600">Select your meals and choose delivery time that works for you.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="bg-red-100 text-red-600 rounded-full w-8 h-8 flex items-center justify-center flex-shrink-0 mt-1 mr-3">
+                                <span>4</span>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-lg">Enjoy Healthy Meals</h4>
+                                <p class="text-gray-600">Receive fresh, delicious meals prepared with traditional methods and ingredients.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-6">
+                        <button onclick="this.parentElement.parentElement.remove()" class="w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg transition">
+                            Got It!
+                        </button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            
+            // Focus on the modal for accessibility
+            modal.querySelector('button').focus();
         }
     </script>
 </body>

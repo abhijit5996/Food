@@ -305,6 +305,32 @@
             background-color: #fed7aa;
             color: #7c2d12;
         }
+
+        /* Loading spinner */
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #e11d48;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Error message */
+        .error-message {
+            background-color: #fee2e2;
+            border-left: 4px solid #ef4444;
+            padding: 1rem;
+            margin: 1rem 0;
+            color: #b91c1c;
+            border-radius: 0.375rem;
+        }
     </style>
     <script>
         tailwind.config = {
@@ -352,7 +378,7 @@
                     <span>Login</span>
                 </a>
                 <div id="profile-section" class="hidden relative">
-                    <button id="profile-button" class="flex items-center space-x-2 bg-amber-100 hover:bg-amber-200 px-4 py-2 rounded-full transition border-animate">
+                    <button id="profile-button" class="flex items-center space-x-2 bg-amber-100 hover:bg-amber-200 px-4 py-2 rounded-full transition border-animate" aria-expanded="false" aria-controls="profile-dropdown">
                         <i class="fas fa-user-circle text-red-600"></i>
                         <span id="profile-name" class="text-gray-700"></span>
                     </button>
@@ -363,7 +389,7 @@
                         <a href="#" onclick="logout()" class="block px-4 py-2 text-sm hover:bg-amber-50 transition text-gray-700">Sign out</a>
                     </div>
                 </div>
-                <button onclick="toggleCart()" class="flex items-center space-x-2 bg-gradient-to-r from-red-600 to-amber-600 hover:from-red-700 hover:to-amber-700 px-4 py-2 rounded-full transition shadow-lg relative group text-white btn-shine">
+                <button onclick="toggleCart()" class="flex items-center space-x-2 bg-gradient-to-r from-red-600 to-amber-600 hover:from-red-700 hover:to-amber-700 px-4 py-2 rounded-full transition shadow-lg relative group text-white btn-shine" aria-label="Shopping cart">
                     <i class="fas fa-shopping-cart"></i>
                     <span id="cart-count" class="bg-white text-red-600 rounded-full w-6 h-6 flex items-center justify-center font-bold">0</span>
                     <span class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity" id="cart-hover-count">0</span>
@@ -400,7 +426,7 @@
         </div>
         <div class="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-amber-50 to-transparent"></div>
         <div class="absolute top-1/2 right-10 transform -translate-y-1/2 floating hidden lg:block">
-            <img src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80" alt="Restaurant" class="w-72 h-72 object-cover rounded-xl shadow-2xl border-4 border-white">
+            <img src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80" alt="Restaurant interior" class="w-72 h-72 object-cover rounded-xl shadow-2xl border-4 border-white">
         </div>
     </section>
 
@@ -422,6 +448,24 @@
             </div>
         </div>
     </section>
+
+    <!-- Error Message Container -->
+    <div id="error-container" class="container mx-auto px-6 hidden">
+        <div class="error-message">
+            <div class="flex items-center">
+                <i class="fas fa-exclamation-circle mr-2"></i>
+                <span id="error-message-text"></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Indicator -->
+    <div id="loading-indicator" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white p-8 rounded-lg shadow-xl text-center">
+            <div class="loader"></div>
+            <p class="mt-4 text-gray-700">Loading restaurants...</p>
+        </div>
+    </div>
 
     <!-- Restaurants Section -->
     <section id="restaurants" class="py-20 px-6 bg-white">
@@ -498,7 +542,7 @@
             <h3 class="text-xl font-semibold text-gray-800 flex items-center">
                 <i class="fas fa-shopping-cart text-red-600 mr-2"></i> Your Order
             </h3>
-            <button onclick="toggleCart()" class="text-gray-500 hover:text-gray-700">
+            <button onclick="toggleCart()" class="text-gray-500 hover:text-gray-700" aria-label="Close cart">
                 <i class="fas fa-times"></i>
             </button>
         </div>
@@ -536,7 +580,7 @@
     <div id="menu-modal" class="hidden fixed inset-0 z-50 overflow-y-auto">
         <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
             <div class="fixed inset-0 transition-opacity" aria-hidden="true">
-                <div class="absolute inset-0 bg-gray-900 opacity-75" onclick="hideRecipe()"></div>
+                <div class="absolute inset-0 bg-gray-900 opacity-75" onclick="hideMenuModal()"></div>
             </div>
             <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
             <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
@@ -545,7 +589,7 @@
                         <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
                             <div class="flex justify-between items-center">
                                 <h3 id="menu-restaurant-name" class="text-lg leading-6 font-medium text-gray-800"></h3>
-                                <button onclick="hideRecipe()" class="text-gray-400 hover:text-gray-500">
+                                <button onclick="hideMenuModal()" class="text-gray-400 hover:text-gray-500" aria-label="Close menu">
                                     <i class="fas fa-times"></i>
                                 </button>
                             </div>
@@ -558,7 +602,7 @@
                     </div>
                 </div>
                 <div class="bg-amber-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                    <button type="button" onclick="hideRecipe()" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-gradient-to-r from-red-600 to-amber-600 text-base font-medium text-white hover:from-red-700 hover:to-amber-700 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm transition btn-shine">
+                    <button type="button" onclick="hideMenuModal()" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-gradient-to-r from-red-600 to-amber-600 text-base font-medium text-white hover:from-red-700 hover:to-amber-700 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm transition btn-shine">
                         Close
                     </button>
                 </div>
@@ -621,87 +665,117 @@
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
     
-        // Firebase configuration
+        // Firebase configuration - Replace with your actual config
         const firebaseConfig = {
-            apiKey: "AIzaSyBx0Kt9o04ye0XrtA8ecp84wD8Q9OCDjlA",
-            authDomain: "foodorder-4380c.firebaseapp.com",
-            projectId: "foodorder-4380c",
-            storageBucket: "foodorder-4380c.appspot.com",
-            messagingSenderId: "735023580381",
-            appId: "1:735023580381:web:c6740bef2fc9bdee1b4734"
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID"
         };
     
         // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
+        let app;
+        let auth;
+        let db;
+        
+        try {
+            app = initializeApp(firebaseConfig);
+            auth = getAuth(app);
+            db = getFirestore(app);
+        } catch (error) {
+            console.error('Firebase initialization error:', error);
+            showError('Failed to initialize the application. Please try again later.');
+        }
     
         // User preferences object
         let userPreferences = {};
+        let authStateListenerUnsubscribe = null;
     
         // Check auth state and load preferences
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                // Update UI for logged in user
-                document.getElementById('login-btn').classList.add('hidden');
-                document.getElementById('profile-section').classList.remove('hidden');
-                document.getElementById('profile-name').textContent = user.displayName || user.email.split('@')[0];
-                
-                // Load profile picture if available
-                if (user.photoURL) {
-                    const profileButton = document.getElementById('profile-button');
-                    const iconElement = profileButton.querySelector('.fas.fa-user-circle');
-                    if (iconElement) {
-                        iconElement.remove();
+        function setupAuthListener() {
+            if (!auth) return;
+            
+            authStateListenerUnsubscribe = onAuthStateChanged(auth, async (user) => {
+                try {
+                    if (user) {
+                        // Update UI for logged in user
+                        document.getElementById('login-btn').classList.add('hidden');
+                        document.getElementById('profile-section').classList.remove('hidden');
+                        document.getElementById('profile-name').textContent = user.displayName || user.email.split('@')[0];
+                        
+                        // Load profile picture if available
+                        if (user.photoURL) {
+                            const profileButton = document.getElementById('profile-button');
+                            const iconElement = profileButton.querySelector('.fas.fa-user-circle');
+                            if (iconElement) {
+                                iconElement.remove();
+                            }
+                            
+                            const profilePic = document.createElement('img');
+                            profilePic.src = user.photoURL;
+                            profilePic.alt = 'Profile';
+                            profilePic.className = 'h-8 w-8 rounded-full object-cover mr-2';
+                            profileButton.prepend(profilePic);
+                        }
+        
+                        // Get user preferences from Firestore
+                        if (db) {
+                            const userDocRef = doc(db, 'users', user.uid);
+                            const userDoc = await getDoc(userDocRef);
+                            
+                            if (userDoc.exists() && userDoc.data().preferences) {
+                                userPreferences = userDoc.data().preferences;
+                                localStorage.setItem('userPreferences', JSON.stringify(userPreferences));
+                                showUserPreferences();
+                                loadRestaurants();
+                            } else {
+                                // Try to load from localStorage if not in Firestore
+                                loadPreferencesFromLocalStorage();
+                            }
+                        } else {
+                            loadPreferencesFromLocalStorage();
+                        }
+                    } else {
+                        // Update UI for logged out user
+                        document.getElementById('login-btn').classList.remove('hidden');
+                        document.getElementById('profile-section').classList.add('hidden');
+                        
+                        // Try to load from localStorage
+                        loadPreferencesFromLocalStorage();
                     }
-                    
-                    const profilePic = document.createElement('img');
-                    profilePic.src = user.photoURL;
-                    profilePic.alt = 'Profile';
-                    profilePic.className = 'h-8 w-8 rounded-full object-cover mr-2';
-                    profileButton.prepend(profilePic);
+                } catch (error) {
+                    console.error('Auth state change error:', error);
+                    showError('Failed to load user data. Please refresh the page.');
                 }
-    
-                // Get user preferences from Firestore
-                const userDocRef = doc(db, 'users', user.uid);
-                const userDoc = await getDoc(userDocRef);
-                
-                if (userDoc.exists() && userDoc.data().preferences) {
-                    userPreferences = userDoc.data().preferences;
-                    localStorage.setItem('userPreferences', JSON.stringify(userPreferences));
-                    showUserPreferences();
-                    loadRestaurants();
-                } else {
-                    // Try to load from localStorage if not in Firestore
-                    const localPrefs = localStorage.getItem('userPreferences');
-                    if (localPrefs) {
-                        userPreferences = JSON.parse(localPrefs);
-                        showUserPreferences();
-                        loadRestaurants();
-                    }
-                }
-            } else {
-                // Update UI for logged out user
-                document.getElementById('login-btn').classList.remove('hidden');
-                document.getElementById('profile-section').classList.add('hidden');
-                
-                // Try to load from localStorage
+            });
+        }
+        
+        function loadPreferencesFromLocalStorage() {
+            try {
                 const localPrefs = localStorage.getItem('userPreferences');
                 if (localPrefs) {
                     userPreferences = JSON.parse(localPrefs);
                     showUserPreferences();
                     loadRestaurants();
                 }
+            } catch (error) {
+                console.error('Error loading preferences from localStorage:', error);
+                localStorage.removeItem('userPreferences');
             }
-        });
+        }
     
         // Logout function
         window.logout = async function() {
             try {
-                await signOut(auth);
+                if (auth) {
+                    await signOut(auth);
+                }
                 window.location.href = 'index.html';
             } catch (error) {
                 console.error('Logout error:', error);
+                showError('Failed to sign out. Please try again.');
             }
         };
     
@@ -762,6 +836,8 @@
         function generateHealthTips() {
             const tips = [];
             
+            if (!userPreferences) return tips;
+            
             // Tips based on health conditions
             if (userPreferences.health_condition) {
                 if (userPreferences.health_condition.includes('diabetes')) {
@@ -800,16 +876,30 @@
         }
     
         // Shopping cart - load from localStorage or initialize empty
-        let cart = JSON.parse(localStorage.getItem('cart')) || [];
+        let cart = [];
+        
+        function loadCartFromLocalStorage() {
+            try {
+                const cartData = localStorage.getItem('cart');
+                cart = cartData ? JSON.parse(cartData) : [];
+                if (!Array.isArray(cart)) {
+                    cart = [];
+                }
+            } catch (error) {
+                console.error('Error loading cart from localStorage:', error);
+                cart = [];
+            }
+            updateCart();
+        }
         
         // Toggle cart visibility
-        function toggleCart() {
+        window.toggleCart = function() {
             const cartSidebar = document.getElementById('cart-sidebar');
             const cartOverlay = document.getElementById('cart-overlay');
             
             cartSidebar.classList.toggle('translate-x-full');
             cartOverlay.classList.toggle('hidden');
-            updateCart();
+            document.body.style.overflow = cartSidebar.classList.contains('translate-x-full') ? 'auto' : 'hidden';
         }
     
         // Update cart UI
@@ -821,7 +911,7 @@
             const cartTotal = document.getElementById('cart-total');
             
             // Update cart count
-            const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+            const totalItems = cart.reduce((sum, item) => sum + (item.quantity || 1), 0);
             cartCount.textContent = totalItems;
             cartHoverCount.textContent = totalItems;
             
@@ -838,29 +928,34 @@
                 `;
             } else {
                 cartItemsContainer.innerHTML = '';
-                cart.forEach(item => {
+                cart.forEach((item, index) => {
+                    if (!item || !item.id || !item.name || !item.price) {
+                        console.warn('Invalid cart item:', item);
+                        return;
+                    }
+                    
                     const cartItem = document.createElement('div');
                     cartItem.className = 'flex justify-between items-center mb-4 pb-4 border-b border-amber-200';
                     cartItem.innerHTML = `
                         <div class="flex items-center">
-                            <img src="${item.image}" alt="${item.name}" class="w-16 h-16 object-cover rounded-lg">
+                            <img src="${item.image || 'https://via.placeholder.com/100'}" alt="${item.name}" class="w-16 h-16 object-cover rounded-lg">
                             <div class="ml-4">
                                 <h3 class="text-sm font-medium text-gray-800">${item.name}</h3>
-                                <p class="text-xs text-gray-600">₹${item.price.toFixed(2)} x ${item.quantity}</p>
+                                <p class="text-xs text-gray-600">₹${item.price.toFixed(2)} x ${item.quantity || 1}</p>
                                 <div class="flex items-center mt-1">
-                                    <button onclick="decreaseQuantity(${item.id})" class="text-gray-500 hover:text-red-600 text-xs">
+                                    <button onclick="decreaseQuantity(${index})" class="text-gray-500 hover:text-red-600 text-xs" aria-label="Decrease quantity">
                                         <i class="fas fa-minus"></i>
                                     </button>
-                                    <span class="mx-2 text-sm">${item.quantity}</span>
-                                    <button onclick="increaseQuantity(${item.id})" class="text-gray-500 hover:text-red-600 text-xs">
+                                    <span class="mx-2 text-sm">${item.quantity || 1}</span>
+                                    <button onclick="increaseQuantity(${index})" class="text-gray-500 hover:text-red-600 text-xs" aria-label="Increase quantity">
                                         <i class="fas fa-plus"></i>
                                     </button>
                                 </div>
                             </div>
                         </div>
                         <div class="flex items-center">
-                            <span class="text-sm font-medium text-gray-800">₹${(item.price * item.quantity).toFixed(2)}</span>
-                            <button onclick="removeFromCart(${item.id})" class="ml-4 text-red-500 hover:text-red-600">
+                            <span class="text-sm font-medium text-gray-800">₹${((item.price || 0) * (item.quantity || 1)).toFixed(2)}</span>
+                            <button onclick="removeFromCart(${index})" class="ml-4 text-red-500 hover:text-red-600" aria-label="Remove item">
                                 <i class="fas fa-trash"></i>
                             </button>
                         </div>
@@ -870,26 +965,49 @@
             }
             
             // Update totals
-            const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const subtotal = cart.reduce((sum, item) => sum + ((item.price || 0) * (item.quantity || 1)), 0);
             const deliveryFee = 30; // 30 INR delivery fee
             const total = subtotal + deliveryFee;
             
             cartSubtotal.textContent = `₹${subtotal.toFixed(2)}`;
             cartTotal.textContent = `₹${total.toFixed(2)}`;
+            
+            // Save to localStorage
+            try {
+                localStorage.setItem('cart', JSON.stringify(cart));
+            } catch (error) {
+                console.error('Error saving cart to localStorage:', error);
+            }
         }
     
         // Add item to cart
-        function addToCart(item) {
-            const existingItem = cart.find(i => i.id === item.id);
+        window.addToCart = function(item) {
+            if (!item || !item.id || !item.name || typeof item.price !== 'number') {
+                console.error('Invalid item:', item);
+                return;
+            }
             
-            if (existingItem) {
-                existingItem.quantity += 1;
+            const existingIndex = cart.findIndex(i => i.id === item.id);
+            
+            if (existingIndex >= 0) {
+                cart[existingIndex].quantity = (cart[existingIndex].quantity || 1) + 1;
             } else {
-                cart.push({...item, quantity: 1});
+                cart.push({
+                    id: item.id,
+                    name: item.name,
+                    price: item.price,
+                    image: item.image || 'https://via.placeholder.com/100',
+                    restaurant: item.restaurant || 'Unknown',
+                    quantity: 1
+                });
             }
             
             // Save to localStorage
-            localStorage.setItem('cart', JSON.stringify(cart));
+            try {
+                localStorage.setItem('cart', JSON.stringify(cart));
+            } catch (error) {
+                console.error('Error saving cart to localStorage:', error);
+            }
             
             updateCart();
             showAddedToCartMessage(item.name);
@@ -915,38 +1033,29 @@
         }
     
         // Increase item quantity in cart
-        function increaseQuantity(itemId) {
-            const item = cart.find(i => i.id === itemId);
-            if (item) {
-                item.quantity += 1;
-                localStorage.setItem('cart', JSON.stringify(cart));
+        window.increaseQuantity = function(index) {
+            if (index >= 0 && index < cart.length) {
+                cart[index].quantity = (cart[index].quantity || 1) + 1;
                 updateCart();
             }
         }
         
         // Decrease item quantity in cart
-        function decreaseQuantity(itemId) {
-            const itemIndex = cart.findIndex(i => i.id === itemId);
-            if (itemIndex !== -1) {
-                if (cart[itemIndex].quantity > 1) {
-                    cart[itemIndex].quantity -= 1;
+        window.decreaseQuantity = function(index) {
+            if (index >= 0 && index < cart.length) {
+                if (cart[index].quantity > 1) {
+                    cart[index].quantity -= 1;
                 } else {
-                    cart.splice(itemIndex, 1);
+                    cart.splice(index, 1);
                 }
-                localStorage.setItem('cart', JSON.stringify(cart));
                 updateCart();
             }
         }
     
         // Remove item from cart
-        function removeFromCart(itemId) {
-            const itemIndex = cart.findIndex(i => i.id === itemId);
-            
-            if (itemIndex !== -1) {
-                cart.splice(itemIndex, 1);
-                
-                // Save to localStorage
-                localStorage.setItem('cart', JSON.stringify(cart));
+        window.removeFromCart = function(index) {
+            if (index >= 0 && index < cart.length) {
+                const removedItem = cart.splice(index, 1)[0];
                 
                 updateCart();
                 
@@ -967,14 +1076,18 @@
         }
     
         // Close menu modal
-        function hideRecipe() {
+        window.hideMenuModal = function() {
             document.getElementById('menu-modal').classList.add('hidden');
+            document.body.style.overflow = 'auto';
         }
     
         // View restaurant menu
-        function viewRestaurantMenu(restaurantId) {
+        window.viewRestaurantMenu = function(restaurantId) {
             const restaurant = restaurants.find(r => r.id === restaurantId);
-            if (!restaurant) return;
+            if (!restaurant) {
+                showError('Restaurant not found');
+                return;
+            }
             
             document.getElementById('menu-restaurant-name').textContent = restaurant.name;
             document.getElementById('menu-restaurant-cuisine').textContent = restaurant.cuisine.map(c => c.charAt(0).toUpperCase() + c.slice(1)).join(', ');
@@ -982,17 +1095,28 @@
             const menuSections = document.getElementById('menu-sections');
             menuSections.innerHTML = '';
             
+            if (!restaurant.menu || Object.keys(restaurant.menu).length === 0) {
+                menuSections.innerHTML = '<p class="text-gray-500">No menu items available for this restaurant.</p>';
+                document.getElementById('menu-modal').classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+                return;
+            }
+            
             for (const [sectionName, items] of Object.entries(restaurant.menu)) {
+                if (!Array.isArray(items)) continue;
+                
                 const section = document.createElement('div');
                 section.className = 'menu-section';
                 
                 // Filter and sort items based on user preferences
                 const filteredItems = items
+                    .filter(item => item && item.id && item.name && typeof item.price === 'number')
                     .map(item => {
                         // Calculate match score for each item
                         const matchInfo = calculateFoodMatchScore(item, restaurant);
                         return {
                             ...item,
+                            image: item.image || 'https://via.placeholder.com/100',
                             matchScore: matchInfo.score,
                             matchReasons: matchInfo.reasons
                         };
@@ -1015,7 +1139,7 @@
                                 </div>
                                 <div class="ml-4 flex-grow">
                                     <h4 class="font-medium text-gray-800">${item.name}</h4>
-                                    <p class="text-sm text-gray-600 mt-1">${item.description}</p>
+                                    <p class="text-sm text-gray-600 mt-1">${item.description || 'No description available'}</p>
                                     <div class="mt-2 flex flex-wrap">
                                         ${item.matchReasons.map(reason => 
                                             `<span class="diet-badge ${reason.class}">${reason.text}</span>`
@@ -1042,6 +1166,7 @@
             }
             
             document.getElementById('menu-modal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
         }
     
         // Get CSS class for match score display
@@ -1170,6 +1295,8 @@
     
         // Food classification functions
         function isVegetarian(foodItem, restaurant) {
+            if (!foodItem || !foodItem.name || !foodItem.description) return false;
+            
             const nonVegKeywords = ['chicken', 'meat', 'beef', 'pork', 'fish', 'seafood', 'shrimp', 'lamb', 'mutton', 'egg'];
             return !nonVegKeywords.some(keyword => 
                 foodItem.name.toLowerCase().includes(keyword) || 
@@ -1178,6 +1305,8 @@
         }
     
         function isVegan(foodItem, restaurant) {
+            if (!foodItem || !foodItem.name || !foodItem.description) return false;
+            
             const nonVeganKeywords = ['cheese', 'milk', 'butter', 'cream', 'yogurt', 'honey', 'egg', 'paneer', 'ghee', 'dahi'];
             return isVegetarian(foodItem, restaurant) && 
                    !nonVeganKeywords.some(keyword => 
@@ -1187,6 +1316,8 @@
         }
     
         function isGlutenFree(foodItem, restaurant) {
+            if (!foodItem || !foodItem.name || !foodItem.description) return false;
+            
             const glutenKeywords = ['wheat', 'bread', 'pasta', 'flour', 'barley', 'rye', 'soy sauce', 'maida', 'atta', 'besan'];
             return !glutenKeywords.some(keyword => 
                 foodItem.name.toLowerCase().includes(keyword) || 
@@ -1195,11 +1326,14 @@
         }
     
         function isHalal(foodItem, restaurant) {
+            if (!restaurant) return false;
             return restaurant.cuisine.includes('halal') || 
                    restaurant.name.toLowerCase().includes('halal');
         }
     
         function isJain(foodItem, restaurant) {
+            if (!foodItem || !foodItem.name || !foodItem.description) return false;
+            
             const jainRestricted = ['onion', 'garlic', 'potato', 'carrot', 'radish', 'beetroot'];
             return isVegetarian(foodItem, restaurant) && 
                    !jainRestricted.some(keyword => 
@@ -1209,6 +1343,8 @@
         }
     
         function hasAllergens(foodItem, userAllergies) {
+            if (!foodItem || !foodItem.name || !foodItem.description || !userAllergies) return false;
+            
             const allergenMap = {
                 'nuts': ['nut', 'almond', 'peanut', 'cashew', 'pistachio', 'walnut', 'kaju', 'badam'],
                 'dairy': ['milk', 'cheese', 'butter', 'cream', 'yogurt', 'paneer', 'ghee', 'dahi'],
@@ -1228,6 +1364,8 @@
         }
     
         function isHighProtein(foodItem) {
+            if (!foodItem || !foodItem.name || !foodItem.description) return false;
+            
             const proteinKeywords = ['chicken', 'fish', 'tofu', 'beans', 'lentils', 'protein', 'steak', 'egg', 'paneer', 'dal', 'chana', 'rajma', 'sprouts'];
             return proteinKeywords.some(keyword => 
                 foodItem.name.toLowerCase().includes(keyword) || 
@@ -1236,6 +1374,8 @@
         }
     
         function isLowCarb(foodItem) {
+            if (!foodItem || !foodItem.name || !foodItem.description) return false;
+            
             const carbKeywords = ['rice', 'pasta', 'bread', 'potato', 'noodle', 'sugar', 'roti', 'naan', 'paratha', 'poori'];
             return !carbKeywords.some(keyword => 
                 foodItem.name.toLowerCase().includes(keyword) || 
@@ -1244,6 +1384,8 @@
         }
     
         function isKeto(foodItem) {
+            if (!foodItem || !foodItem.name || !foodItem.description) return false;
+            
             const ketoKeywords = ['keto', 'high-fat', 'avocado', 'cheese', 'butter', 'ghee', 'paneer'];
             const nonKetoKeywords = ['sugar', 'bread', 'pasta', 'rice', 'potato', 'roti', 'naan'];
             
@@ -1257,6 +1399,8 @@
         }
     
         function isBalanced(foodItem) {
+            if (!foodItem || !foodItem.description) return false;
+            
             const hasProtein = isHighProtein(foodItem);
             const hasVeggies = ['vegetable', 'salad', 'greens', 'spinach', 'kale', 'sabzi', 'bhaji'].some(keyword => 
                 foodItem.description.toLowerCase().includes(keyword)
@@ -1269,6 +1413,8 @@
         }
     
         function isDiabetesFriendly(foodItem) {
+            if (!foodItem || !foodItem.name || !foodItem.description) return false;
+            
             const badKeywords = ['sugar', 'syrup', 'juice', 'white rice', 'white bread', 'maida', 'fried', 'ghee'];
             const goodKeywords = ['high-fiber', 'whole grain', 'vegetable', 'protein', 'multigrain', 'bajra'];
             
@@ -1281,6 +1427,8 @@
         }
     
         function isLowSodium(foodItem) {
+            if (!foodItem || !foodItem.name || !foodItem.description) return false;
+            
             const highSodiumKeywords = ['soy sauce', 'processed', 'canned', 'pickle', 'bacon', 'sausage', 'papad', 'chutney'];
             return !highSodiumKeywords.some(keyword => 
                 foodItem.name.toLowerCase().includes(keyword) || 
@@ -1289,6 +1437,8 @@
         }
     
         function isHeartHealthy(foodItem) {
+            if (!foodItem || !foodItem.name || !foodItem.description) return false;
+            
             const badKeywords = ['fried', 'cream', 'butter', 'fatty', 'ghee', 'malai'];
             const goodKeywords = ['omega-3', 'salmon', 'avocado', 'olive oil', 'nuts', 'flaxseed'];
             
@@ -1302,6 +1452,8 @@
         }
     
         function isCholesterolFriendly(foodItem) {
+            if (!foodItem || !foodItem.name || !foodItem.description) return false;
+            
             const badKeywords = ['fried', 'fatty', 'cream', 'butter', 'cheese', 'ghee'];
             const goodKeywords = ['fiber', 'oat', 'beans', 'lentil', 'vegetable', 'whole grain'];
             
@@ -1315,6 +1467,8 @@
         }
     
         function isWeightLossFriendly(foodItem) {
+            if (!foodItem || !foodItem.name || !foodItem.description) return false;
+            
             const badKeywords = ['fried', 'cream', 'cheese', 'sugar', 'syrup', 'ghee', 'malai'];
             const goodKeywords = ['lean', 'grilled', 'steamed', 'vegetable', 'salad', 'sprouts'];
             
@@ -1332,14 +1486,16 @@
         }
     
         function isEnduranceFriendly(foodItem) {
+            if (!foodItem || !foodItem.description) return false;
+            
             const carbKeywords = ['whole grain', 'brown rice', 'quinoa', 'potato', 'oat', 'bajra', 'jowar'];
             return carbKeywords.some(keyword => 
                 foodItem.description.toLowerCase().includes(keyword)
             );
         }
     
-        // Sample restaurant data with healthy Indian food options
-        const restaurants = [
+         // Sample restaurant data with healthy Indian food options
+         const restaurants = [
             {
                 id: 1,
                 name: "Green Bites - Healthy Indian Cuisine",
@@ -1867,33 +2023,44 @@
             
             return restaurantCard;
         }
-    
+        
+        // Show error message
+        function showError(message) {
+            const errorContainer = document.getElementById('error-container');
+            const errorMessage = document.getElementById('error-message-text');
+            
+            if (errorContainer && errorMessage) {
+                errorMessage.textContent = message;
+                errorContainer.classList.remove('hidden');
+                
+                // Auto-hide after 5 seconds
+                setTimeout(() => {
+                    errorContainer.classList.add('hidden');
+                }, 5000);
+            }
+        }
+        
+        // Show loading indicator
+        function showLoading() {
+            document.getElementById('loading-indicator').classList.remove('hidden');
+        }
+        
+        // Hide loading indicator
+        function hideLoading() {
+            document.getElementById('loading-indicator').classList.add('hidden');
+        }
+
         // Initialize page
         document.addEventListener('DOMContentLoaded', function() {
-            // Try to load preferences from localStorage if Firebase hasn't loaded them yet
-            const localPrefs = localStorage.getItem('userPreferences');
-            if (localPrefs && (!userPreferences || Object.keys(userPreferences).length === 0)) {
-                userPreferences = JSON.parse(localPrefs);
-                showUserPreferences();
-                loadRestaurants();
-            }
+            // Setup Firebase auth listener
+            setupAuthListener();
             
-            updateCart(); // Initialize cart count on page load
+            // Load cart from localStorage
+            loadCartFromLocalStorage();
             
             // Add smooth transition to all links
-            document.querySelectorAll('a').forEach(link => {
+            document.querySelectorAll('a[href^="#"]').forEach(link => {
                 link.addEventListener('click', function(e) {
-                    // Don't apply to:
-                    // 1. External links
-                    // 2. Anchor links (#)
-                    // 3. Links to the current page
-                    if (!this.href || 
-                        this.href.startsWith('http') || 
-                        this.href.includes('#') || 
-                        this.href === window.location.href) {
-                        return;
-                    }
-                    
                     e.preventDefault();
                     document.body.style.opacity = '0';
                     document.body.style.transition = 'opacity 0.3s ease';
@@ -1905,29 +2072,45 @@
             });
             
             // Search functionality
-            document.getElementById('restaurant-search').addEventListener('input', function() {
-                const searchTerm = this.value.toLowerCase();
-                filterRestaurants();
-            });
+            const searchInput = document.getElementById('restaurant-search');
+            if (searchInput) {
+                searchInput.addEventListener('input', function() {
+                    filterRestaurants();
+                });
+            }
             
             // Filter functionality
-            document.getElementById('cuisine-filter').addEventListener('change', filterRestaurants);
-            document.getElementById('diet-filter').addEventListener('change', filterRestaurants);
+            const cuisineFilter = document.getElementById('cuisine-filter');
+            const dietFilter = document.getElementById('diet-filter');
+            
+            if (cuisineFilter) {
+                cuisineFilter.addEventListener('change', filterRestaurants);
+            }
+            
+            if (dietFilter) {
+                dietFilter.addEventListener('change', filterRestaurants);
+            }
             
             // Reset filters
-            document.getElementById('reset-filters').addEventListener('click', function() {
-                document.getElementById('restaurant-search').value = '';
-                document.getElementById('cuisine-filter').value = '';
-                document.getElementById('diet-filter').value = '';
-                filterRestaurants();
-            });
+            const resetFilters = document.getElementById('reset-filters');
+            if (resetFilters) {
+                resetFilters.addEventListener('click', function() {
+                    if (searchInput) searchInput.value = '';
+                    if (cuisineFilter) cuisineFilter.value = '';
+                    if (dietFilter) dietFilter.value = '';
+                    filterRestaurants();
+                });
+            }
     
             // Profile dropdown toggle
             const profileButton = document.getElementById('profile-button');
             if (profileButton) {
                 profileButton.addEventListener('click', function() {
                     const dropdown = document.getElementById('profile-dropdown');
-                    dropdown.classList.toggle('hidden');
+                    if (dropdown) {
+                        dropdown.classList.toggle('hidden');
+                        profileButton.setAttribute('aria-expanded', dropdown.classList.contains('hidden') ? 'false' : 'true');
+                    }
                 });
             }
     
@@ -1940,21 +2123,50 @@
                     !profileButton.contains(event.target) && 
                     !dropdown.contains(event.target)) {
                     dropdown.classList.add('hidden');
+                    profileButton.setAttribute('aria-expanded', 'false');
                 }
             });
+            
+            // Load restaurants initially
+            loadRestaurants();
         });
     
         // Filter restaurants based on search and filters
         function filterRestaurants() {
-            const searchTerm = document.getElementById('restaurant-search').value.toLowerCase();
-            const cuisineFilter = document.getElementById('cuisine-filter').value;
-            const dietFilter = document.getElementById('diet-filter').value;
+            const searchTerm = document.getElementById('restaurant-search')?.value.toLowerCase() || '';
+            const cuisineFilter = document.getElementById('cuisine-filter')?.value || '';
+            const dietFilter = document.getElementById('diet-filter')?.value || '';
             
-            const allCards = document.querySelectorAll('#recommended-restaurants > div, #all-restaurants > div');
+            const recommendedCards = document.querySelectorAll('#recommended-restaurants > div');
+            const allCards = document.querySelectorAll('#all-restaurants > div');
             
+            // Filter recommended restaurants
+            recommendedCards.forEach(card => {
+                const name = card.querySelector('h3')?.textContent.toLowerCase() || '';
+                const description = card.querySelector('p')?.textContent.toLowerCase() || '';
+                const cuisineBadges = Array.from(card.querySelectorAll('.flex-wrap span')).map(span => span.textContent.toLowerCase());
+                
+                const matchesSearch = searchTerm === '' || 
+                    name.includes(searchTerm) || 
+                    description.includes(searchTerm);
+                
+                const matchesCuisine = cuisineFilter === '' || 
+                    cuisineBadges.some(badge => badge.includes(cuisineFilter));
+                
+                const matchesDiet = dietFilter === '' || 
+                    cuisineBadges.some(badge => badge.includes(dietFilter));
+                
+                if (matchesSearch && matchesCuisine && matchesDiet) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+            
+            // Filter all restaurants
             allCards.forEach(card => {
-                const name = card.querySelector('h3').textContent.toLowerCase();
-                const description = card.querySelector('p').textContent.toLowerCase();
+                const name = card.querySelector('h3')?.textContent.toLowerCase() || '';
+                const description = card.querySelector('p')?.textContent.toLowerCase() || '';
                 const cuisineBadges = Array.from(card.querySelectorAll('.flex-wrap span')).map(span => span.textContent.toLowerCase());
                 
                 const matchesSearch = searchTerm === '' || 
@@ -1974,6 +2186,13 @@
                 }
             });
         }
+        
+        // Clean up when page unloads
+        window.addEventListener('beforeunload', function() {
+            if (authStateListenerUnsubscribe) {
+                authStateListenerUnsubscribe();
+            }
+        });
     </script>
 </body>
 </html>
