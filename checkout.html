@@ -232,6 +232,7 @@
         import {
             getAuth,
             onAuthStateChanged,
+            signOut,
         } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import {
             getDatabase,
@@ -258,6 +259,18 @@
         const auth = getAuth(app);
         const database = getDatabase(app);
 
+        // Logout function
+        window.logout = async function() {
+            try {
+                await signOut(auth);
+                localStorage.removeItem("cart");
+                window.location.href = "login.html";
+            } catch (error) {
+                console.error("Error signing out:", error);
+                showErrorMessage("Failed to sign out. Please try again.");
+            }
+        };
+
         // Cart counter
         function updateCartCounter() {
             const cart = JSON.parse(localStorage.getItem("cart")) || [];
@@ -274,20 +287,25 @@
 
         // Check auth state
         onAuthStateChanged(auth, (user) => {
+            const loginButton = document.getElementById("login-btn");
+            const profileSection = document.getElementById("profile-section");
+            
             if (!user) {
+                // User not logged in
+                if (loginButton) loginButton.classList.remove("hidden");
+                if (profileSection) profileSection.classList.add("hidden");
                 localStorage.setItem("redirectAfterLogin", "checkout.html");
                 window.location.href = "login.html";
             } else {
+                // User logged in
+                if (loginButton) loginButton.classList.add("hidden");
+                if (profileSection) profileSection.classList.remove("hidden");
                 loadUserData(user.uid);
                 loadCartItems();
                 
                 // Show profile section and update with user data
-                const profileSection = document.getElementById('profile-section');
                 const profileName = document.getElementById('profile-name');
                 const profileButton = document.getElementById('profile-button');
-                
-                // Show the profile section that was hidden by default
-                profileSection.classList.remove('hidden');
                 
                 // Set the profile name
                 profileName.textContent = user.displayName || user.email || 'User';
@@ -723,7 +741,7 @@
                     <i class="fas fa-store text-red-600"></i>
                     <span class="text-gray-700">Retailer Login</span>
                 </a>
-                <a href="login.html" id="login-btn" class="flex items-center space-x-2 bg-gradient-to-r from-red-600 to-amber-600 hover:from-red-700 hover:to-amber-700 px-4 py-2 rounded-full transition shadow-lg text-white btn-shine">
+                <a href="login.html" id="login-btn" class="hidden flex items-center space-x-2 bg-gradient-to-r from-red-600 to-amber-600 hover:from-red-700 hover:to-amber-700 px-4 py-2 rounded-full transition shadow-lg text-white btn-shine">
                     <i class="fas fa-sign-in-alt"></i>
                     <span>Login</span>
                 </a>
