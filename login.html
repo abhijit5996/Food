@@ -214,10 +214,21 @@
             border-radius: 1rem;
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
         }
+        
+        /* Mobile menu styles */
+        .mobile-menu {
+            transition: all 0.3s ease;
+            max-height: 0;
+            overflow: hidden;
+        }
+
+        .mobile-menu.open {
+            max-height: 500px;
+        }
     </style>
     <script type="module">
       import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
-      import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, GoogleAuthProvider, createUserWithEmailAndPassword,signInWithPopup } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
+      import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, GoogleAuthProvider, createUserWithEmailAndPassword,signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
       import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
 
       const firebaseConfig = {
@@ -236,6 +247,179 @@
 
       window.db = db;
       window.auth = auth;
+
+      // Shopping cart - load from localStorage or initialize empty
+      let cart = [];
+      
+      // Initialize the app when DOM is loaded
+      document.addEventListener('DOMContentLoaded', function() {
+          // Load cart from localStorage
+          try {
+              const savedCart = localStorage.getItem('cart');
+              cart = savedCart ? JSON.parse(savedCart) : [];
+          } catch (e) {
+              console.error('Error loading cart from localStorage:', e);
+              cart = [];
+          }
+          updateCart();
+      });
+
+      // Update cart UI
+      function updateCart() {
+          const cartCount = document.getElementById('cart-count');
+          const cartHoverCount = document.getElementById('cart-hover-count');
+          const mobileCartCount = document.getElementById('mobile-cart-count');
+          const cartSubtotal = document.getElementById('cart-subtotal');
+          const cartTotal = document.getElementById('cart-total');
+          
+          if (!cartCount || !cartHoverCount || !mobileCartCount || !cartSubtotal || !cartTotal) return;
+          
+          // Update cart count
+          const totalItems = cart.reduce((sum, item) => sum + (item.quantity || 0), 0);
+          cartCount.textContent = totalItems;
+          cartHoverCount.textContent = totalItems;
+          mobileCartCount.textContent = totalItems;
+          
+          // Update totals
+          const subtotal = cart.reduce((sum, item) => sum + (item.price * (item.quantity || 0)), 0);
+          const deliveryFee = 30; // 30 INR delivery fee
+          const total = subtotal + deliveryFee;
+          
+          cartSubtotal.textContent = `₹${subtotal.toFixed(2)}`;
+          cartTotal.textContent = `₹${total.toFixed(2)}`;
+      }
+
+      // Toggle cart visibility
+      function toggleCart() {
+          const cartSidebar = document.getElementById('cart-sidebar');
+          const cartOverlay = document.getElementById('cart-overlay');
+          
+          if (!cartSidebar || !cartOverlay) return;
+          
+          const isOpen = !cartSidebar.classList.contains('translate-x-full');
+          
+          cartSidebar.classList.toggle('translate-x-full');
+          cartOverlay.classList.toggle('hidden');
+          cartSidebar.setAttribute('aria-hidden', isOpen);
+          
+          // Update cart when opened
+          if (!isOpen) {
+              updateCartItems();
+          }
+      }
+      
+      // Update cart items in the sidebar
+      function updateCartItems() {
+          const cartItemsContainer = document.getElementById('cart-items');
+          if (!cartItemsContainer) return;
+          
+          if (!cart || cart.length === 0) {
+              cartItemsContainer.innerHTML = `
+                  <div class="text-center py-12">
+                      <i class="fas fa-shopping-cart text-4xl text-gray-400 mb-4" aria-hidden="true"></i>
+                      <p class="text-gray-500">Your cart is empty</p>
+                      <button onclick="toggleCart()" class="mt-4 text-red-600 hover:text-red-500 underline">
+                          Browse our menu
+                      </button>
+                  </div>
+              `;
+          } else {
+              cartItemsContainer.innerHTML = '';
+              cart.forEach(item => {
+                  if (!item || !item.id) return;
+                  
+                  const cartItem = document.createElement('div');
+                  cartItem.className = 'flex justify-between items-center mb-4 pb-4 border-b border-amber-200';
+                  cartItem.innerHTML = `
+                      <div class="flex items-center">
+                          <img src="${item.image}" alt="${item.name}" class="w-16 h-16 object-cover rounded-lg">
+                          <div class="ml-4">
+                              <h3 class="text-sm font-medium text-gray-800">${item.name}</h3>
+                              <p class="text-xs text-gray-600">₹${item.price.toFixed(2)} x ${item.quantity}</p>
+                              <div class="flex items-center mt-1">
+                                  <button onclick="decreaseQuantity(${item.id})" class="text-gray-500 hover:text-red-600 text-xs" aria-label="Decrease quantity">
+                                      <i class="fas fa-minus" aria-hidden="true"></i>
+                                  </button>
+                                  <span class="mx-2 text-sm">${item.quantity}</span>
+                                  <button onclick="increaseQuantity(${item.id})" class="text-gray-500 hover:text-red-600 text-xs" aria-label="Increase quantity">
+                                      <i class="fas fa-plus" aria-hidden="true"></i>
+                                  </button>
+                              </div>
+                          </div>
+                      </div>
+                      <div class="flex items-center">
+                          <span class="text-sm font-medium text-gray-800">₹${(item.price * item.quantity).toFixed(2)}</span>
+                          <button onclick="removeFromCart(${item.id})" class="ml-4 text-red-500 hover:text-red-600" aria-label="Remove item">
+                              <i class="fas fa-trash" aria-hidden="true"></i>
+                          </button>
+                      </div>
+                  `;
+                  cartItemsContainer.appendChild(cartItem);
+              });
+          }
+      }
+      
+      // Increase item quantity in cart
+      function increaseQuantity(itemId) {
+          const item = cart.find(i => i.id === itemId);
+          if (item) {
+              item.quantity = (item.quantity || 0) + 1;
+              saveCart();
+              updateCart();
+              updateCartItems();
+          }
+      }
+      
+      // Decrease item quantity in cart
+      function decreaseQuantity(itemId) {
+          const itemIndex = cart.findIndex(i => i.id === itemId);
+          if (itemIndex !== -1) {
+              if (cart[itemIndex].quantity > 1) {
+                  cart[itemIndex].quantity -= 1;
+              } else {
+                  cart.splice(itemIndex, 1);
+              }
+              saveCart();
+              updateCart();
+              updateCartItems();
+          }
+      }
+      
+      // Remove item from cart
+      function removeFromCart(itemId) {
+          const itemIndex = cart.findIndex(i => i.id === itemId);
+          
+          if (itemIndex !== -1) {
+              cart.splice(itemIndex, 1);
+              saveCart();
+              updateCart();
+              updateCartItems();
+              
+              // Show removed notification
+              const notification = document.createElement('div');
+              notification.className = 'fixed bottom-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg flex items-center z-50 animate-bounce';
+              notification.setAttribute('role', 'alert');
+              notification.innerHTML = `
+                  <i class="fas fa-trash mr-3 text-xl" aria-hidden="true"></i>
+                  <p class="font-bold">Item removed from cart</p>
+              `;
+              document.body.appendChild(notification);
+              
+              setTimeout(() => {
+                  notification.classList.add('opacity-0', 'transition-opacity', 'duration-300');
+                  setTimeout(() => notification.remove(), 300);
+              }, 2000);
+          }
+      }
+      
+      // Save cart to localStorage
+      function saveCart() {
+          try {
+              localStorage.setItem('cart', JSON.stringify(cart));
+          } catch (e) {
+              console.error('Error saving cart:', e);
+          }
+      }
 
       window.checkUserPreferencesAndRedirect = async function(userId) {
         try {
@@ -354,6 +538,17 @@
           document.getElementById('authError').classList.remove('hidden');
         }
       };
+      
+      // Logout function
+      window.logout = async function() {
+          try {
+              await signOut(auth);
+              window.location.href = 'index.html';
+          } catch (error) {
+              console.error('Logout error:', error);
+              alert('Failed to sign out. Please try again.');
+          }
+      };
     </script>
     <script>
         tailwind.config = {
@@ -389,20 +584,22 @@
                 <i class="fas fa-utensils text-red-600 text-2xl"></i>
                 <span class="text-xl font-bold gradient-text heading-font">NutriOrder</span>
             </div>
+            
+            <!-- Mobile menu button -->
+            <button id="mobile-menu-button" class="md:hidden text-gray-700 focus:outline-none" aria-label="Toggle menu" aria-expanded="false">
+                <i class="fas fa-bars text-2xl"></i>
+            </button>
+            
             <div class="hidden md:flex space-x-6">
                 <a href="index.html" class="hover:text-red-600 transition underline-animate">Home</a>
                 <a href="#menu" class="hover:text-red-600 transition underline-animate">Menu</a>
                 <a href="#about" class="hover:text-red-600 transition underline-animate">About</a>
                 <a href="#contact" class="hover:text-red-600 transition underline-animate">Contact</a>
             </div>
-            <div class="flex items-center space-x-4">
+            <div class="hidden md:flex items-center space-x-4">
                 <a href="retailer-login.html" class="flex items-center space-x-2 bg-amber-100 hover:bg-amber-200 px-4 py-2 rounded-full transition border-animate">
                     <i class="fas fa-store text-red-600"></i>
                     <span class="text-gray-700">Retailer Login</span>
-                </a>
-                <a href="login.html" id="login-btn" class="flex items-center space-x-2 bg-gradient-to-r from-red-600 to-amber-600 hover:from-red-700 hover:to-amber-700 px-4 py-2 rounded-full transition shadow-lg text-white btn-shine">
-                    <i class="fas fa-sign-in-alt"></i>
-                    <span>Login</span>
                 </a>
                 <div id="profile-section" class="hidden relative">
                     <button id="profile-button" class="flex items-center space-x-2 bg-amber-100 hover:bg-amber-200 px-4 py-2 rounded-full transition border-animate">
@@ -421,6 +618,22 @@
                     <span id="cart-count" class="bg-white text-red-600 rounded-full w-6 h-6 flex items-center justify-center font-bold">0</span>
                     <span class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity" id="cart-hover-count">0</span>
                 </button>
+            </div>
+        </div>
+        
+        <!-- Mobile menu -->
+        <div id="mobile-menu" class="mobile-menu md:hidden bg-white w-full mt-4 rounded-lg shadow-lg">
+            <div class="px-4 py-3 space-y-3">
+                <a href="index.html" class="block px-4 py-2 hover:bg-amber-50 rounded-lg transition">Home</a>
+                <a href="#menu" class="block px-4 py-2 hover:bg-amber-50 rounded-lg transition">Menu</a>
+                <a href="#about" class="block px-4 py-2 hover:bg-amber-50 rounded-lg transition">About</a>
+                <a href="#contact" class="block px-4 py-2 hover:bg-amber-50 rounded-lg transition">Contact</a>
+                <a href="retailer-login.html" class="block px-4 py-2 hover:bg-amber-50 rounded-lg transition">Retailer Login</a>
+                <div class="pt-4 border-t border-amber-200">
+                    <button onclick="toggleCart()" class="w-full flex items-center justify-center bg-gradient-to-r from-red-600 to-amber-600 text-white px-4 py-2 rounded-lg transition shadow-lg">
+                        <i class="fas fa-shopping-cart mr-2"></i> View Cart (<span id="mobile-cart-count">0</span>)
+                    </button>
+                </div>
             </div>
         </div>
     </nav>
@@ -551,6 +764,46 @@
         </div>
     </footer>
 
+    <!-- Shopping Cart Sidebar -->
+    <div id="cart-sidebar" class="fixed top-0 right-0 h-full w-full md:w-96 bg-white shadow-xl transform translate-x-full transition-transform duration-300 ease-in-out z-50 overflow-y-auto border-l border-amber-200" aria-hidden="true" aria-label="Shopping cart">
+        <div class="p-6 border-b border-amber-200 flex justify-between items-center bg-white">
+            <h3 class="text-xl font-semibold text-gray-800 flex items-center">
+                <i class="fas fa-shopping-cart mr-2 text-red-600" aria-hidden="true"></i> Your Order
+            </h3>
+            <button onclick="toggleCart()" class="text-gray-500 hover:text-gray-700 text-xl" aria-label="Close cart">
+                <i class="fas fa-times" aria-hidden="true"></i>
+            </button>
+        </div>
+        <div id="cart-items" class="p-6">
+            <!-- Cart items will be added here dynamically -->
+            <div class="text-center py-12">
+                <i class="fas fa-shopping-cart text-4xl text-gray-400 mb-4" aria-hidden="true"></i>
+                <p class="text-gray-500">Your cart is empty</p>
+                <button onclick="toggleCart()" class="mt-4 text-red-600 hover:text-red-500 underline">
+                    Browse our menu
+                </button>
+            </div>
+        </div>
+        <div class="p-6 border-t border-amber-200 bg-white">
+            <div class="flex justify-between mb-3 text-gray-700">
+                <span>Subtotal:</span>
+                <span id="cart-subtotal">₹0.00</span>
+            </div>
+            <div class="flex justify-between mb-3 text-gray-700">
+                <span>Delivery Fee:</span>
+                <span>₹30.00</span>
+            </div>
+            <div class="flex justify-between mb-6 text-lg font-bold text-gray-800">
+                <span>Total:</span>
+                <span id="cart-total">₹30.00</span>
+            </div>
+            <a href="orders.html" class="w-full bg-gradient-to-r from-red-600 to-amber-600 text-white py-3 rounded-lg hover:from-red-700 hover:to-amber-700 transition flex items-center justify-center shadow-lg btn-shine">
+                <i class="fas fa-credit-card mr-2" aria-hidden="true"></i> Proceed to Checkout
+            </a>
+        </div>
+    </div>
+    <div id="cart-overlay" class="hidden fixed inset-0 bg-black bg-opacity-50 z-40 backdrop-blur-sm" onclick="toggleCart()" aria-hidden="true"></div>
+
     <script>
         // Check for remembered email
         document.addEventListener('DOMContentLoaded', function() {
@@ -560,13 +813,32 @@
                 document.getElementById('remember').checked = true;
             }
             
+            // Initialize mobile menu toggle
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            
+            if (mobileMenuButton && mobileMenu) {
+                mobileMenuButton.addEventListener('click', function() {
+                    const isExpanded = this.getAttribute('aria-expanded') === 'true';
+                    this.setAttribute('aria-expanded', !isExpanded);
+                    mobileMenu.classList.toggle('open');
+                    
+                    // Toggle icon
+                    const icon = this.querySelector('i');
+                    if (icon) {
+                        icon.classList.toggle('fa-bars');
+                        icon.classList.toggle('fa-times');
+                    }
+                });
+            }
+            
             // Add smooth transition to all links
             document.querySelectorAll('a').forEach(link => {
+                if (!this.href || this.href.startsWith('http') || this.href.includes('#') || this.href === window.location.href) {
+                    return;
+                }
+                
                 link.addEventListener('click', function(e) {
-                    if (!this.href || this.href.startsWith('http') || this.href.includes('#') || this.href === window.location.href) {
-                        return;
-                    }
-                    
                     e.preventDefault();
                     document.body.style.opacity = '0';
                     document.body.style.transition = 'opacity 0.3s ease';
@@ -598,6 +870,27 @@
                     }
                 }
             });
+            
+            // Initialize profile dropdown
+            const profileButton = document.getElementById('profile-button');
+            const profileDropdown = document.getElementById('profile-dropdown');
+            
+            if (profileButton && profileDropdown) {
+                profileButton.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const isExpanded = this.getAttribute('aria-expanded') === 'true';
+                    this.setAttribute('aria-expanded', !isExpanded);
+                    profileDropdown.classList.toggle('hidden');
+                });
+                
+                // Close dropdown when clicking outside
+                document.addEventListener('click', function() {
+                    if (profileButton && profileDropdown) {
+                        profileButton.setAttribute('aria-expanded', 'false');
+                        profileDropdown.classList.add('hidden');
+                    }
+                });
+            }
         });
     </script>
 </body>
