@@ -247,13 +247,14 @@
         import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
   
         const firebaseConfig = {
-          apiKey: "AIzaSyBx0Kt9o04ye0XrtA8ecp84wD8Q9OCDjlA",
-          authDomain: "foodorder-4380c.firebaseapp.com",
-          projectId: "foodorder-4380c",
-          storageBucket: "foodorder-4380c.appspot.com",
-          messagingSenderId: "735023580381",
-          appId: "1:735023580381:web:c6740bef2fc9bdee1b4734"
-        };
+  apiKey: "AIzaSyB7v7yVwDmc6nIiLOig2oBUyFYvkn9sFU8",
+  authDomain: "nutriorder2.firebaseapp.com",
+  databaseURL: "https://nutriorder2-default-rtdb.firebaseio.com",
+  projectId: "nutriorder2",
+  storageBucket: "nutriorder2.firebasestorage.app",
+  messagingSenderId: "349911476827",
+  appId: "1:349911476827:web:aba09225ca22183426ed7e"
+};
   
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
